@@ -2,7 +2,7 @@
 inclusion: always
 ---
 
-# Product: Tab Graveyard (Kuburan Tab)
+# Product: Rest in Tabs
 
 Browser extension that "buries" idle tabs in a spooky graveyard so the browser stays fast, and lets the user "resurrect" any of them in one click.
 

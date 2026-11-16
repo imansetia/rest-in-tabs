@@ -2,11 +2,11 @@
 
 ## Introduction
 
-Tab Graveyard is a Chrome/Edge extension that buries idle tabs in a spooky graveyard page. Burying a tab saves its address, title and a short summary, then closes it so the browser uses less memory. The user can resurrect any buried tab with one click. Nothing leaves the user's device.
+Rest in Tabs is a Chrome/Edge extension that buries idle tabs in a spooky graveyard page. Burying a tab saves its address, title and a short summary, then closes it so the browser uses less memory. The user can resurrect any buried tab with one click. Nothing leaves the user's device.
 
 ## Glossary
 
-- **Extension**: the Tab Graveyard browser extension.
+- **Extension**: the Rest in Tabs browser extension.
 - **Bury**: save a Grave for a tab, then close the tab.
 - **Grave**: the saved record of one buried tab.
 - **Epitaph**: a summary of the buried page, at most 200 characters, shown on its tombstone.

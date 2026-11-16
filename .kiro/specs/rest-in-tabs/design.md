@@ -2,7 +2,7 @@
 
 ## Overview
 
-Tab Graveyard is a Manifest V3 extension with no backend. A service worker wakes on a one-minute alarm, asks pure functions which tabs to bury, saves a Grave for each, and closes the tab. The Graveyard page reads Graves from `chrome.storage.local` and renders them as tombstones.
+Rest in Tabs is a Manifest V3 extension with no backend. A service worker wakes on a one-minute alarm, asks pure functions which tabs to bury, saves a Grave for each, and closes the tab. The Graveyard page reads Graves from `chrome.storage.local` and renders them as tombstones.
 
 Two decisions shape the design:
 
@@ -180,7 +180,7 @@ For any input value, `normalizeSettings` returns settings inside the allowed ran
 
 ## Testing Strategy
 
-- **Property-based tests (fast-check, 100+ runs each):** the ten properties above, one test per property, each tagged `Feature: tab-graveyard, Property N`.
+- **Property-based tests (fast-check, 100+ runs each):** the ten properties above, one test per property, each tagged `Feature: rest-in-tabs, Property N`.
 - **Unit tests (Vitest):** concrete examples and edge cases for the same functions: boundary at exactly the Idle Threshold, subdomain matching, 200-character truncation on a multi-byte string, empty Grave list.
 - **Orchestration tests:** service worker burial and resurrection flows with fake `platform/` adapters, covering "save fails → tab not closed" and "create fails → Grave kept".
 - **Manual checks before submission:** load unpacked in Chrome and Edge; keyboard-only pass through Graveyard, Popup and Options; reduced-motion on; 360 px width; contrast check on tombstone text.
