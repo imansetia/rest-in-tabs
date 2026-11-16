@@ -27,12 +27,12 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - **Property 3: Auto-Bury off selects nothing**
     - **Validates: Requirements 1.2, 1.3, 1.6, 2.2**
 
-- [ ] 4. Implement graves and epitaphs
-  - [ ] 4.1 Implement `fallbackEpitaph` with source order meta → paragraph → title and 200-character limit
+- [x] 4. Implement graves and epitaphs
+  - [x] 4.1 Implement `fallbackEpitaph` with source order meta → paragraph → title and 200-character limit
     - _Requirements: 3.2, 3.3, 3.7_
-  - [ ] 4.2 Implement `addGrave` with deduplication by address and the 2,000 cap
+  - [x] 4.2 Implement `addGrave` with deduplication by address and the 2,000 cap
     - _Requirements: 3.8, 6.5_
-  - [ ] 4.3 Write property tests for graves and epitaphs
+  - [x] 4.3 Write property tests for graves and epitaphs
     - **Property 4: Graves stay unique and capped**
     - **Property 5: Burial preserves the address**
     - **Property 6: Epitaphs are always valid**
@@ -61,7 +61,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
 - [ ] 8. Build the service worker
   - [ ] 8.1 Register the one-minute `bury-check` alarm on install and startup
     - _Requirements: 1.1_
-  - [ ] 8.2 Implement the burial flow: select → extract → epitaph → save → close, in a single queue, closing the tab only after the save succeeds
+  - [ ] 8.2 Implement the burial flow: select → extract → `createGrave` → `addGrave` → save → close, in a single queue, closing the tab only after the save succeeds
     - _Requirements: 1.2, 1.4, 1.5, 3.1_
   - [ ] 8.3 Implement expiry on each alarm and the `buryTab`, `buryIdle`, `resurrect`, `exorcise` message handlers, updating stats. The `buryIdle` handler calls `selectBurialCandidates` with `autoBury` forced to `true` so "Bury idle tabs now" works even when Auto-Bury is disabled.
     - _Requirements: 2.1, 2.2, 5.1, 5.2, 5.4, 6.3, 7.1_

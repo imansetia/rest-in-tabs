@@ -61,7 +61,8 @@ selectBurialCandidates(tabs: TabInfo[], settings: Settings, now: number): TabInf
 isProtected(tab: TabInfo, protectedSites: string[]): boolean
 canBuryManually(tab: TabInfo): boolean            // http(s) and not incognito
 fallbackEpitaph(page: PageInfo): { text: string; source: EpitaphSource }
-addGrave(graves: Grave[], grave: Grave, cap: number): Grave[]   // dedupe by url, enforce cap
+createGrave(tab: TabInfo, page: PageInfo, now: number, id: string): Grave  // builds a full Grave from a tab + extracted page info
+addGrave(graves: Grave[], grave: Grave, cap: number): Grave[]   // dedupe by url, enforce cap; never drops the new grave
 expiredGraves(graves: Grave[], retentionDays: number | null, now: number): Grave[]
 decayStage(buriedAt: number, now: number): 'fresh' | 'weathered' | 'crumbling'
 searchGraves(graves: Grave[], query: string): Grave[]
@@ -113,14 +114,14 @@ interface Grave {
   id: string;                      // crypto.randomUUID()
   url: string; title: string; domain: string; favIconUrl?: string;
   buriedAt: number; lastAccessed: number;
-  epitaph: string;                 // 1..200 chars
+  epitaph: string;                 // 1..200 Unicode code points, internal whitespace collapsed
   epitaphSource: EpitaphSource;
   excerpt?: string;                // up to 4,000 chars, removed after AI upgrade or 7 days
 }
 
 interface Settings {
   autoBury: boolean;               // default true
-  idleMinutes: number;             // 5..1440, default 30
+  idleMinutes: number;             // 5..10080 (7 days), default 180 (3 hours)
   protectedSites: string[];        // lower-case domains, default []
   retentionDays: number | null;    // 1..365 or null (Never), default 30
 }
@@ -141,7 +142,7 @@ For any list of tabs, settings and time, `selectBurialCandidates` returns no tab
 **Validates: Requirements 1.3**
 
 **Property 2: Selection is exactly the idle, unprotected tabs.**
-For any list of tabs, settings with `autoBury` on, and time (all in milliseconds epoch), a tab is returned if and only if it is not protected and `now - lastAccessed >= idleMinutes * 60_000`. Property generators must produce `lastAccessed` and `now` in milliseconds; `idleMinutes` is in whole minutes (5–1440).
+For any list of tabs, settings with `autoBury` on, and time (all in milliseconds epoch), a tab is returned if and only if it is not protected and `now - lastAccessed >= idleMinutes * 60_000`. Property generators must produce `lastAccessed` and `now` in milliseconds; `idleMinutes` is in whole minutes (5–10080, i.e. up to 7 days).
 **Validates: Requirements 1.2, 2.2**
 
 **Property 3: Auto-Bury off selects nothing.**
@@ -157,7 +158,7 @@ For any buryable tab, the Grave produced from it has `url` identical to the tab'
 **Validates: Requirements 3.1, 5.1**
 
 **Property 6: Epitaphs are always valid.**
-For any `PageInfo` (including empty, whitespace-only and very long strings), `fallbackEpitaph` returns text that is non-empty after trimming and at most 200 characters, and picks sources in the order meta, paragraph, title.
+For any `PageInfo` (including empty, whitespace-only and very long strings), `fallbackEpitaph` returns text that is non-empty, contains no leading/trailing whitespace, has all internal whitespace runs collapsed to a single space, is at most 200 Unicode code points long (measured as `[...text].length`), and picks sources in the order meta, paragraph, title. When all fields are empty or whitespace-only, it returns `"Untitled page"` with source `'title'`.
 **Validates: Requirements 3.2, 3.3, 3.7**
 
 **Property 7: Decay never reverses.**

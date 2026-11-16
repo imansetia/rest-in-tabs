@@ -5,7 +5,7 @@ import type { Settings } from './types.js';
 // ---------------------------------------------------------------------------
 
 export const IDLE_MINUTES_MIN = 5;
-export const IDLE_MINUTES_MAX = 1440;
+export const IDLE_MINUTES_MAX = 10080; // 7 days
 export const RETENTION_DAYS_MIN = 1;
 export const RETENTION_DAYS_MAX = 365;
 
@@ -15,7 +15,7 @@ export const RETENTION_DAYS_MAX = 365;
 
 export const DEFAULT_SETTINGS: Settings = {
   autoBury: true,
-  idleMinutes: 30,
+  idleMinutes: 180, // 3 hours
   protectedSites: [],
   retentionDays: 30,
 };
@@ -29,7 +29,7 @@ export const DEFAULT_SETTINGS: Settings = {
  *
  * Rules:
  * - Missing or non-boolean `autoBury` → default (true).
- * - `idleMinutes` outside 5–1440 or non-integer → clamped/defaulted.
+ * - `idleMinutes` outside 5–10080 or non-integer → clamped/defaulted.
  * - `protectedSites` non-array → default ([]); non-string entries are dropped.
  *   String entries are trimmed, lower-cased, deduplicated and empty strings dropped.
  * - `retentionDays` null → kept as null ("Never").

@@ -1,4 +1,5 @@
 import type { TabInfo, Settings } from './types.js';
+import { hostnameOf } from './url-utils.js';
 
 /**
  * Returns true when a tab must never be buried automatically.
@@ -26,14 +27,8 @@ export function isProtected(tab: TabInfo, protectedSites: string[]): boolean {
 
   // Parse the URL unconditionally so an unparseable URL is always protected,
   // regardless of whether protectedSites is empty.
-  let host: string;
-  try {
-    // Strip a single trailing dot from the hostname (FQDN form "example.com.")
-    // before matching so "example.com." correctly matches the entry "example.com".
-    host = new URL(tab.url).hostname.toLowerCase().replace(/\.$/, '');
-  } catch {
-    return true;
-  }
+  const host = hostnameOf(tab.url);
+  if (host === null) return true;
 
   if (protectedSites.some((entry) => host === entry || host.endsWith('.' + entry))) {
     return true;
@@ -53,6 +48,8 @@ export function isProtected(tab: TabInfo, protectedSites: string[]): boolean {
 export function canBuryManually(tab: TabInfo): boolean {
   if (tab.incognito) return false;
   if (!tab.url.startsWith('http://') && !tab.url.startsWith('https://')) return false;
+  // Reject unparseable URLs (hostnameOf returns null).
+  if (hostnameOf(tab.url) === null) return false;
   return true;
 }
 

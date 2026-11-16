@@ -89,7 +89,7 @@ export interface Settings {
   autoBury: boolean;
   /**
    * How long (in whole minutes) a tab must go unused before it is buried
-   * automatically. Range: 5–1440. Default: 30.
+   * automatically. Range: 5–10080 (7 days). Default: 180 (3 hours).
    */
   idleMinutes: number;
   /**

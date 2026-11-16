@@ -53,7 +53,7 @@ Rest in Tabs is a Chrome/Edge extension that buries idle tabs in a spooky gravey
 
 1. THE Extension SHALL store in each Grave the page address, title, icon address, domain, time of burial, time of last use, and Epitaph.
 2. WHEN the Extension buries a tab, THE Extension SHALL write the Epitaph from the first of these that is available: the page's meta description, the page's first paragraph, the page title.
-3. THE Extension SHALL keep every Epitaph non-empty and at most 200 characters long.
+3. THE Extension SHALL keep every Epitaph non-empty and at most 200 Unicode code points long.
 4. WHERE the browser's Summarizer API (available in Chrome and Edge 138+) reports availability status `"available"`, THE Graveyard SHALL automatically replace the Grave's Epitaph with an AI-generated summary produced from the stored text excerpt, then delete the excerpt.
 5. WHERE the Summarizer API reports availability status `"downloadable"`, THE Graveyard SHALL show an "Enable AI epitaphs" button; WHEN the user clicks it, THE Graveyard SHALL initiate the model download and, once complete, upgrade Epitaphs as in criterion 4.
 6. THE Extension SHALL NOT send page content, addresses or titles to any remote server.
@@ -112,7 +112,7 @@ Rest in Tabs is a Chrome/Edge extension that buries idle tabs in a spooky gravey
 
 #### Acceptance Criteria
 
-1. THE Extension SHALL let the user set Auto-Bury on or off (default on), the Idle Threshold from 5 minutes to 24 hours (default 30 minutes), the Protected Sites list (default empty), and the Retention Period from 1 to 365 days or "Never" (default 30 days).
+1. THE Extension SHALL let the user set Auto-Bury on or off (default on), the Idle Threshold from 5 minutes to 7 days (default 3 hours), the Protected Sites list (default empty), and the Retention Period from 1 to 365 days or "Never" (default 30 days).
 2. WHEN the user changes a setting, THE Extension SHALL apply it from the next check without a browser restart.
 3. IF the user enters a value outside the allowed range, THEN THE Extension SHALL reject it and show the allowed range.
 4. THE Extension SHALL keep the settings across browser restarts.

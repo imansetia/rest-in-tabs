@@ -96,7 +96,7 @@ const anyTab: fc.Arbitrary<TabInfo> = fc.record<TabInfo>({
 /** Arbitrary valid Settings with autoBury on and no protected sites. */
 const settingsOn: fc.Arbitrary<Settings> = fc.record<Settings>({
   autoBury: fc.constant(true),
-  idleMinutes: fc.integer({ min: 5, max: 1440 }),
+  idleMinutes: fc.integer({ min: 5, max: 10080 }), // 5 minutes to 7 days
   protectedSites: fc.constant([]),
   retentionDays: fc.oneof(fc.integer({ min: 1, max: 365 }), fc.constant(null)),
 });
@@ -382,5 +382,9 @@ describe('canBuryManually — targeted examples', () => {
 
   it('allows a tab on a protected site (Protected Sites bypassed for manual)', () => {
     expect(canBuryManually(makeTab({ url: 'https://example.com/' }))).toBe(true);
+  });
+
+  it('blocks a tab with an unparseable URL', () => {
+    expect(canBuryManually(makeTab({ url: 'not-a-valid-url' }))).toBe(false);
   });
 });
