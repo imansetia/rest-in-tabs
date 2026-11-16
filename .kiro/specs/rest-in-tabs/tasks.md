@@ -10,11 +10,11 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - _Requirements: 1.1, 3.6_
 
 - [ ] 2. Define data models and settings
-  - [ ] 2.1 Create `src/core/types.ts` with `TabInfo`, `PageInfo`, `Grave`, `Settings`, `Stats` and constants
+  - [x] 2.1 Create `src/core/types.ts` with `TabInfo`, `PageInfo`, `Grave`, `Settings`, `Stats` and constants
     - _Requirements: 3.1, 8.1_
-  - [ ] 2.2 Implement `normalizeSettings` and `validateSetting`
+  - [x] 2.2 Implement `normalizeSettings` and `validateSetting`
     - _Requirements: 8.1, 8.3_
-  - [ ] 2.3 Write property test for settings
+  - [x] 2.3 Write property test for settings
     - **Property 10: Settings are always in range**
     - **Validates: Requirements 8.1, 8.3**
 
