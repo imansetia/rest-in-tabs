@@ -53,9 +53,9 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
 - [ ] 7. Build the platform adapters
   - [x] 7.1 `platform/storage.ts`: typed get/set for graves, settings, stats and an `onChanged` subscription
     - _Requirements: 7.3, 8.4_
-  - [ ] 7.2 `platform/tabs.ts`: query → `TabInfo[]`, remove, create
+  - [x] 7.2 `platform/tabs.ts`: query → `TabInfo[]`, remove, create
     - _Requirements: 1.2, 5.1_
-  - [ ] 7.3 `platform/extract.ts`: read title, meta description, first paragraph and excerpt with a 2-second timeout
+  - [x] 7.3 `platform/extract.ts`: read title, meta description, first paragraph and excerpt with a 2-second timeout
     - _Requirements: 3.2, 3.7_
 
 - [ ] 8. Build the service worker
