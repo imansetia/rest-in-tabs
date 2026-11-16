@@ -9,7 +9,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - Add MIT `LICENSE` and a README stub with load-unpacked instructions
   - _Requirements: 1.1, 3.6_
 
-- [ ] 2. Define data models and settings
+- [x] 2. Define data models and settings
   - [x] 2.1 Create `src/core/types.ts` with `TabInfo`, `PageInfo`, `Grave`, `Settings`, `Stats` and constants
     - _Requirements: 3.1, 8.1_
   - [x] 2.2 Implement `normalizeSettings` and `validateSetting`
@@ -19,9 +19,9 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - **Validates: Requirements 8.1, 8.3**
 
 - [ ] 3. Implement tab selection
-  - [ ] 3.1 Implement `isProtected` (including subdomain matching), `canBuryManually` and `selectBurialCandidates`
+  - [x] 3.1 Implement `isProtected` (including subdomain matching), `canBuryManually` and `selectBurialCandidates`
     - _Requirements: 1.2, 1.3, 1.6, 2.2_
-  - [ ] 3.2 Write property tests for selection
+  - [x] 3.2 Write property tests for selection
     - **Property 1: Protected tabs are never selected**
     - **Property 2: Selection is exactly the idle, unprotected tabs**
     - **Property 3: Auto-Bury off selects nothing**
@@ -63,11 +63,12 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - _Requirements: 1.1_
   - [ ] 8.2 Implement the burial flow: select → extract → epitaph → save → close, in a single queue, closing the tab only after the save succeeds
     - _Requirements: 1.2, 1.4, 1.5, 3.1_
-  - [ ] 8.3 Implement expiry on each alarm and the `buryTab`, `buryIdle`, `resurrect`, `exorcise` message handlers, updating stats
+  - [ ] 8.3 Implement expiry on each alarm and the `buryTab`, `buryIdle`, `resurrect`, `exorcise` message handlers, updating stats. The `buryIdle` handler calls `selectBurialCandidates` with `autoBury` forced to `true` so "Bury idle tabs now" works even when Auto-Bury is disabled.
     - _Requirements: 2.1, 2.2, 5.1, 5.2, 5.4, 6.3, 7.1_
   - [ ] 8.4 Write orchestration tests with fake adapters
     - Save fails → tab is not closed; create fails → Grave is kept
-    - _Requirements: 1.5, 5.2_
+    - `buryIdle` buries idle tabs even when `settings.autoBury` is false
+    - _Requirements: 1.5, 2.2, 5.2_
 
 - [ ] 9. Build the Popup
   - Grave count, "Bury this tab" (disabled with reason when not allowed), "Bury idle tabs now", "Open graveyard"

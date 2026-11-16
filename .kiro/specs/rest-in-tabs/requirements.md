@@ -41,7 +41,7 @@ Rest in Tabs is a Chrome/Edge extension that buries idle tabs in a spooky gravey
 #### Acceptance Criteria
 
 1. WHEN the user chooses "Bury this tab" in the Popup, THE Extension SHALL bury the current tab even if it is active, pinned or on the Protected Sites list; the restrictions in criterion 3 of this requirement (private window, non-http(s) address) still apply.
-2. WHEN the user chooses "Bury idle tabs now" in the Popup, THE Extension SHALL immediately bury every tab that meets Requirement 1.2.
+2. WHEN the user chooses "Bury idle tabs now" in the Popup, THE Extension SHALL immediately bury every tab that meets Requirement 1.2, regardless of whether Auto-Bury is enabled.
 3. IF the current tab is in a private window or its address does not start with `http://` or `https://`, THEN THE Popup SHALL disable "Bury this tab" and show the reason.
 4. THE Popup SHALL show the number of Graves and a link that opens the Graveyard.
 
