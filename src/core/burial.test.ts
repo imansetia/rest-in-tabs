@@ -141,6 +141,18 @@ describe('buryTab', () => {
     expect(storage.graves()[0].duplicateCount).toBe(2);
   });
 
+  it('still buries the tab with a count of 1 when querying all tabs fails', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const storage = fakeStorage();
+    const url = 'https://same.example.com/page';
+    const tabs = fakeTabs([makeTab(1, { url, active: true }), makeTab(2, { url })], { failQuery: true });
+
+    expect(await buryTab(storage.adapter, tabs.adapter, fakeExtract(), 1)).toEqual({ ok: true });
+    expect(tabs.removeCalls).toEqual([1]);
+    expect(storage.graves()[0].duplicateCount).toBe(1);
+    expect(storage.stats().buried).toBe(1);
+  });
+
   it('refuses private-window and non-http(s) tabs, and reports a missing tab', async () => {
     const storage = fakeStorage();
     const tabs = fakeTabs([

@@ -43,6 +43,7 @@ const anyRawSettings: fc.Arbitrary<unknown> = fc.oneof(
     idleMinutes: anyScalar,
     protectedSites: fc.oneof(fc.array(anyScalar), anyScalar),
     retentionDays: fc.oneof(fc.integer(), fc.constant(null), anyScalar),
+    demo: anyScalar,
   }),
   // Partial object (only some keys present)
   fc.record(
@@ -51,6 +52,7 @@ const anyRawSettings: fc.Arbitrary<unknown> = fc.oneof(
       idleMinutes: fc.integer({ min: 1, max: 2000 }),
       protectedSites: fc.array(fc.string()),
       retentionDays: fc.oneof(fc.integer({ min: 0, max: 400 }), fc.constant(null)),
+      demo: fc.boolean(),
     },
     { requiredKeys: [] },
   ),
@@ -79,9 +81,31 @@ describe('Property 10: Settings are always in range', () => {
           expect(s.retentionDays).toBeGreaterThanOrEqual(RETENTION_DAYS_MIN);
           expect(s.retentionDays).toBeLessThanOrEqual(RETENTION_DAYS_MAX);
         }
+
+        expect(typeof s.demo).toBe('boolean');
       }),
       { numRuns: 200 },
     );
+  });
+
+  it('keeps a boolean demo and turns anything else into false', () => {
+    const seen = { keptTrue: 0, keptFalse: 0, defaulted: 0 };
+    fc.assert(
+      fc.property(anyRawSettings, (raw) => {
+        const s = normalizeSettings(raw);
+        const stored = raw !== null && typeof raw === 'object' ? (raw as Record<string, unknown>).demo : undefined;
+        if (typeof stored === 'boolean') {
+          expect(s.demo).toBe(stored);
+          if (stored) seen.keptTrue++;
+          else seen.keptFalse++;
+        } else {
+          expect(s.demo).toBe(false);
+          seen.defaulted++;
+        }
+      }),
+      { numRuns: 300 },
+    );
+    for (const count of Object.values(seen)) expect(count).toBeGreaterThan(0);
   });
 
   it('normalizeSettings is idempotent', () => {
@@ -215,6 +239,20 @@ describe('validateSetting', () => {
     });
   });
 
+  describe('demo', () => {
+    it('defaults to false', () => {
+      expect(DEFAULT_SETTINGS.demo).toBe(false);
+      expect(normalizeSettings({}).demo).toBe(false);
+    });
+    it('accepts true and false, rejects anything else', () => {
+      expect(validateSetting('demo', true)).toEqual({ ok: true });
+      expect(validateSetting('demo', false)).toEqual({ ok: true });
+      for (const v of [1, 'true', null, undefined]) {
+        expect(validateSetting('demo', v).ok).toBe(false);
+      }
+    });
+  });
+
   describe('retentionDays', () => {
     it('accepts null', () => {
       expect(validateSetting('retentionDays', null)).toEqual({ ok: true });
@@ -243,6 +281,7 @@ describe('validateSetting', () => {
       'idleMinutes',
       'protectedSites',
       'retentionDays',
+      'demo',
     ];
     fc.assert(
       fc.property(fc.constantFrom(...keys), anyValue, (key, value) => {

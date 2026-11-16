@@ -99,6 +99,7 @@ const settingsOn: fc.Arbitrary<Settings> = fc.record<Settings>({
   idleMinutes: fc.integer({ min: IDLE_MINUTES_MIN, max: IDLE_MINUTES_MAX }),
   protectedSites: fc.constant([]),
   retentionDays: fc.oneof(fc.integer({ min: 1, max: 365 }), fc.constant(null)),
+  demo: fc.boolean(), // must not affect selection
 });
 
 /**
@@ -235,6 +236,7 @@ describe('Property 2: Selection is exactly the idle, unprotected tabs', () => {
             idleMinutes,
             protectedSites,
             retentionDays: 30,
+            demo: false,
           };
 
           const result = selectBurialCandidates(tabs, settings, now);

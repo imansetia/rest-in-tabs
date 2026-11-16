@@ -109,6 +109,11 @@ export interface Settings {
    * Default: 30.
    */
   retentionDays: number | null;
+  /**
+   * When true, the Graveyard shows the Demo clock (Requirement 8.5).
+   * Changes nothing outside the Graveyard display. Default: false.
+   */
+  demo: boolean;
 }
 
 // ---------------------------------------------------------------------------

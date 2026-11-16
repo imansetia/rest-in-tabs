@@ -72,14 +72,17 @@ export function fakeStorage(options: FakeStorageOptions = {}) {
 }
 
 /** Open tabs live in a Map. removeTab closes them and throws on an unknown id, like Chrome. */
-export function fakeTabs(initial: TabInfo[], options: { failCreate?: boolean } = {}) {
+export function fakeTabs(initial: TabInfo[], options: { failCreate?: boolean; failQuery?: boolean } = {}) {
   const open = new Map(initial.map((t) => [t.id, { ...t }]));
   const removeCalls: number[] = [];
   const createdUrls: string[] = [];
   let nextId = 1000;
 
   const adapter: TabsAdapter = {
-    queryTabs: async () => [...open.values()].map((t) => ({ ...t })),
+    queryTabs: async () => {
+      if (options.failQuery) throw new Error('Tabs cannot be queried right now');
+      return [...open.values()].map((t) => ({ ...t }));
+    },
     getTab: async (id) => {
       const tab = open.get(id);
       return tab ? { ...tab } : null;

@@ -82,12 +82,19 @@ export function buryTab(
   tabId: number,
 ): Promise<MessageResponse> {
   return runQueue.enqueue(async () => {
-    // All tabs are queried only to compute the Duplicate count.
-    const [tab, openTabs] = await Promise.all([tabs.getTab(tabId), tabs.queryTabs()]);
+    // All tabs are queried only to compute the Duplicate count. The count is
+    // cosmetic, so a failed query buries the tab with a count of 1.
+    const [tab, openTabs] = await Promise.all([
+      tabs.getTab(tabId),
+      tabs.queryTabs().catch((err: unknown) => {
+        console.warn('Could not count duplicate tabs; using 1:', err);
+        return null;
+      }),
+    ]);
     if (tab === null) return { ok: false, error: 'not-found' };
     if (!canBuryManually(tab)) return { ok: false, error: 'not-allowed' };
 
-    const duplicates = countDuplicates(openTabs, tab.url);
+    const duplicates = openTabs === null ? 1 : countDuplicates(openTabs, tab.url);
     const outcome = await burySingleTab(storage, tabs, extract, tab, () => true, duplicates);
     if (outcome === 'saved') return { ok: true };
     return { ok: false, error: outcome === 'skipped' ? 'not-found' : 'save-failed' };

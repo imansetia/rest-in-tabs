@@ -129,7 +129,7 @@ describe('tabToTabInfo', () => {
     expect(isValidGrave(grave)).toBe(true);
 
     // The tab must not be selected as idle at the same now.
-    const settings = { autoBury: true, idleMinutes: 30, protectedSites: [], retentionDays: 30 };
+    const settings = { autoBury: true, idleMinutes: 30, protectedSites: [], retentionDays: 30, demo: false };
     const candidates = selectBurialCandidates([tabInfo!], settings, now);
     expect(candidates).toEqual([]);
   });

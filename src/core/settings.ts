@@ -18,6 +18,7 @@ export const DEFAULT_SETTINGS: Settings = {
   idleMinutes: 180, // 3 hours
   protectedSites: [],
   retentionDays: 30,
+  demo: false,
 };
 
 // ---------------------------------------------------------------------------
@@ -34,6 +35,7 @@ export const DEFAULT_SETTINGS: Settings = {
  *   String entries are trimmed, lower-cased, deduplicated and empty strings dropped.
  * - `retentionDays` null → kept as null ("Never").
  *   Non-null outside 1–365 or non-integer → clamped/defaulted.
+ * - Missing or non-boolean `demo` → default (false).
  *
  * The function is idempotent: normalizeSettings(normalizeSettings(x)) ≡ normalizeSettings(x).
  */
@@ -72,7 +74,10 @@ export function normalizeSettings(raw: unknown): Settings {
     );
   }
 
-  return { autoBury, idleMinutes, protectedSites, retentionDays };
+  // demo
+  const demo = typeof src['demo'] === 'boolean' ? src['demo'] : DEFAULT_SETTINGS.demo;
+
+  return { autoBury, idleMinutes, protectedSites, retentionDays, demo };
 }
 
 // ---------------------------------------------------------------------------
@@ -114,6 +119,10 @@ export function validateSetting(key: keyof Settings, value: unknown): ValidateRe
       )
         return OK;
       return err(`${RETENTION_DAYS_MIN}–${RETENTION_DAYS_MAX} days, or Never`);
+
+    case 'demo':
+      if (typeof value === 'boolean') return OK;
+      return err('true or false');
   }
 }
 

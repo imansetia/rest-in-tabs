@@ -84,7 +84,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - Add `parseGrave` (missing or bad count becomes 1, the Grave is kept); `getGraves` uses it
     - Update the existing tests: the createGrave → isValidGrave property, and a burial test where 3 identical tabs give `duplicateCount` 3
     - _Requirements: 3.1, 10.2, 10.4_
-  - [ ] 10.3 Add `Settings.demo` (default `false`) to `types.ts`, `normalizeSettings`, `validateSetting` and the Property 10 generators
+  - [x] 10.3 Add `Settings.demo` (default `false`) to `types.ts`, `normalizeSettings`, `validateSetting` and the Property 10 generators
     - _Requirements: 8.5_
   - [ ] 10.4 Add `selectManualCandidates`, shared by `buryIdle` and a new `countIdle` message
     - `parseMessage` accepts `countIdle`; the service worker replies `{ ok: true, count }` without writing and without waiting in the run queue
