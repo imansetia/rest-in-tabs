@@ -5,7 +5,7 @@ inclusion: always
 # Project structure
 
 ```
-manifest.json
+public/        manifest.json (copied to dist/ unchanged)
 src/
   core/          pure logic (selection, decay, epitaph, stats) + *.test.ts
   platform/      chrome.* adapters (tabs, storage, alarms, summarizer)

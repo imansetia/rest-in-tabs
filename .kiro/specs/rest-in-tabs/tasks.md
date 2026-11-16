@@ -2,7 +2,7 @@
 
 Tasks marked `*` are optional and can be skipped for a faster first version.
 
-- [ ] 1. Set up the project
+- [x] 1. Set up the project
   - Create `manifest.json` (MV3) with `tabs`, `storage`, `alarms`, `scripting` and `<all_urls>` host permission
   - Configure Vite + TypeScript strict to build service worker, graveyard, popup and options entries
   - Add Vitest and fast-check; add `npm test` and `npm run build`
