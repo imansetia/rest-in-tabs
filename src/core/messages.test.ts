@@ -26,6 +26,7 @@ describe('parseMessage', () => {
   it('accepts each well-formed message', () => {
     expect(parseMessage({ type: 'buryTab', tabId: 7 })).toEqual({ type: 'buryTab', tabId: 7 });
     expect(parseMessage({ type: 'buryIdle' })).toEqual({ type: 'buryIdle' });
+    expect(parseMessage({ type: 'countIdle' })).toEqual({ type: 'countIdle' });
     expect(parseMessage({ type: 'resurrect', graveId: 'g1' })).toEqual({ type: 'resurrect', graveId: 'g1' });
     expect(parseMessage({ type: 'exorcise', graveId: 'g1' })).toEqual({ type: 'exorcise', graveId: 'g1' });
   });

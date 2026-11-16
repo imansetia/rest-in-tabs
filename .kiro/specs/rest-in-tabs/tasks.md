@@ -86,7 +86,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - _Requirements: 3.1, 10.2, 10.4_
   - [x] 10.3 Add `Settings.demo` (default `false`) to `types.ts`, `normalizeSettings`, `validateSetting` and the Property 10 generators
     - _Requirements: 8.5_
-  - [ ] 10.4 Add `selectManualCandidates`, shared by `buryIdle` and a new `countIdle` message
+  - [x] 10.4 Add `selectManualCandidates`, shared by `buryIdle` and a new `countIdle` message
     - `parseMessage` accepts `countIdle`; the service worker replies `{ ok: true, count }` without writing and without waiting in the run queue
     - Test with fake adapters: for the same tabs, the `countIdle` count equals the number a manual run buries
     - _Requirements: 2.2, 4.10_

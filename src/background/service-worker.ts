@@ -13,7 +13,7 @@ import {
 import { queryTabs, getTab, removeTab, createTab } from '../platform/tabs.js';
 import { extractPageInfo } from '../platform/extract.js';
 import type { StorageAdapter, TabsAdapter, ExtractAdapter } from '../core/adapters.js';
-import { buryTabs, buryTab } from '../core/burial.js';
+import { buryTabs, buryTab, countIdleTabs } from '../core/burial.js';
 import { resurrect, exorcise, expireGraves } from '../core/grave-actions.js';
 import { parseMessage } from '../core/messages.js';
 import type { Message, MessageResponse } from '../core/messages.js';
@@ -111,6 +111,8 @@ async function handleMessage(message: Message): Promise<MessageResponse> {
       return buryTab(storage, tabs, extract, message.tabId);
     case 'buryIdle':
       return { ok: true, count: await buryTabs(storage, tabs, extract, false) };
+    case 'countIdle':
+      return { ok: true, count: await countIdleTabs(storage, tabs) };
     case 'resurrect':
       return resurrect(storage, tabs, message.graveId);
     case 'exorcise':

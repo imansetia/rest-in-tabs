@@ -3,7 +3,7 @@ import { GRAVE_CAP } from './types.js';
 import type { StorageAdapter, TabsAdapter, ExtractAdapter } from './adapters.js';
 import type { MessageResponse } from './messages.js';
 import { runQueue, writeQueue } from './queue.js';
-import { selectBurialCandidates, selectAutomaticCandidates, canBuryManually } from './selection.js';
+import { selectManualCandidates, selectAutomaticCandidates, canBuryManually } from './selection.js';
 import { createGrave, addGrave, countDuplicates } from './graves.js';
 
 // Burial orchestration. Adapters are injected so tests can use fakes.
@@ -51,9 +51,8 @@ export function buryTabs(
       stillBuriable = (fresh) =>
         selectAutomaticCandidates([fresh], settings, installedAt, Date.now()).length === 1;
     } else {
-      const manual = { ...settings, autoBury: true };
-      candidates = selectBurialCandidates(openTabs, manual, now);
-      stillBuriable = (fresh) => selectBurialCandidates([fresh], manual, Date.now()).length === 1;
+      candidates = selectManualCandidates(openTabs, settings, now);
+      stillBuriable = (fresh) => selectManualCandidates([fresh], settings, Date.now()).length === 1;
     }
 
     // Duplicate counts come from the same snapshot as the selection, so
@@ -65,6 +64,23 @@ export function buryTabs(
     }
     return saved;
   });
+}
+
+// ---------------------------------------------------------------------------
+// countIdleTabs (countIdle message)
+// ---------------------------------------------------------------------------
+
+/**
+ * How many tabs "Bury N idle tabs" would bury right now (Requirement 4.10).
+ *
+ * Read-only, so it does not wait in the run queue: a count must not hang for
+ * the length of a long burial run. While a run is in progress the count can
+ * include tabs that run is about to close; the button's action always selects
+ * fresh, so a stale count never buries the wrong tab.
+ */
+export async function countIdleTabs(storage: StorageAdapter, tabs: TabsAdapter): Promise<number> {
+  const [settings, openTabs] = await Promise.all([storage.getSettings(), tabs.queryTabs()]);
+  return selectManualCandidates(openTabs, settings, Date.now()).length;
 }
 
 // ---------------------------------------------------------------------------

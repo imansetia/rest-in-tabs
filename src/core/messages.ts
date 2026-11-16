@@ -3,6 +3,7 @@
 export type Message =
   | { type: 'buryTab'; tabId: number }
   | { type: 'buryIdle' }
+  | { type: 'countIdle' }
   | { type: 'resurrect'; graveId: string }
   | { type: 'exorcise'; graveId: string };
 
@@ -63,6 +64,8 @@ export function parseMessage(raw: unknown): Message | null {
         : null;
     case 'buryIdle':
       return { type: 'buryIdle' };
+    case 'countIdle':
+      return { type: 'countIdle' };
     case 'resurrect':
       return typeof graveId === 'string' && graveId !== '' ? { type: 'resurrect', graveId } : null;
     case 'exorcise':

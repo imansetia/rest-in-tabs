@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { isProtected, canBuryManually, selectBurialCandidates, manualBurialBlock } from './selection.js';
+import {
+  isProtected,
+  canBuryManually,
+  selectBurialCandidates,
+  selectManualCandidates,
+  manualBurialBlock,
+} from './selection.js';
 import { DEFAULT_SETTINGS, IDLE_MINUTES_MIN, IDLE_MINUTES_MAX } from './settings.js';
 import type { TabInfo, Settings } from './types.js';
 
@@ -411,5 +417,27 @@ describe('manualBurialBlock', () => {
       }),
       { numRuns: 200 },
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// selectManualCandidates
+// ---------------------------------------------------------------------------
+
+describe('selectManualCandidates', () => {
+  it('gives the same result whether Auto-Bury is on or off, equal to selection with it on', () => {
+    let nonEmpty = 0;
+    fc.assert(
+      fc.property(fc.array(anyTab, { maxLength: 10 }), settingsOn, fc.integer({ min: 0, max: 2_000_000_000_000 }),
+        (tabs, settings, now) => {
+          const on = selectManualCandidates(tabs, { ...settings, autoBury: true }, now);
+          const off = selectManualCandidates(tabs, { ...settings, autoBury: false }, now);
+          expect(off).toEqual(on);
+          expect(on).toEqual(selectBurialCandidates(tabs, { ...settings, autoBury: true }, now));
+          if (on.length > 0) nonEmpty++;
+        }),
+      { numRuns: 200 },
+    );
+    expect(nonEmpty).toBeGreaterThan(0);
   });
 });

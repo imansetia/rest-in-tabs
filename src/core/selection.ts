@@ -96,6 +96,22 @@ export function selectBurialCandidates(
 }
 
 /**
+ * Selection for "Bury N idle tabs" and for its count (countIdle): the same
+ * rules as automatic burial, with Auto-Bury treated as on (Requirement 2.2)
+ * and the tab's real lastAccessed (no installedAt clamp). Sharing this one
+ * function keeps the button's count and the burial in agreement.
+ *
+ * Validates: Requirements 2.2, 4.10
+ */
+export function selectManualCandidates(
+  tabs: TabInfo[],
+  settings: Settings,
+  now: number,
+): TabInfo[] {
+  return selectBurialCandidates(tabs, { ...settings, autoBury: true }, now);
+}
+
+/**
  * Selection for automatic runs. Idleness is measured from the later of
  * tab.lastAccessed and installedAt, so tabs that were already idle before
  * install are not buried right away. Returns the original tab objects, so
