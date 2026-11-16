@@ -1,4 +1,4 @@
-# Requirements Document
+﻿# Requirements Document
 
 ## Introduction
 
@@ -40,7 +40,7 @@ Rest in Tabs is a Chrome/Edge extension that buries idle tabs in a spooky gravey
 
 #### Acceptance Criteria
 
-1. WHEN the user chooses "Bury this tab" in the Popup, THE Extension SHALL bury the current tab even if it is active, pinned or on the Protected Sites list.
+1. WHEN the user chooses "Bury this tab" in the Popup, THE Extension SHALL bury the current tab even if it is active, pinned or on the Protected Sites list; the restrictions in criterion 3 of this requirement (private window, non-http(s) address) still apply.
 2. WHEN the user chooses "Bury idle tabs now" in the Popup, THE Extension SHALL immediately bury every tab that meets Requirement 1.2.
 3. IF the current tab is in a private window or its address does not start with `http://` or `https://`, THEN THE Popup SHALL disable "Bury this tab" and show the reason.
 4. THE Popup SHALL show the number of Graves and a link that opens the Graveyard.
@@ -54,10 +54,11 @@ Rest in Tabs is a Chrome/Edge extension that buries idle tabs in a spooky gravey
 1. THE Extension SHALL store in each Grave the page address, title, icon address, domain, time of burial, time of last use, and Epitaph.
 2. WHEN the Extension buries a tab, THE Extension SHALL write the Epitaph from the first of these that is available: the page's meta description, the page's first paragraph, the page title.
 3. THE Extension SHALL keep every Epitaph non-empty and at most 200 characters long.
-4. WHERE the browser provides a built-in, on-device summarizer, THE Extension SHALL replace the Epitaph with a summary produced by that summarizer.
-5. THE Extension SHALL NOT send page content, addresses or titles to any remote server.
-6. IF the page text cannot be read within 2 seconds, THEN THE Extension SHALL use the page title as the Epitaph and still bury the tab.
-7. WHEN the Extension buries a tab whose address already has a Grave, THE Extension SHALL update the existing Grave instead of creating a second one.
+4. WHERE the browser's Summarizer API (available in Chrome and Edge 138+) reports availability status `"available"`, THE Graveyard SHALL automatically replace the Grave's Epitaph with an AI-generated summary produced from the stored text excerpt, then delete the excerpt.
+5. WHERE the Summarizer API reports availability status `"downloadable"`, THE Graveyard SHALL show an "Enable AI epitaphs" button; WHEN the user clicks it, THE Graveyard SHALL initiate the model download and, once complete, upgrade Epitaphs as in criterion 4.
+6. THE Extension SHALL NOT send page content, addresses or titles to any remote server.
+7. IF the page text cannot be read within 2 seconds, THEN THE Extension SHALL use the page title as the Epitaph and still bury the tab.
+8. WHEN the Extension buries a tab whose address already has a Grave, THE Extension SHALL update the existing Grave instead of creating a second one.
 
 ### Requirement 4: Graveyard page
 

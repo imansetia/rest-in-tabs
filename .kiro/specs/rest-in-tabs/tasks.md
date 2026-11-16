@@ -1,4 +1,4 @@
-# Implementation Plan
+﻿# Implementation Plan
 
 Tasks marked `*` are optional and can be skipped for a faster first version.
 
@@ -7,7 +7,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - Configure Vite + TypeScript strict to build service worker, graveyard, popup and options entries
   - Add Vitest and fast-check; add `npm test` and `npm run build`
   - Add MIT `LICENSE` and a README stub with load-unpacked instructions
-  - _Requirements: 1.1, 3.5_
+  - _Requirements: 1.1, 3.6_
 
 - [ ] 2. Define data models and settings
   - [ ] 2.1 Create `src/core/types.ts` with `TabInfo`, `PageInfo`, `Grave`, `Settings`, `Stats` and constants
@@ -29,14 +29,14 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
 
 - [ ] 4. Implement graves and epitaphs
   - [ ] 4.1 Implement `fallbackEpitaph` with source order meta → paragraph → title and 200-character limit
-    - _Requirements: 3.2, 3.3, 3.6_
+    - _Requirements: 3.2, 3.3, 3.7_
   - [ ] 4.2 Implement `addGrave` with deduplication by address and the 2,000 cap
-    - _Requirements: 3.7, 6.5_
+    - _Requirements: 3.8, 6.5_
   - [ ] 4.3 Write property tests for graves and epitaphs
     - **Property 4: Graves stay unique and capped**
     - **Property 5: Burial preserves the address**
     - **Property 6: Epitaphs are always valid**
-    - **Validates: Requirements 3.1, 3.2, 3.3, 3.6, 3.7, 5.1, 6.5**
+    - **Validates: Requirements 3.1, 3.2, 3.3, 3.7, 3.8, 5.1, 6.5**
 
 - [ ] 5. Implement decay, expiry, search and stats
   - [ ] 5.1 Implement `decayStage`, `expiredGraves`, `sortGraves`, `searchGraves`, `estimateFreedMb`
@@ -56,7 +56,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - [ ] 7.2 `platform/tabs.ts`: query → `TabInfo[]`, remove, create
     - _Requirements: 1.2, 5.1_
   - [ ] 7.3 `platform/extract.ts`: read title, meta description, first paragraph and excerpt with a 2-second timeout
-    - _Requirements: 3.2, 3.6_
+    - _Requirements: 3.2, 3.7_
 
 - [ ] 8. Build the service worker
   - [ ] 8.1 Register the one-minute `bury-check` alarm on install and startup
@@ -94,8 +94,15 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
 - [ ] 13. Add on-device AI epitaphs
-  - `platform/summarizer.ts` with availability check; Graveyard upgrades Graves that have an excerpt, then deletes the excerpt; excerpts older than 7 days are dropped
-  - _Requirements: 3.4, 3.5_
+  - [ ] 13.1 Implement `platform/summarizer.ts`: `checkAvailability()` wrapping `Summarizer.availability()`, and `createAndSummarize(text)` wrapping `Summarizer.create()` + `.summarize()` with `downloadprogress` callback
+    - _Requirements: 3.4, 3.5_
+  - [ ] 13.2 On Graveyard load, call `checkAvailability()`:
+    - `"available"` → iterate Graves with an excerpt, call `createAndSummarize`, save updated Epitaph (`epitaphSource: "ai"`), delete excerpt
+    - `"downloadable"` → render "Enable AI epitaphs" button; on click call `createAndSummarize` (triggers download), show progress, then upgrade Epitaphs as above
+    - `"downloading"` / `"unavailable"` → do nothing; fallback Epitaph stays
+    - _Requirements: 3.4, 3.5_
+  - [ ] 13.3 Add excerpt pruning in the service-worker alarm handler (separate step from `expiredGraves`): remove `excerpt` from any Grave where `now - buriedAt > 7 * 24 * 60 * 60 * 1000`  
+    - _Requirements: 3.4_
 
 - [ ] 14. Checkpoint: full manual test
   - Load unpacked in Chrome and Edge; run the manual checks from the design's Testing Strategy; ask the user about anything that fails.

@@ -1,4 +1,4 @@
-# Design Document
+﻿# Design Document
 
 ## Overview
 
@@ -40,7 +40,17 @@ flowchart LR
 
 ### AI epitaph upgrade
 
-The built-in Summarizer API is exposed to window contexts, so it is called from the Graveyard page, not the service worker (verify against current Chrome docs during implementation). At burial, the Grave stores a short text excerpt alongside the fallback Epitaph. When the Graveyard opens and a summarizer is available, it summarizes each Grave that still has an excerpt, saves the new Epitaph with `epitaphSource: 'ai'`, and deletes the excerpt. If no summarizer exists (for example on Edge), the fallback Epitaph simply stays. The excerpt is dropped after 7 days either way to keep storage small.
+The Summarizer API (`Summarizer` global, Chrome and Edge 138+, on-device) is exposed to window contexts only — not to service workers or Web Workers. It is therefore called from the Graveyard page.
+
+At burial the service worker stores a short text excerpt (up to 4,000 chars) in the Grave alongside the fallback Epitaph. When the Graveyard page loads it checks `Summarizer.availability()`:
+
+- **`"available"`** — model already on device; the page iterates every Grave that still has an excerpt, calls `Summarizer.create()` + `.summarize()`, saves the result as the new Epitaph (`epitaphSource: "ai"`), and deletes the excerpt.
+- **`"downloadable"`** — model not yet downloaded; the page shows an "Enable AI epitaphs" button. No download begins until the user clicks it. After the click the page calls `Summarizer.create()` (which triggers the download, surfacing progress via the `downloadprogress` event) and then upgrades Epitaphs as above.
+- **`"downloading"` or `"unavailable"`** — the page does nothing; the fallback Epitaph stays. This covers browsers below Chrome/Edge 138 and devices that do not meet the hardware requirements (22 GB free disk, >4 GB VRAM or 16 GB RAM).
+
+**Note on user activation:** opening the Graveyard page does not constitute a user activation gesture, so `Summarizer.create()` must not be called on page load when the status is `"downloadable"`. It is safe to call on the button click. When the status is `"available"` the model is already on-device and `create()` succeeds without a gesture.
+
+The excerpt is dropped after 7 days either way to keep storage small. This pruning runs in the service-worker alarm handler (same pass as `expiredGraves`), not inside `expiredGraves` itself — `expiredGraves` only checks the Retention Period. If the user never opens the Graveyard, excerpts accumulate until the 7-day alarm prune; this is accepted because excerpts are capped at 4,000 chars each and the Grave cap (2,000) bounds total storage.
 
 ## Components and Interfaces
 
@@ -68,7 +78,7 @@ estimateFreedMb(buried: number): number
 | `tabs.ts` | `chrome.tabs.query/remove/create` | Maps `chrome.tabs.Tab` to `TabInfo` using `lastAccessed` |
 | `storage.ts` | `chrome.storage.local` | `getGraves/setGraves/getSettings/setSettings/getStats/setStats`, `onChanged` subscription |
 | `extract.ts` | `chrome.scripting.executeScript` | Returns `PageInfo`; rejects after 2 s or on discarded tabs |
-| `summarizer.ts` | `Summarizer` global | `isAvailable()`, `summarize(text)`; returns `null` when unsupported |
+| `summarizer.ts` | `Summarizer` global | `checkAvailability(): Promise<"available"|"downloadable"|"downloading"|"unavailable">` wraps `Summarizer.availability()`; `createAndSummarize(text): Promise<string>` wraps `Summarizer.create()` + `.summarize()` with download-progress callback; throws when status is not `"available"` or `"downloadable"` |
 
 ### `src/background/service-worker.ts`
 
@@ -131,7 +141,7 @@ For any list of tabs, settings and time, `selectBurialCandidates` returns no tab
 **Validates: Requirements 1.3**
 
 **Property 2: Selection is exactly the idle, unprotected tabs.**
-For any list of tabs, settings with `autoBury` on, and time, a tab is returned if and only if it is not protected and `now - lastAccessed >= idleMinutes`.
+For any list of tabs, settings with `autoBury` on, and time (all in milliseconds epoch), a tab is returned if and only if it is not protected and `now - lastAccessed >= idleMinutes * 60_000`. Property generators must produce `lastAccessed` and `now` in milliseconds; `idleMinutes` is in whole minutes (5–1440).
 **Validates: Requirements 1.2, 2.2**
 
 **Property 3: Auto-Bury off selects nothing.**
@@ -140,7 +150,7 @@ For any tabs and time, when `autoBury` is false the automatic check buries no ta
 
 **Property 4: Graves stay unique and capped.**
 For any existing list of Graves with unique addresses and any new Grave, `addGrave` returns a list that contains the new Grave's address exactly once, has no duplicate addresses, and has at most `cap` entries; when entries are dropped, they are the oldest.
-**Validates: Requirements 3.7, 6.5**
+**Validates: Requirements 3.8, 6.5**
 
 **Property 5: Burial preserves the address.**
 For any buryable tab, the Grave produced from it has `url` identical to the tab's address, so resurrecting it opens the same page.
@@ -148,7 +158,7 @@ For any buryable tab, the Grave produced from it has `url` identical to the tab'
 
 **Property 6: Epitaphs are always valid.**
 For any `PageInfo` (including empty, whitespace-only and very long strings), `fallbackEpitaph` returns text that is non-empty after trimming and at most 200 characters, and picks sources in the order meta, paragraph, title.
-**Validates: Requirements 3.2, 3.3, 3.6**
+**Validates: Requirements 3.2, 3.3, 3.7**
 
 **Property 7: Decay never reverses.**
 For any `buriedAt` and times `t1 <= t2`, the stage at `t2` is the same as or later than the stage at `t1`, and the stage boundaries fall at exactly 1 day and 7 days.
@@ -171,7 +181,7 @@ For any input value, `normalizeSettings` returns settings inside the allowed ran
 | Situation | Behaviour | Requirement |
 |---|---|---|
 | Storage write fails during burial | Tab stays open; error logged; retry on next alarm | 1.5 |
-| Page extraction times out or tab is discarded | Use title as Epitaph, continue burial | 3.6 |
+| Page extraction times out or tab is discarded | Use title as Epitaph, continue burial | 3.7 |
 | `tabs.create` fails on Resurrect | Grave kept; Graveyard shows "Could not reopen this page" | 5.2 |
 | Tab closed by the user mid-burial | Grave is kept (the page is still recoverable) | 1.4 |
 | Summarizer missing or throws | Fallback Epitaph kept, no error shown | 3.4 |
