@@ -1,0 +1,1216 @@
+<!doctype html>
+<html lang="en" data-theme="night">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rest in Tabs · Mockup</title>
+<!--
+  Design reference for Rest in Tabs. Open this file in Chrome or Edge.
+  Everything here is sample data. Two things exist only in the mockup and must NOT be copied into the extension:
+  - fonts are loaded from Google Fonts (the extension bundles them, see .kiro/steering/design.md)
+  - favicons come from a public icon service (the extension uses the favIconUrl stored in each grave)
+  Rules and tokens are written out in .kiro/steering/design.md.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Inter:wght@400;500;600&family=Pirata+One&display=swap" rel="stylesheet" />
+<style>
+/* ------------------------------------------------------------------ tokens */
+:root {
+  --sky-1: #03050b;
+  --sky-2: #0a1222;
+  --sky-3: #15233a;
+  --hill-far: #0c1424;
+  --hill-near: #080d17;
+  --ground: #070a10;
+  --fog: 190 202 216;
+  --bone: #ece6d8;
+  --bone-dim: #b8b2a4;
+  --stone-1: #4b5361;
+  --stone-2: #343b47;
+  --stone-edge: #20252e;
+  --soil: #1d1712;
+  --soil-dark: #0d0a07;
+  --moss: 84 112 66;
+  --spectral: #a9ecd1;
+  --spectral-dim: #6bbf9f;
+  --ice: #a3d3ff;
+  --amber: #ffb547;
+  --marigold: #ff9a1f;
+  --text: #e7e2d6;
+  --muted: #a7adba;
+  --panel: #0c121d;
+  --panel-2: #121a28;
+  --line: #2b3444;
+  --iron: #05070b;
+  --danger: #e6b4b4;
+  color-scheme: dark;
+}
+[data-theme="dusk"] {
+  --sky-1: #121a2b;
+  --sky-2: #222c42;
+  --sky-3: #3a4561;
+  --hill-far: #1a2336;
+  --hill-near: #121a29;
+  --ground: #0f1520;
+  --stone-1: #5c6474;
+  --stone-2: #464d5b;
+  --panel: #151d2c;
+  --panel-2: #1c2638;
+  --line: #3a4559;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--sky-1);
+  color: var(--text);
+  font: 15px/1.5 Inter, system-ui, sans-serif;
+  min-height: 100vh;
+}
+button, input, select { font: inherit; color: inherit; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+:focus-visible { outline: 2px solid var(--spectral); outline-offset: 3px; }
+
+/* ------------------------------------------------------------------ header */
+.top {
+  display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between;
+  gap: 12px 32px; padding: 18px 24px 10px;
+  background: var(--sky-1);
+}
+.brand h1 {
+  font-family: "Pirata One", Cinzel, serif; font-weight: 400; letter-spacing: .01em; line-height: 1;
+  font-size: clamp(34px, 4.2vw, 50px); margin: 0; color: var(--bone);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .6), 0 0 22px rgba(190, 212, 245, .12);
+}
+.brand p {
+  margin: 2px 0 0; font-family: "Cormorant Garamond", serif; font-style: italic;
+  font-size: 18px; color: var(--bone-dim);
+}
+.stats { display: flex; flex-wrap: wrap; gap: 6px 22px; color: var(--muted); font-size: 14px; }
+.stats b { color: var(--bone); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.controls {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+  padding: 10px 24px 14px; border-bottom: 1px solid var(--line); background: var(--sky-1);
+}
+.search { position: relative; flex: 1 1 220px; max-width: 340px; }
+.search input {
+  width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--text);
+}
+.search input::placeholder { color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button {
+  padding: 7px 12px; background: var(--panel); border: 0; cursor: pointer; color: var(--muted);
+}
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--panel-2); color: var(--bone); }
+.clock { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+.clock input { width: 120px; accent-color: var(--spectral-dim); }
+.clock output { min-width: 58px; color: var(--bone); font-variant-numeric: tabular-nums; }
+.spacer { flex: 1 1 0; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 8px 14px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--text); cursor: pointer; font-weight: 500;
+}
+.btn:hover { border-color: #46526a; }
+.btn.primary {
+  border-color: var(--spectral-dim); color: var(--spectral);
+  font-family: Cinzel, serif; font-weight: 600; letter-spacing: .06em;
+  box-shadow: 0 0 18px rgba(169, 236, 209, .12);
+}
+.btn.primary:hover { background: rgba(169, 236, 209, .07); }
+.btn.danger { color: var(--danger); }
+.btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; box-shadow: none; }
+
+/* ------------------------------------------------------------------ scene */
+main { position: relative; }
+.scene {
+  position: relative; overflow: hidden;
+  height: clamp(540px, calc(100vh - 150px), 900px);
+  background:
+    radial-gradient(ellipse 60% 40% at 80% 12%, rgba(120, 150, 200, .12), transparent 70%),
+    linear-gradient(to bottom, var(--sky-1) 0%, var(--sky-2) 42%, var(--sky-3) 64%, var(--hill-far) 66%);
+  isolation: isolate;
+}
+.stars {
+  position: absolute; inset: 0 0 45% 0; pointer-events: none; opacity: .8;
+  background-image:
+    radial-gradient(1px 1px at 8% 18%, #cfd8e6 50%, transparent 51%),
+    radial-gradient(1px 1px at 22% 8%, #cfd8e6 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 35% 26%, #e4ebf5 50%, transparent 51%),
+    radial-gradient(1px 1px at 48% 12%, #cfd8e6 50%, transparent 51%),
+    radial-gradient(1px 1px at 58% 30%, #b8c3d4 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 66% 6%, #e4ebf5 50%, transparent 51%),
+    radial-gradient(1px 1px at 92% 34%, #cfd8e6 50%, transparent 51%),
+    radial-gradient(1px 1px at 14% 40%, #b8c3d4 50%, transparent 51%),
+    radial-gradient(1px 1px at 40% 44%, #b8c3d4 50%, transparent 51%);
+}
+[data-theme="dusk"] .stars { opacity: .35; }
+.moon {
+  position: absolute; top: 7%; right: 13%; width: clamp(74px, 9vw, 124px); aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 62%, rgba(150, 160, 175, .35) 0 9%, transparent 10%),
+    radial-gradient(circle at 62% 34%, rgba(150, 160, 175, .3) 0 7%, transparent 8%),
+    radial-gradient(circle at 68% 70%, rgba(150, 160, 175, .25) 0 5%, transparent 6%),
+    radial-gradient(circle at 38% 34%, #fbf8ef, #dfe4ea 58%, #c2cad6);
+  box-shadow: 0 0 40px 8px rgba(190, 212, 245, .28), 0 0 160px 50px rgba(110, 145, 200, .15);
+}
+[data-theme="dusk"] .moon { top: 13%; opacity: .85; }
+.hills { position: absolute; left: 0; right: 0; bottom: 46%; width: 100%; height: 26%; pointer-events: none; }
+.hills .far { fill: var(--hill-far); }
+.hills .near { fill: var(--hill-near); }
+.ground {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 47%;
+  background: linear-gradient(to bottom, var(--hill-near), var(--ground) 45%);
+}
+.tree { position: absolute; bottom: 46%; pointer-events: none; }
+.tree path { stroke: var(--iron); }
+.tree.t1 { left: 2%; width: clamp(130px, 16vw, 230px); bottom: 38%; }
+.tree.t2 { right: 3%; width: clamp(100px, 12vw, 170px); bottom: 42%; transform: scaleX(-1); opacity: .85; }
+.tree.t3 { left: 40%; width: clamp(60px, 6vw, 90px); bottom: 56%; opacity: .5; }
+
+.fog {
+  position: absolute; left: -50%; width: 200%; pointer-events: none;
+  background:
+    radial-gradient(ellipse 18% 60% at 10% 60%, rgba(var(--fog), .26), transparent 70%),
+    radial-gradient(ellipse 22% 50% at 34% 50%, rgba(var(--fog), .2), transparent 70%),
+    radial-gradient(ellipse 16% 70% at 58% 65%, rgba(var(--fog), .24), transparent 70%),
+    radial-gradient(ellipse 24% 55% at 82% 55%, rgba(var(--fog), .2), transparent 70%),
+    linear-gradient(to top, transparent, rgba(var(--fog), .08) 45%, transparent);
+  animation: drift 70s linear infinite;
+  transition: opacity 1.2s ease;
+}
+/* the back rows stand in the thickest fog; the front row is always clear */
+.fog.f-far { bottom: 40%; height: 24%; z-index: 35; opacity: 1; animation-duration: 90s; }
+.fog.f-mid { bottom: 27%; height: 20%; z-index: 35; opacity: .7; animation-duration: 70s; animation-direction: reverse; }
+.fog.f-near { bottom: 0; height: 14%; z-index: 65; opacity: .35; animation-duration: 55s; }
+@keyframes drift { from { transform: translateX(0); } to { transform: translateX(25%); } }
+.scene.searching .fog { opacity: .18; }
+.scene.fogroll .fog { opacity: 1; transition-duration: .7s; }
+.scene.fogroll .fog.f-near { opacity: .95; }
+.scene.hush .fog { animation-play-state: paused; }
+.scene.hush { filter: brightness(.82) saturate(.8); transition: filter .5s; }
+
+.fence { position: absolute; left: 0; right: 0; bottom: 0; height: 58px; z-index: 70; pointer-events: none; }
+.fence-crow { position: absolute; right: 9%; bottom: 46px; width: 46px; z-index: 71; transform-origin: 60% 90%; }
+.fence-crow.caw { animation: caw .7s ease-in-out 1; }
+@keyframes caw {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-14deg) translateY(-2px); }
+  45% { transform: rotate(4deg); }
+  60% { transform: rotate(-10deg); }
+}
+.flyer { position: absolute; top: 10%; left: -80px; width: 64px; z-index: 5; pointer-events: none; opacity: 0; }
+.flyer.go { animation: fly 4.2s linear 1; }
+@keyframes fly {
+  0% { opacity: 0; transform: translate(0, 40px) scale(.8); }
+  6% { opacity: 1; }
+  50% { transform: translate(55vw, -10px) scale(.9); }
+  94% { opacity: 1; }
+  100% { opacity: 0; transform: translate(110vw, 20px) scale(.8); }
+}
+
+/* ------------------------------------------------------------------ camera, rows, graves */
+.camera {
+  position: absolute; inset: 0; transform-origin: 0 0; z-index: 30;
+  transition: transform 1.1s cubic-bezier(.3, .7, .2, 1);
+}
+.row {
+  position: absolute; left: 0; right: 0;
+  display: flex; justify-content: center; align-items: flex-end;
+  gap: calc(30px * var(--s));
+}
+.plot {
+  --w: 172px;
+  position: relative; flex: 0 0 auto;
+  width: calc(var(--w) * var(--s));
+  height: calc(236px * var(--s));
+  display: flex; align-items: flex-end; justify-content: center;
+  margin-bottom: var(--jy, 0px);
+  filter: brightness(calc(1 - var(--d) * .09)) saturate(calc(1 - var(--d) * .15)) blur(calc(var(--d) * .35px));
+  transition: opacity .6s ease, filter .6s ease;
+}
+.scene.searching .plot.match { filter: none; }
+.plot::after {
+  content: ""; position: absolute; inset: -12% -16% -8%; pointer-events: none; z-index: 4;
+  background:
+    radial-gradient(ellipse 75% 70% at 50% 60%, rgba(var(--fog), calc(var(--veil) * .9)) 0%, rgba(var(--fog), calc(var(--veil) * .7)) 55%, transparent 85%),
+    linear-gradient(to top, rgba(var(--fog), calc(var(--veil) * .55)), transparent 70%);
+  transition: opacity .9s ease;
+}
+.scene.searching .plot::after { opacity: .3; }
+.scene.searching .plot.match::after { opacity: 0; }
+.scene.searching .plot:not(.match) { opacity: .28; }
+
+.mound {
+  position: absolute; z-index: 0; left: -10%; right: -10%; bottom: calc(-10px * var(--s));
+  height: calc(30px * var(--s)); border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 30%, #2b2219, var(--soil-dark) 72%);
+}
+.stage-weathered .mound { background: radial-gradient(ellipse at 50% 30%, #1f2219, #0b0d09 72%); }
+.stage-crumbling .mound { background: radial-gradient(ellipse at 50% 30%, #1a1f16, #090b08 72%); height: calc(20px * var(--s)); }
+
+.stone {
+  position: relative; z-index: 2; width: 100%;
+  height: calc(196px * var(--s));
+  padding: calc(20px * var(--s)) calc(13px * var(--s)) calc(10px * var(--s));
+  border: 0; border-radius: 48% 48% 6px 6px / 30% 30% 6px 6px;
+  background: linear-gradient(165deg, var(--stone-1), var(--stone-2) 68%, var(--stone-edge));
+  box-shadow:
+    inset 0 0 0 calc(3px * var(--s)) rgba(255, 255, 255, .045),
+    inset 0 calc(-12px * var(--s)) calc(20px * var(--s)) rgba(0, 0, 0, .35),
+    0 calc(8px * var(--s)) calc(16px * var(--s)) rgba(0, 0, 0, .55);
+  color: var(--bone); cursor: pointer; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: calc(4px * var(--s));
+  transform-origin: 50% 100%;
+  transition: box-shadow .3s ease;
+}
+.stone:hover { box-shadow:
+  inset 0 0 0 calc(3px * var(--s)) rgba(169, 236, 209, .12),
+  inset 0 calc(-12px * var(--s)) calc(20px * var(--s)) rgba(0, 0, 0, .35),
+  0 0 calc(26px * var(--s)) rgba(169, 236, 209, .16); }
+.stone:focus-visible { outline-offset: calc(5px * var(--s)); }
+.stone .fav {
+  width: calc(24px * var(--s)); height: calc(24px * var(--s)); border-radius: 50%;
+  display: grid; place-items: center; flex: 0 0 auto;
+  font: 600 calc(10px * var(--s)) / 1 Inter, sans-serif; color: #10141b;
+  background: var(--c); box-shadow: inset 0 0 0 calc(2px * var(--s)) rgba(0, 0, 0, .25);
+}
+.stone .name {
+  font-family: "Pirata One", Cinzel, serif; font-weight: 400; letter-spacing: .01em;
+  font-size: calc(18px * var(--s)); line-height: 1.02;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.stone .dates {
+  font-family: Cinzel, serif; font-size: calc(9.5px * var(--s)); letter-spacing: .14em;
+  color: var(--bone-dim); white-space: nowrap;
+}
+.stone .epi {
+  font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 500;
+  font-size: calc(14.5px * var(--s)); line-height: 1.18;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.stone .cause {
+  margin-top: auto; font-size: calc(9.5px * var(--s)); line-height: 1.25; color: var(--bone-dim);
+  letter-spacing: .02em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.deco { position: absolute; pointer-events: none; }
+.stone .crack { inset: 0; width: 100%; height: 100%; display: none; }
+.stone .web { top: calc(8px * var(--s)); right: calc(4px * var(--s)); width: 34%; display: none; transform: scaleX(-1); }
+.rose { z-index: 3; left: -13%; bottom: calc(-6px * var(--s)); width: 17%; transform: rotate(-12deg); }
+.weeds { z-index: 3; left: -6%; right: -6%; bottom: calc(-6px * var(--s)); height: calc(34px * var(--s)); width: 112%; display: none; }
+.perch { z-index: 5; width: 30%; top: calc(14px * var(--s)); left: 12%; display: none; }
+.fallen { z-index: 1; width: 58%; right: -38%; bottom: calc(-6px * var(--s)); transform: rotate(-4deg); display: none; }
+
+/* fresh: dark new soil, upright stone, a black rose */
+.stage-fresh .rose { display: block; }
+/* weathered: moss, tilt, crack, faded letters, cobweb */
+.stage-weathered .stone {
+  transform: rotate(var(--tilt));
+  background:
+    radial-gradient(circle at 18% 88%, rgba(var(--moss), .6) 0 16%, transparent 30%),
+    radial-gradient(circle at 82% 94%, rgba(var(--moss), .5) 0 13%, transparent 26%),
+    radial-gradient(circle at 10% 34%, rgba(var(--moss), .32) 0 7%, transparent 15%),
+    linear-gradient(165deg, var(--stone-1), var(--stone-2) 68%, var(--stone-edge));
+}
+.stage-weathered .stone > span:not(.fav) { opacity: .78; }
+.stage-weathered .crack, .stage-weathered .web { display: block; }
+.stage-weathered .rose { display: none; }
+/* crumbling: broken stone, fallen cross, weeds, a crow, nearly unreadable */
+.stage-crumbling .stone {
+  transform: rotate(calc(var(--tilt) * 2));
+  padding-top: calc(42px * var(--s));
+  clip-path: polygon(0% 22%, 10% 12%, 24% 6%, 38% 4%, 47% 10%, 53% 22%, 61% 15%, 70% 27%, 82% 24%, 100% 38%, 100% 100%, 0% 100%);
+  background:
+    radial-gradient(circle at 16% 86%, rgba(var(--moss), .75) 0 22%, transparent 36%),
+    radial-gradient(circle at 86% 90%, rgba(var(--moss), .65) 0 18%, transparent 32%),
+    radial-gradient(circle at 30% 46%, rgba(var(--moss), .4) 0 9%, transparent 18%),
+    linear-gradient(165deg, #434a56, #2e343e 68%, #1c2028);
+}
+.stage-crumbling .stone > span:not(.fav) { opacity: .42; }
+.stage-crumbling .stone .fav { opacity: .55; }
+.stage-crumbling .crack { display: block; }
+.stage-crumbling .weeds, .stage-crumbling.has-crow .perch { display: block; }
+.stage-crumbling.has-cross .fallen { display: block; }
+
+/* after a resurrection: fresh empty soil; after an exorcism: bare ground */
+.plot.emptied .stone, .plot.emptied .deco { display: none; }
+.plot.emptied .mound { background: radial-gradient(ellipse at 50% 30%, #33281c, var(--soil-dark) 72%); height: calc(26px * var(--s)); }
+.plot.gone .stone, .plot.gone .deco, .plot.gone .mound { display: none; }
+.plot.gone::before {
+  content: ""; position: absolute; left: 6%; right: 6%; bottom: calc(-4px * var(--s)); height: calc(10px * var(--s));
+  border-radius: 50%; background: rgba(0, 0, 0, .45);
+}
+
+/* new graves rise out of the ground */
+.plot.rising { clip-path: inset(-300% -80% 0 -80%); }
+.plot.rising .stone { animation: rise 1s cubic-bezier(.2, .8, .25, 1) both; animation-delay: var(--delay); }
+.plot.rising .mound, .plot.rising .rose { animation: pop .45s ease-out both; animation-delay: var(--delay); }
+@keyframes rise { from { transform: translateY(105%); } to { transform: translateY(0); } }
+@keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.scene-msg {
+  position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); z-index: 80;
+  margin: 0; font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 24px;
+  color: var(--bone); text-align: center; text-shadow: 0 2px 12px #000;
+}
+.scene-msg button { display: block; margin: 12px auto 0; font-family: Inter, sans-serif; font-style: normal; font-size: 14px; }
+
+/* ------------------------------------------------------------------ plaque (grave details) */
+.plaque {
+  position: absolute; z-index: 90; left: 50%; bottom: 18px; transform: translateX(-50%);
+  width: min(600px, calc(100% - 32px));
+  padding: 18px 20px 16px; border-radius: 8px;
+  background: var(--panel); border: 1px solid var(--line);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .04);
+}
+.plaque h2 {
+  margin: 0 32px 2px 0; font-family: "Pirata One", Cinzel, serif; font-weight: 400; font-size: 27px; letter-spacing: .01em;
+  color: var(--bone); line-height: 1.25;
+}
+.plaque .domain { color: var(--muted); font-size: 13px; }
+.plaque .close {
+  position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 6px;
+  border: 1px solid transparent; background: transparent; color: var(--muted); cursor: pointer; font-size: 20px; line-height: 1;
+}
+.plaque .close:hover { border-color: var(--line); color: var(--bone); }
+.plaque dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 14px 0; }
+.plaque dt { color: var(--muted); font-size: 13px; }
+.plaque dd { margin: 0; }
+.plaque .epitaph { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 19px; line-height: 1.3; color: var(--bone); }
+.plaque .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.chip { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; border: 1px solid var(--line); }
+.chip.fresh { color: var(--bone); }
+.chip.weathered { color: #b9c9a6; border-color: #3d4a35; }
+.chip.crumbling { color: #9aa1ab; border-color: #333a44; }
+
+/* ------------------------------------------------------------------ list view */
+.list { padding: 16px 24px 40px; min-height: 60vh; background: var(--sky-1); }
+.list-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; color: var(--muted); font-size: 14px; }
+.list-head select { padding: 6px 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-weight: 500; color: var(--muted); font-size: 13px; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+td { padding: 10px; border-bottom: 1px solid #1a2230; vertical-align: top; }
+td .t { display: flex; gap: 10px; align-items: flex-start; }
+td .t .fav { flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font: 600 10px/1 Inter, sans-serif; color: #10141b; background: var(--c); margin-top: 2px; }
+td .title { font-weight: 500; color: var(--bone); }
+td .sub { color: var(--muted); font-size: 13px; }
+td .epi { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 17px; line-height: 1.25; }
+td .row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+td .row-actions .btn { padding: 5px 10px; font-size: 13px; }
+.list .empty { padding: 40px 0; text-align: center; font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 22px; color: var(--bone-dim); }
+@media (max-width: 760px) {
+  thead { display: none; }
+  tr { display: grid; grid-template-columns: 1fr; padding: 8px 0; border-bottom: 1px solid #1a2230; }
+  td { border: 0; padding: 4px 0; }
+}
+
+/* ------------------------------------------------------------------ popup preview */
+.popup {
+  position: fixed; z-index: 120; top: 112px; right: 24px; width: 320px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .7); overflow: hidden;
+}
+.popup .strip { display: block; width: 100%; height: 26px; background: var(--panel-2); }
+.popup .inner { padding: 14px 16px 16px; display: grid; gap: 10px; }
+.pop-head { display: flex; align-items: center; gap: 12px; }
+.pop-head svg { width: 44px; flex: 0 0 auto; }
+.pop-head h2 { margin: 0; font-family: "Pirata One", Cinzel, serif; font-weight: 400; font-size: 27px; line-height: 1.05; color: var(--bone); }
+.pop-head p { margin: 0; color: var(--muted); font-size: 13px; }
+.pop-head b { color: var(--bone); }
+.popup .btn { width: 100%; }
+.pop-last { margin: 2px 0 0; padding-top: 10px; border-top: 1px solid var(--line); }
+.pop-last .label { display: block; color: var(--muted); font-size: 12px; }
+.pop-last .epi { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 16px; line-height: 1.25; color: var(--bone); }
+.popup a { color: var(--spectral); font-size: 14px; }
+.popup-note { margin: 0; color: var(--muted); font-size: 12px; }
+
+/* ------------------------------------------------------------------ dialog, toast, effects */
+dialog {
+  border: 1px solid var(--line); border-radius: 10px; padding: 22px 22px 18px; width: min(440px, calc(100% - 32px));
+  background: var(--panel); color: var(--text); box-shadow: 0 30px 80px rgba(0, 0, 0, .8);
+}
+dialog::backdrop { background: rgba(2, 4, 9, .72); }
+dialog h2 { margin: 0 0 8px; font-family: "Pirata One", Cinzel, serif; font-weight: 400; font-size: 28px; color: var(--bone); }
+dialog p { margin: 0 0 18px; color: var(--muted); }
+dialog .actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+.toast {
+  position: fixed; z-index: 140; left: 50%; bottom: 24px; transform: translate(-50%, 20px);
+  padding: 10px 16px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line);
+  opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+.flash { position: absolute; inset: 0; z-index: 85; pointer-events: none; background: #dfe9ff; opacity: 0; }
+.bolt { position: fixed; z-index: 131; pointer-events: none; }
+.fx { position: fixed; z-index: 125; pointer-events: none; }
+.warm-glow {
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 196, 102, .85) 0%, rgba(255, 154, 31, .45) 35%, rgba(255, 140, 20, 0) 70%);
+  mix-blend-mode: screen;
+}
+.ghost { filter: drop-shadow(0 0 18px rgba(255, 220, 160, .45)); }
+.ghost svg { display: block; width: 100%; }
+.ghost .eye {
+  position: absolute; top: 31%; width: 15%; aspect-ratio: 1; border-radius: 22%;
+  display: grid; place-items: center; font: 700 9px/1 Inter, sans-serif; color: #10141b; background: var(--c);
+  box-shadow: 0 0 0 2px rgba(16, 20, 27, .55);
+}
+/* favicon over its letter; the letter shows only if the icon fails to load */
+.fav, .ghost .eye { position: relative; overflow: hidden; }
+.ghost .eye { position: absolute; }
+.fav img, .ghost .eye img {
+  position: absolute; inset: 0; width: 100%; height: 100%; padding: 14%;
+  object-fit: contain; background: var(--bone); border-radius: inherit;
+  opacity: 0; transition: opacity .3s;
+}
+.fav img.ok, .ghost .eye img.ok { opacity: 1; }
+.ghost .eye.l { left: 30%; }
+.ghost .eye.r { left: 55%; }
+.petal { width: 10px; height: 14px; border-radius: 60% 60% 50% 50%; background: radial-gradient(circle at 40% 30%, #ffc04d, var(--marigold) 70%); }
+.bat { width: 34px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fog, .flyer.go, .fence-crow.caw { animation: none !important; }
+  .camera { transition: none; }
+  .plot.rising .stone, .plot.rising .mound, .plot.rising .rose { animation: fade .3s both !important; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+}
+@media (max-width: 640px) {
+  .top, .controls { padding-left: 16px; padding-right: 16px; }
+  .popup { right: 16px; left: 16px; width: auto; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <h1>Rest in Tabs</h1>
+    <p>Final resting place of tabs that were going to be read later.</p>
+  </div>
+  <div class="stats" aria-label="Statistics">
+    <span><b id="st-buried">46</b> buried</span>
+    <span><b id="st-res">12</b> resurrected</span>
+    <span>≈ <b id="st-ram">2.3 GB</b> freed (estimated)</span>
+  </div>
+</header>
+
+<div class="controls">
+  <label class="search">
+    <span class="sr-only">Search the graveyard</span>
+    <input id="q" type="search" placeholder="Search by title, site or epitaph" autocomplete="off" />
+  </label>
+  <div class="seg" role="group" aria-label="View">
+    <button type="button" id="v-land" aria-pressed="true">Landscape</button>
+    <button type="button" id="v-list" aria-pressed="false">List</button>
+  </div>
+  <div class="seg" role="group" aria-label="Theme">
+    <button type="button" id="th-night" aria-pressed="true">Night</button>
+    <button type="button" id="th-dusk" aria-pressed="false">Dusk</button>
+  </div>
+  <label class="clock">Demo clock
+    <input id="clock" type="range" min="0" max="14" step="1" value="0" />
+    <output id="clock-out" for="clock">+0 days</output>
+  </label>
+  <span class="spacer"></span>
+  <button type="button" class="btn" id="show-popup" aria-expanded="false" aria-controls="popup">Preview popup</button>
+  <button type="button" class="btn primary" id="bury-idle">Bury 12 idle tabs</button>
+</div>
+
+<main>
+  <section class="scene" id="scene" aria-label="Graveyard, landscape view">
+    <div class="stars" aria-hidden="true"></div>
+    <div class="moon" aria-hidden="true"></div>
+    <svg class="flyer" id="flyer" viewBox="0 0 80 40" aria-hidden="true"><path d="M2 18 C14 7 26 7 36 18 C40 13 44 13 48 18 C58 7 70 7 78 16 C68 16 58 20 50 24 C46 29 40 30 36 26 C28 22 16 18 2 18Z" fill="#04060a"/></svg>
+    <svg class="hills" viewBox="0 0 1440 320" preserveAspectRatio="none" aria-hidden="true">
+      <path class="far" d="M0 200 C180 140 360 160 520 182 C700 206 820 128 1000 140 C1160 152 1300 196 1440 172 L1440 320 L0 320Z"/>
+      <path class="near" d="M0 250 C200 214 380 234 560 244 C760 254 900 208 1080 218 C1240 228 1340 250 1440 240 L1440 320 L0 320Z"/>
+    </svg>
+    <div class="ground" aria-hidden="true"></div>
+    <svg class="tree t3" viewBox="0 0 200 300" aria-hidden="true"><g fill="none" stroke-linecap="round"><path d="M100 300 C98 250 102 210 96 170" stroke-width="14"/><path d="M97 190 C80 160 60 150 40 120" stroke-width="7"/><path d="M99 175 C120 150 140 140 160 112" stroke-width="7"/><path d="M96 170 C96 140 92 112 100 80" stroke-width="6"/></g></svg>
+    <svg class="tree t1" viewBox="0 0 200 300" aria-hidden="true"><g fill="none" stroke-linecap="round"><path d="M100 300 C98 250 102 210 96 170" stroke-width="14"/><path d="M97 190 C80 160 60 150 40 120" stroke-width="7"/><path d="M60 148 C50 130 48 112 52 96" stroke-width="4"/><path d="M99 175 C120 150 140 140 160 112" stroke-width="7"/><path d="M140 138 C150 120 168 112 182 108" stroke-width="3.5"/><path d="M96 170 C96 140 92 112 100 80" stroke-width="6"/><path d="M99 110 C112 96 120 80 118 60" stroke-width="3.5"/><path d="M100 96 C88 84 80 70 78 52" stroke-width="3"/><path d="M44 124 C34 118 24 118 14 122" stroke-width="2.5"/><path d="M158 116 C164 100 162 88 156 76" stroke-width="2.5"/><path d="M118 62 C124 52 132 48 140 46" stroke-width="2"/></g></svg>
+    <svg class="tree t2" viewBox="0 0 200 300" aria-hidden="true"><g fill="none" stroke-linecap="round"><path d="M100 300 C100 240 96 200 104 150" stroke-width="12"/><path d="M102 200 C84 176 66 168 46 146" stroke-width="6"/><path d="M104 160 C124 136 146 128 168 98" stroke-width="6"/><path d="M104 150 C102 120 108 96 98 70" stroke-width="5"/><path d="M60 158 C52 140 52 126 58 110" stroke-width="3"/><path d="M98 76 C86 66 82 54 84 40" stroke-width="2.5"/></g></svg>
+
+    <div class="fog f-far" aria-hidden="true"></div>
+    <div class="fog f-mid" aria-hidden="true"></div>
+    <div class="camera" id="camera"></div>
+    <div class="fog f-near" aria-hidden="true"></div>
+
+    <svg class="fence" aria-hidden="true" preserveAspectRatio="none">
+      <defs>
+        <pattern id="bars" width="26" height="58" patternUnits="userSpaceOnUse">
+          <rect x="11" y="12" width="4" height="46" fill="#05070b"/>
+          <path d="M13 1 L18 12 L8 12Z" fill="#05070b"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="58" fill="url(#bars)"/>
+      <rect y="22" width="100%" height="4" fill="#05070b"/>
+      <rect y="48" width="100%" height="10" fill="#05070b"/>
+    </svg>
+    <svg class="fence-crow" id="fence-crow" viewBox="0 0 60 50" aria-hidden="true"><path d="M8 30 C10 22 18 18 26 19 C30 12 38 10 44 14 L55 13 L46 18 C48 24 46 32 38 36 L40 47 M33 37 L32 47" fill="#04060a" stroke="#04060a" stroke-width="2"/><path d="M8 30 C4 31 2 34 1 38 C6 35 12 34 18 32" fill="#04060a"/><circle cx="42" cy="16" r="1.3" fill="#9aa3b0"/></svg>
+
+    <p class="scene-msg" id="scene-msg" hidden></p>
+    <div class="flash" id="flash" aria-hidden="true"></div>
+
+    <aside class="plaque" id="plaque" aria-labelledby="pl-title" hidden>
+      <button type="button" class="close" id="pl-close" aria-label="Close">×</button>
+      <h2 id="pl-title"></h2>
+      <div class="domain" id="pl-domain"></div>
+      <dl>
+        <dt>Epitaph</dt><dd class="epitaph" id="pl-epi"></dd>
+        <dt>Cause of death</dt><dd id="pl-cause"></dd>
+        <dt>Last visited</dt><dd id="pl-visited"></dd>
+        <dt>Buried</dt><dd id="pl-buried"></dd>
+        <dt>Condition</dt><dd id="pl-stage"></dd>
+      </dl>
+      <div class="actions">
+        <button type="button" class="btn primary" id="pl-res">Resurrect</button>
+        <button type="button" class="btn danger" id="pl-exo">Exorcise</button>
+      </div>
+    </aside>
+  </section>
+
+  <section class="list" id="list" aria-label="Graveyard, list view" hidden>
+    <div class="list-head">
+      <span id="list-count"></span>
+      <span class="spacer"></span>
+      <label>Sort
+        <select id="sort">
+          <option value="new">Newest first</option>
+          <option value="old">Oldest first</option>
+          <option value="name">Name</option>
+        </select>
+      </label>
+    </div>
+    <table>
+      <thead><tr><th>Tab</th><th>Epitaph</th><th>Cause of death</th><th>Buried</th><th>Condition</th><th><span class="sr-only">Actions</span></th></tr></thead>
+      <tbody id="list-body"></tbody>
+    </table>
+    <p class="empty" id="list-empty" hidden></p>
+  </section>
+</main>
+
+<div class="popup" id="popup" role="dialog" aria-label="Popup preview" hidden>
+  <svg class="strip" viewBox="0 0 320 26" preserveAspectRatio="none" aria-hidden="true">
+    <defs><pattern id="pbars" width="16" height="26" patternUnits="userSpaceOnUse"><rect x="7" y="7" width="2.5" height="19" fill="#05070b"/><path d="M8.2 0 L11.5 7 L5 7Z" fill="#05070b"/></pattern></defs>
+    <rect width="320" height="26" fill="url(#pbars)"/><rect y="14" width="320" height="2.5" fill="#05070b"/>
+  </svg>
+  <div class="inner">
+    <div class="pop-head">
+      <svg viewBox="0 0 100 124" aria-hidden="true"><path d="M50 4 C23 4 11 27 11 52 L11 112 Q19 103 27 112 Q35 121 43 112 Q51 103 59 112 Q67 121 75 112 Q83 103 89 112 L89 52 C89 27 77 4 50 4Z" fill="#ece6d8"/><ellipse cx="38" cy="46" rx="6" ry="8" fill="#10141b"/><ellipse cx="62" cy="46" rx="6" ry="8" fill="#10141b"/></svg>
+      <div>
+        <h2>Rest in Tabs</h2>
+        <p><b id="pop-count">26</b> tabs at rest</p>
+      </div>
+    </div>
+    <button type="button" class="btn primary" id="pop-bury-idle">Bury 12 idle tabs</button>
+    <button type="button" class="btn" id="pop-bury-this">Bury this tab</button>
+    <p class="pop-last"><span class="label">Last buried</span><span class="epi" id="pop-last"></span></p>
+    <a href="#scene" id="pop-open">Open the graveyard</a>
+    <p class="popup-note">Popup preview. In the extension this opens from the toolbar.</p>
+  </div>
+</div>
+
+<dialog id="confirm" aria-labelledby="cf-title">
+  <h2 id="cf-title">Exorcise this grave?</h2>
+  <p id="cf-text"></p>
+  <div class="actions">
+    <button type="button" class="btn" id="cf-keep">Keep it</button>
+    <button type="button" class="btn danger" id="cf-go">Exorcise</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---------------------------------------------------------------- data
+  const H = 3600e3, DAY = 24 * H, EST_MB_PER_TAB = 50;
+  const NOW0 = Date.now();
+  let dayOffset = 0;
+  const now = () => NOW0 + dayOffset * DAY;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const COLORS = ['#7d93ad', '#a08470', '#76967f', '#9384a6', '#a57b78', '#7493a0', '#a39a73', '#8d9aa8'];
+  // [title, domain, path, epitaph (page summary), hours since burial, hours idle before burial, identical tabs]
+  const SEED = [
+    ["Sourdough starter: a beginner's guide", 'kingarthurbaking.com', '/recipes/sourdough-starter', 'How to feed, store and revive a sourdough starter, with a daily schedule.', 3, 50, 1],
+    ['Fix flaky auth test · Pull Request #482', 'github.com', '/acme/web/pull/482', 'Replaces a fixed sleep in the login test with a wait for the session cookie.', 5, 30, 3],
+    ['Flights from Jakarta to Lisbon', 'google.com', '/travel/flights', 'Round trips from CGK to LIS in March, sorted by price.', 9, 96, 1],
+    ['Shopping cart · IKEA', 'ikea.com', '/us/en/shoppingcart', 'One POÄNG armchair and two picture frames, not yet paid for.', 14, 20, 1],
+    ['The event loop · MDN', 'developer.mozilla.org', '/en-US/docs/Web/JavaScript/Event_loop', 'How JavaScript runs tasks, microtasks and rendering on a single thread.', 20, 144, 1],
+    ['Q3 budget memo', 'docs.google.com', '/document/d/1x9/edit', 'A budget memo with three headings and no paragraphs.', 48, 40, 1],
+    ['How to fix a dripping tap', 'youtube.com', '/watch?v=tap', 'A nine-minute video on replacing the cartridge in a mixer tap.', 60, 72, 1],
+    ['Best mechanical keyboards', 'rtings.com', '/keyboard/reviews/best', 'Lab-tested reviews of 40 keyboards, ranked by typing quality.', 72, 264, 1],
+    ['Two-bedroom flat near the park', 'zillow.com', '/homedetails/2br-park', 'Two bedrooms, 74 m², balcony, available from April.', 84, 26, 4],
+    ['Specs · Kiro docs', 'kiro.dev', '/docs/specs', 'Write requirements, design and tasks before any code.', 96, 30, 2],
+    ['Create your profile · Duolingo', 'duolingo.com', '/register', 'Learn a language for free. Pick a course to start.', 120, 8, 1],
+    ['The Fall of the House of Usher', 'gutenberg.org', '/ebooks/932', "Full text of Edgar Allan Poe's short story, first published in 1839.", 144, 552, 1],
+    ['Landing page v7 (final)', 'figma.com', '/design/landing-v7', 'Version seven of seven. Two comments unresolved.', 192, 624, 1],
+    ['Getting started · The Rust Book', 'doc.rust-lang.org', '/book/ch01-00-getting-started.html', 'Chapter one: installing Rust and writing Hello, world.', 216, 1536, 1],
+    ['List of lighthouses in Portugal', 'en.wikipedia.org', '/wiki/List_of_lighthouses_in_Portugal', 'A table of 48 lighthouses with the year each was built.', 264, 432, 1],
+    ['Lisbon weather', 'bbc.com', '/weather/2267057', 'A 14-day forecast for Lisbon.', 288, 288, 1],
+    ['Untitled spreadsheet', 'docs.google.com', '/spreadsheets/d/7k2/edit', 'One cell filled: A1 says "ideas".', 360, 90, 1],
+    ['Standing desk · Cart', 'amazon.com', '/gp/cart/view.html', 'One standing desk, 160 by 80 cm, waiting in the cart.', 384, 50, 1],
+    ['Membership plans · City Gym', 'citygym.com', '/memberships', 'Monthly and yearly plans. The first week is free.', 480, 744, 1],
+    ['Regex matches nothing · Stack Overflow', 'stackoverflow.com', '/questions/regex-matches-nothing', 'Asked four years ago. Three answers, none accepted.', 600, 12, 5],
+    ['Why are my leaves yellow? · r/houseplants', 'reddit.com', '/r/houseplants/comments/yellow', 'Top comment: overwatering, low light or root rot, in that order.', 648, 70, 1],
+    ['Show HN: A spreadsheet in the terminal', 'news.ycombinator.com', '/item?id=41', '142 points and 61 comments.', 792, 20, 2],
+    ['Meditation for beginners', 'headspace.com', '/meditation/beginners', 'A ten-day course, ten minutes a day.', 960, 2160, 1],
+    ['Your 2025 Wrapped · Spotify', 'spotify.com', '/wrapped', '41,000 minutes of music in one year.', 1080, 1440, 1],
+    ['Tax return checklist', 'gov.uk', '/self-assessment-tax-returns/checklist', 'The documents to gather before filing a tax return.', 1200, 1080, 1],
+    ['Machine Learning, week 2 · Coursera', 'coursera.org', '/learn/machine-learning/week/2', 'Linear regression with one variable. Two of nine videos watched.', 1680, 2880, 1],
+  ];
+  // Open tabs that have gone idle: [title, domain, path, epitaph, hours idle, identical tabs]
+  const POOL_SEED = [
+    ['Hotel in Porto · Booking.com', 'booking.com', '/hotel/pt/ribeira', 'A riverside room in Ribeira, free cancellation until Friday.', 30, 1],
+    ['CSS :has() selector · MDN', 'developer.mozilla.org', '/en-US/docs/Web/CSS/:has', 'Select a parent element based on what it contains.', 8, 1],
+    ['Invoice #2041 · Stripe', 'dashboard.stripe.com', '/invoices/2041', 'An invoice for 340 euros, due in seven days.', 26, 1],
+    ['Untitled document', 'docs.google.com', '/document/d/9q/edit', 'An empty document with a title and nothing else.', 12, 1],
+    ['Checkout · Etsy', 'etsy.com', '/cart/checkout', 'A hand-bound notebook and a brass bookmark.', 19, 1],
+    ['Lo-fi beats to study to', 'youtube.com', '/watch?v=lofi', 'A live stream of quiet music, running for six years.', 6, 2],
+    ['The Pragmatic Programmer · Goodreads', 'goodreads.com', '/book/show/4099', 'Rated 4.3 by 70,000 readers. Marked as want to read.', 40, 1],
+    ['Train times Lisbon to Porto', 'cp.pt', '/passageiros/en/train-times', 'Departures every hour; the fastest takes 2 hours 49 minutes.', 22, 1],
+    ['Dark mode toggle · Issue #77', 'github.com', '/acme/web/issues/77', 'A request for a dark mode toggle, open since spring.', 15, 2],
+    ['Config reference · Vite', 'vite.dev', '/config', 'Every option for vite.config.ts, grouped by area.', 5, 1],
+    ['Reading list · Notion', 'notion.so', '/reading-list', 'Fourteen books, one marked as finished.', 52, 1],
+    ['Porto weather', 'bbc.com', '/weather/2735943', 'Rain until Thursday, then clearing.', 9, 1],
+  ];
+
+  let nextId = 1;
+  const colorFor = (domain) => COLORS[[...domain].reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length];
+  const makeGrave = (title, domain, path, epitaph, buriedAt, idleMs, dupes) => ({
+    id: String(nextId++), title, domain, url: 'https://' + domain + path, epitaph,
+    buriedAt, lastAccessed: buriedAt - idleMs, dupes, color: colorFor(domain), cross: nextId % 3 === 0,
+  });
+  let graves = SEED.map(([t, d, p, e, ago, idle, dup]) => makeGrave(t, d, p, e, NOW0 - ago * H, idle * H, dup));
+  let pool = POOL_SEED.map(([t, d, p, e, idle, dup]) => ({ t, d, p, e, idle, dup }));
+  const stats = { buried: 46, resurrected: 12 };
+
+  // ---------------------------------------------------------------- derived values
+  function stageOf(g) {
+    const age = now() - g.buriedAt;
+    if (age < DAY) return 'fresh';
+    if (age < 7 * DAY) return 'weathered';
+    return 'crumbling';
+  }
+  const STAGE_LABEL = { fresh: 'Fresh', weathered: 'Weathered', crumbling: 'Crumbling' };
+
+  function duration(ms) {
+    const h = Math.round(ms / H);
+    if (h < 48) return h === 1 ? '1 hour' : `${h} hours`;
+    const d = Math.round(ms / DAY);
+    if (d < 60) return `${d} days`;
+    return `${Math.round(d / 30)} months`;
+  }
+  // Cause of death comes from a fixed taxonomy computed from data, never invented.
+  function causeOf(g) {
+    const path = new URL(g.url).pathname.toLowerCase();
+    if (g.dupes > 1) return `Died a duplicate. ${g.dupes} identical tabs were open.`;
+    if (/(cart|checkout)/.test(path)) return 'Abandoned at checkout.';
+    if (/\/(edit|draft|compose)\b/.test(path)) return 'Abandoned mid-draft.';
+    if (/(register|signup|sign-up|join)/.test(path)) return 'Abandoned during sign-up.';
+    return `Died of neglect. Unvisited for ${duration(g.buriedAt - g.lastAccessed)}.`;
+  }
+  const fmtShort = (t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase();
+  const fmtLong = (t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  function ago(t) {
+    const ms = Math.max(0, now() - t);
+    if (ms < H) return 'just now';
+    return `${duration(ms)} ago`;
+  }
+  function fmtRam(mb) { return mb >= 1000 ? `${(mb / 1000).toFixed(1)} GB` : `${mb} MB`; }
+  const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const initial = (d) => d.replace(/^www\./, '')[0].toUpperCase();
+  // Mockup only: favicons come from a public icon service for the sample sites. The extension
+  // uses the favicon Chrome already gives for the tab (stored in the grave), with no third party.
+  // If an icon fails to load, the letter underneath stays visible.
+  const favImg = (d) => `<img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(d)}&sz=64" alt="" referrerpolicy="no-referrer" onload="this.classList.add('ok')" onerror="this.remove()">`;
+  const favHtml = (g, cls = 'fav') => `<span class="${cls}" style="--c:${g.color}" aria-hidden="true">${initial(g.domain)}${favImg(g.domain)}</span>`;
+  const shortTitle = (t) => t.split(' · ')[0];
+
+  // ---------------------------------------------------------------- svg pieces
+  const ROSE = '<svg class="deco rose" viewBox="0 0 40 60" aria-hidden="true"><path d="M20 58 C19 46 22 38 20 26" stroke="#1d281b" stroke-width="2.4" fill="none"/><path d="M20 44 C14 40 9 42 7 46 C12 47 16 46 20 44Z" fill="#1d281b"/><path d="M20 26 C12 26 9 18 13 12 C15 8 20 7 22 9 C25 6 30 9 30 14 C31 21 27 26 20 26Z" fill="#120e14"/><path d="M15 14 C18 11 22 12 23 15 C21 19 17 19 15 14Z" fill="#3b0d18"/><path d="M19 18 C21 16 25 17 25 20" stroke="#4a1220" stroke-width="1.4" fill="none"/></svg>';
+  const CRACK = '<svg class="deco crack" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M63 2 L56 15 L64 23 L52 39 L58 48 L49 63" stroke="#191d24" stroke-width="1.6" fill="none" vector-effect="non-scaling-stroke"/><path d="M58 48 L69 55" stroke="#191d24" stroke-width="1.2" fill="none" vector-effect="non-scaling-stroke"/></svg>';
+  const WEB = '<svg class="deco web" viewBox="0 0 50 50" aria-hidden="true"><g stroke="rgba(232,228,216,.42)" stroke-width=".7" fill="none"><path d="M0 0 L50 50 M0 0 L50 18 M0 0 L18 50 M0 0 L36 50 M0 0 L50 34"/><path d="M10 0 Q12 8 0 10 M22 0 Q24 16 0 22 M34 0 Q36 24 0 34 M46 0 Q46 32 0 46"/></g></svg>';
+  const WEEDS = '<svg class="deco weeds" viewBox="0 0 120 40" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="#2a3824" stroke-width="2" stroke-linecap="round"><path d="M6 40 Q8 24 4 12"/><path d="M12 40 Q14 22 20 10"/><path d="M18 40 Q16 28 10 20"/><path d="M98 40 Q100 20 94 6"/><path d="M104 40 Q108 26 116 16"/><path d="M110 40 Q110 30 104 22"/><path d="M40 40 Q42 32 38 26"/><path d="M80 40 Q78 30 84 24"/><path d="M60 40 Q62 30 58 22"/></g></svg>';
+  const PERCH = '<svg class="deco perch" viewBox="0 0 60 50" aria-hidden="true"><path d="M8 30 C10 22 18 18 26 19 C30 12 38 10 44 14 L55 13 L46 18 C48 24 46 32 38 36 L40 47 M33 37 L32 47" fill="#04060a" stroke="#04060a" stroke-width="2"/><path d="M8 30 C4 31 2 34 1 38 C6 35 12 34 18 32" fill="#04060a"/><circle cx="42" cy="16" r="1.3" fill="#9aa3b0"/></svg>';
+  const FALLEN = '<svg class="deco fallen" viewBox="0 0 90 40" aria-hidden="true"><g fill="#3a414d" stroke="#232831" stroke-width="1.5"><rect x="4" y="18" width="80" height="11" rx="2"/><rect x="58" y="6" width="11" height="34" rx="2"/></g></svg>';
+  const GHOST = '<svg viewBox="0 0 100 124" aria-hidden="true"><defs><linearGradient id="gsheet" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf8f1"/><stop offset="1" stop-color="#d6dbe2"/></linearGradient></defs><path d="M50 4 C23 4 11 27 11 52 L11 112 Q19 103 27 112 Q35 121 43 112 Q51 103 59 112 Q67 121 75 112 Q83 103 89 112 L89 52 C89 27 77 4 50 4Z" fill="url(#gsheet)"/><path d="M30 62 C34 82 32 98 27 110 M70 64 C66 84 68 98 73 110" stroke="#c4cad3" stroke-width="2" fill="none" opacity=".7"/></svg>';
+  const BAT = '<svg viewBox="0 0 60 30" aria-hidden="true"><path d="M30 10 C28 6 26 6 25 9 C20 4 10 4 2 10 C8 11 11 14 12 18 C16 15 20 15 22 18 C25 16 28 17 30 21 C32 17 35 16 38 18 C40 15 44 15 48 18 C49 14 52 11 58 10 C50 4 40 4 35 9 C34 6 32 6 30 10Z" fill="#090b11"/></svg>';
+
+  // ---------------------------------------------------------------- elements
+  const $ = (id) => document.getElementById(id);
+  const scene = $('scene'), camera = $('camera'), sceneMsg = $('scene-msg');
+  const plaque = $('plaque'), list = $('list'), listBody = $('list-body');
+  const q = $('q'), toastEl = $('toast');
+  let view = 'land', selectedId = null, lastFocus = null, camScale = 1, busy = false;
+
+  // ---------------------------------------------------------------- landscape
+  const ROWS = [
+    { s: 1, veil: 0 }, { s: .78, veil: .26 }, { s: .62, veil: .5 },
+    { s: .5, veil: .68 }, { s: .41, veil: .8 }, { s: .34, veil: .86 },
+  ];
+  function hash(str) { let h = 7; for (const c of str) h = (h * 31 + c.charCodeAt(0)) % 9973; return h; }
+
+  function plotHtml(g, d, extraClass, delay) {
+    const stage = stageOf(g);
+    const h = hash(g.id + g.title);
+    const tilt = ((h % 7) - 3) || 2;
+    const jy = (h % 5) * 3;
+    const label = `${g.title}. ${STAGE_LABEL[stage]}. Buried ${ago(g.buriedAt)}.`;
+    return `<div class="plot stage-${stage}${g.cross ? ' has-cross' : ''}${h % 3 === 0 ? ' has-crow' : ''}${extraClass}" data-id="${g.id}" style="--d:${d};--tilt:${tilt}deg;--jy:${jy}px;--delay:${delay}ms">
+      <span class="mound"></span>
+      ${FALLEN}
+      <button type="button" class="stone" aria-label="${esc(label)}" style="--c:${g.color}">
+        ${favHtml(g)}
+        <span class="name">${esc(shortTitle(g.title))}</span>
+        <span class="dates">${fmtShort(g.lastAccessed)} — ${fmtShort(g.buriedAt)}</span>
+        <span class="epi">${esc(g.epitaph)}</span>
+        <span class="cause">${esc(causeOf(g))}</span>
+        ${CRACK}${WEB}
+      </button>
+      ${ROSE}${WEEDS}${PERCH}
+    </div>`;
+  }
+
+  function renderLandscape(risingIds = new Set()) {
+    const sorted = [...graves].sort((a, b) => b.buriedAt - a.buriedAt);
+    const W = scene.clientWidth, Hh = scene.clientHeight;
+    const cap0 = Math.max(2, Math.floor((W - 40) / (172 + 30)));
+    // Each row sits behind the one in front of it, high enough that its stones peek out above.
+    // Only as many rows as fit below the horizon; the last one holds the rest, deep in the fog.
+    const rows = [];
+    let base = 58;
+    for (const [i, r] of ROWS.entries()) {
+      if (i > 0 && base + 236 * r.s * .55 > Hh * .8) break;
+      rows.push({ ...r, i, bottom: base, cap: Math.max(cap0, Math.floor(cap0 / r.s) + i), items: [] });
+      base += 236 * r.s * .7;
+    }
+    rows[rows.length - 1].cap = Infinity;
+    let ri = 0;
+    for (const g of sorted) {
+      while (rows[ri].items.length >= rows[ri].cap) ri++;
+      rows[ri].items.push(g);
+    }
+    // A lone stone in the back row looks lost; fold a short last row into the one in front.
+    const used = rows.filter((r) => r.items.length);
+    if (used.length > 1 && used[used.length - 1].items.length < 3) {
+      used[used.length - 2].items.push(...used.pop().items);
+      rows.length = used.length;
+    }
+    // Newest graves rise first: the front row, then the ones behind it.
+    const riseOrder = new Map(sorted.filter((g) => risingIds.has(g.id)).map((g, i) => [g.id, i]));
+    camera.innerHTML = rows.filter((r) => r.items.length).reverse().map((r) => {
+      const bottom = r.bottom;
+      const plots = r.items.map((g) => {
+        const isNew = riseOrder.has(g.id);
+        return plotHtml(g, r.i, isNew ? ' rising' : '', isNew ? riseOrder.get(g.id) * 170 : 0);
+      }).join('');
+      return `<div class="row" data-s="${r.s}" style="--s:${r.s};--veil:${r.veil};bottom:${bottom}px;z-index:${60 - r.i * 10}">${plots}</div>`;
+    }).join('');
+    applySearch(false);
+  }
+
+  // ---------------------------------------------------------------- search
+  function matches(g, term) {
+    return [g.title, g.domain, g.epitaph].some((s) => s.toLowerCase().includes(term));
+  }
+  function applySearch(walk = true) {
+    const term = q.value.trim().toLowerCase();
+    scene.classList.toggle('searching', term !== '');
+    let first = null;
+    for (const el of camera.querySelectorAll('.plot')) {
+      const g = graves.find((x) => x.id === el.dataset.id);
+      const hit = term !== '' && g && matches(g, term);
+      el.classList.toggle('match', hit);
+      if (hit && !first) first = el;
+    }
+    if (graves.length === 0) {
+      showMsg('Nothing has died here yet. Give it time.');
+    } else if (term !== '' && !first) {
+      showMsg('No grave bears that name.', true);
+    } else {
+      sceneMsg.hidden = true;
+    }
+    if (walk) walkTo(first);
+    if (view === 'list') renderList();
+  }
+  function showMsg(text, withClear) {
+    sceneMsg.hidden = false;
+    sceneMsg.innerHTML = esc(text) + (withClear ? '<button type="button" class="btn" id="clear-q">Clear search</button>' : '');
+    const c = $('clear-q');
+    if (c) c.onclick = () => { q.value = ''; applySearch(); q.focus(); };
+  }
+
+  // The camera walks toward the first match: far graves come forward out of the fog.
+  function walkTo(el) {
+    if (!el) { camScale = 1; camera.style.transform = ''; return; }
+    const sr = scene.getBoundingClientRect(), cr = camera.getBoundingClientRect(), r = el.getBoundingClientRect();
+    const ex = (r.left + r.width / 2 - cr.left) / camScale;
+    const ey = (r.top + r.height / 2 - cr.top) / camScale;
+    const s = Number(el.closest('.row').dataset.s);
+    const k = Math.min(1.9, Math.max(1, .92 / s));
+    let tx = sr.width * .5 - k * ex, ty = sr.height * .6 - k * ey;
+    tx = Math.min(0, Math.max(sr.width * (1 - k), tx));
+    ty = Math.min(0, Math.max(sr.height * (1 - k), ty));
+    camScale = k;
+    camera.style.transform = k === 1 ? '' : `translate(${tx}px, ${ty}px) scale(${k})`;
+  }
+
+  // ---------------------------------------------------------------- plaque
+  function openPlaque(id, fromEl) {
+    const g = graves.find((x) => x.id === id);
+    if (!g) return;
+    selectedId = id; lastFocus = fromEl || document.activeElement;
+    const stage = stageOf(g);
+    $('pl-title').textContent = g.title;
+    $('pl-domain').textContent = g.domain;
+    $('pl-epi').textContent = g.epitaph;
+    $('pl-cause').textContent = causeOf(g);
+    $('pl-visited').textContent = fmtLong(g.lastAccessed);
+    $('pl-buried').textContent = `${fmtLong(g.buriedAt)} (${ago(g.buriedAt)})`;
+    $('pl-stage').innerHTML = `<span class="chip ${stage}">${STAGE_LABEL[stage]}</span>`;
+    plaque.hidden = false;
+    $('pl-res').focus();
+  }
+  function closePlaque(restore = true) {
+    plaque.hidden = true;
+    selectedId = null;
+    if (restore && lastFocus && document.contains(lastFocus)) lastFocus.focus();
+  }
+
+  // ---------------------------------------------------------------- list view
+  function renderList() {
+    const term = q.value.trim().toLowerCase();
+    const sort = $('sort').value;
+    let rows = graves.filter((g) => term === '' || matches(g, term));
+    rows.sort(sort === 'old' ? (a, b) => a.buriedAt - b.buriedAt
+      : sort === 'name' ? (a, b) => a.title.localeCompare(b.title)
+      : (a, b) => b.buriedAt - a.buriedAt);
+    $('list-count').textContent = `${rows.length} of ${graves.length} graves`;
+    listBody.innerHTML = rows.map((g) => {
+      const st = stageOf(g);
+      return `<tr data-id="${g.id}">
+        <td><div class="t">${favHtml(g)}<div><div class="title">${esc(g.title)}</div><div class="sub">${esc(g.domain)}</div></div></div></td>
+        <td class="epi">${esc(g.epitaph)}</td>
+        <td>${esc(causeOf(g))}</td>
+        <td><span title="${fmtLong(g.buriedAt)}">${ago(g.buriedAt)}</span></td>
+        <td><span class="chip ${st}">${STAGE_LABEL[st]}</span></td>
+        <td><div class="row-actions"><button type="button" class="btn" data-act="res">Resurrect</button><button type="button" class="btn danger" data-act="exo">Exorcise</button></div></td>
+      </tr>`;
+    }).join('');
+    const empty = $('list-empty');
+    empty.hidden = rows.length !== 0;
+    empty.textContent = graves.length === 0 ? 'Nothing has died here yet. Give it time.' : 'No grave bears that name.';
+  }
+
+  // ---------------------------------------------------------------- header, popup
+  function renderStats() {
+    $('st-buried').textContent = stats.buried.toLocaleString('en-US');
+    $('st-res').textContent = stats.resurrected.toLocaleString('en-US');
+    $('st-ram').textContent = fmtRam(stats.buried * EST_MB_PER_TAB);
+    $('pop-count').textContent = graves.length;
+    const newest = [...graves].sort((a, b) => b.buriedAt - a.buriedAt)[0];
+    $('pop-last').textContent = newest ? newest.epitaph : 'Nothing yet.';
+    const label = pool.length ? `Bury ${pool.length} idle tab${pool.length === 1 ? '' : 's'}` : 'No idle tabs to bury';
+    for (const b of [$('bury-idle'), $('pop-bury-idle')]) {
+      b.textContent = label;
+      b.setAttribute('aria-disabled', String(pool.length === 0 || busy));
+    }
+  }
+  function render(risingIds) {
+    renderLandscape(risingIds);
+    if (view === 'list') renderList();
+    renderStats();
+  }
+
+  // ---------------------------------------------------------------- feedback helpers
+  let toastTimer;
+  function toast(text) {
+    toastEl.textContent = text;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2800);
+  }
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  function fx(className, html, box) {
+    const el = document.createElement('div');
+    el.className = 'fx ' + className;
+    el.innerHTML = html || '';
+    Object.assign(el.style, { left: box.x + 'px', top: box.y + 'px', width: box.w + 'px', height: box.h ? box.h + 'px' : '' });
+    document.body.appendChild(el);
+    return el;
+  }
+  const rand = (a, b) => a + Math.random() * (b - a);
+  function countUp(el, from, to, format) {
+    if (reduce) { el.textContent = format(to); return; }
+    const t0 = performance.now(), dur = 1400;
+    const step = (t) => {
+      const p = Math.min(1, (t - t0) / dur);
+      el.textContent = format(Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  function crowFlight() {
+    const f = $('flyer');
+    f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+  }
+
+  // ---------------------------------------------------------------- resurrect: up into warm light
+  async function resurrect(id) {
+    const g = graves.find((x) => x.id === id);
+    if (!g || busy) return;
+    busy = true;
+    closePlaque(false);
+    const plot = view === 'land' ? camera.querySelector(`.plot[data-id="${id}"]`) : null;
+    if (plot && !reduce) {
+      const stone = plot.querySelector('.stone');
+      const r = stone.getBoundingClientRect();
+      const baseX = r.left + r.width / 2, baseY = r.bottom;
+      // 1. the ground splits: the only warm light on the page
+      const glow = fx('warm-glow', '', { x: baseX - r.width, y: baseY - r.width * .9, w: r.width * 2, h: r.width * 1.6 });
+      glow.animate([{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1.1)' }], { duration: 650, easing: 'ease-out', fill: 'forwards' });
+      await sleep(450);
+      // 2. the stone slides aside
+      const current = getComputedStyle(stone).transform;
+      stone.animate([{ transform: current === 'none' ? 'none' : current }, { transform: 'translateX(34%) rotate(10deg)', opacity: .9 }], { duration: 520, easing: 'cubic-bezier(.3,.7,.3,1)', fill: 'forwards' });
+      await sleep(260);
+      // 3. the ghost of the tab rises, its favicon for eyes; marigold petals scatter
+      const gw = Math.max(70, r.width * .78);
+      const ghost = fx('ghost', GHOST + favHtml(g, 'eye l') + favHtml(g, 'eye r'), { x: baseX - gw / 2, y: baseY - gw * 1.24, w: gw });
+      ghost.animate([
+        { opacity: 0, transform: 'translateY(45%) scale(.55)' },
+        { opacity: 1, transform: 'translateY(-18%) scale(1)', offset: .7 },
+        { opacity: 1, transform: 'translateY(-26%) scale(1) rotate(-3deg)' },
+      ], { duration: 1000, easing: 'cubic-bezier(.2,.8,.3,1)', fill: 'forwards' });
+      for (let i = 0; i < 18; i++) {
+        const p = fx('petal', '', { x: baseX - 5, y: baseY - 18, w: 10, h: 14 });
+        p.animate([
+          { opacity: 1, transform: 'translate(0,0) rotate(0deg) scale(1)' },
+          { opacity: 0, transform: `translate(${rand(-180, 180)}px, ${rand(-320, -90)}px) rotate(${rand(-540, 540)}deg) scale(${rand(.5, 1)})` },
+        ], { duration: rand(1300, 2100), easing: 'cubic-bezier(.15,.7,.4,1)', fill: 'forwards' }).finished.then(() => p.remove());
+      }
+      await sleep(1150);
+      // 4. it flies off the top edge, toward the tab bar
+      await ghost.animate([
+        { transform: 'translateY(-26%) scale(1) rotate(-3deg)' },
+        { transform: `translate(${-baseX * .35}px, ${-(baseY + 260)}px) scale(.45) rotate(-14deg)`, opacity: .9 },
+      ], { duration: 820, easing: 'cubic-bezier(.5,0,.8,.4)', fill: 'forwards' }).finished;
+      ghost.remove();
+      glow.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, fill: 'forwards' }).finished.then(() => glow.remove());
+      // 5. the plot returns to fresh, empty soil
+      plot.classList.add('emptied');
+      plot.classList.remove('stage-weathered', 'stage-crumbling');
+    } else if (plot) {
+      plot.classList.add('emptied');
+    }
+    graves = graves.filter((x) => x.id !== id);
+    stats.resurrected++;
+    renderStats();
+    if (view === 'list') renderList();
+    toast('Reopened in a new tab.');
+    busy = false;
+    renderStats();
+  }
+
+  // ---------------------------------------------------------------- exorcise: down into the dark
+  const confirmDlg = $('confirm');
+  function askExorcise(id) {
+    const g = graves.find((x) => x.id === id);
+    if (!g || busy) return Promise.resolve(false);
+    $('cf-text').textContent = `“${g.title}” will be deleted permanently. This cannot be undone.`;
+    confirmDlg.showModal();
+    $('cf-keep').focus();
+    return new Promise((resolve) => {
+      const done = (ok) => { confirmDlg.close(); cleanup(); resolve(ok); };
+      const onKeep = () => done(false), onGo = () => done(true), onCancel = (e) => { e.preventDefault(); done(false); };
+      const cleanup = () => {
+        $('cf-keep').removeEventListener('click', onKeep);
+        $('cf-go').removeEventListener('click', onGo);
+        confirmDlg.removeEventListener('cancel', onCancel);
+      };
+      $('cf-keep').addEventListener('click', onKeep);
+      $('cf-go').addEventListener('click', onGo);
+      confirmDlg.addEventListener('cancel', onCancel);
+    });
+  }
+  async function exorcise(id) {
+    if (!(await askExorcise(id))) { if (lastFocus && document.contains(lastFocus)) lastFocus.focus(); return; }
+    busy = true;
+    closePlaque(false);
+    const plot = view === 'land' ? camera.querySelector(`.plot[data-id="${id}"]`) : null;
+    if (plot && !reduce) {
+      const stone = plot.querySelector('.stone');
+      const r = stone.getBoundingClientRect();
+      // a moment of silence
+      scene.classList.add('hush');
+      await sleep(800);
+      // one strike of lightning
+      // the bolt starts at the top of the sky, not above the page header
+      const bolt = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      const bx = r.left + r.width / 2;
+      const skyTop = Math.max(0, scene.getBoundingClientRect().top);
+      const bh = r.top + 20 - skyTop;
+      bolt.setAttribute('class', 'bolt');
+      bolt.setAttribute('width', '120'); bolt.setAttribute('height', String(bh));
+      Object.assign(bolt.style, { left: bx - 60 + 'px', top: skyTop + 'px' });
+      const pts = [], steps = 7;
+      for (let i = 0; i <= steps; i++) pts.push(`${60 + (i === 0 || i === steps ? 0 : rand(-26, 26))},${bh * i / steps}`);
+      bolt.innerHTML = `<polyline points="${pts.join(' ')}" fill="none" stroke="#eef3ff" stroke-width="3" stroke-linejoin="bevel"/><polyline points="${pts.join(' ')}" fill="none" stroke="rgba(170,200,255,.5)" stroke-width="10" stroke-linejoin="bevel"/>`;
+      document.body.appendChild(bolt);
+      $('flash').animate([{ opacity: 0 }, { opacity: .75 }, { opacity: .08 }, { opacity: .5 }, { opacity: 0 }], { duration: 520 });
+      bolt.animate([{ opacity: 1 }, { opacity: .2 }, { opacity: 1 }, { opacity: 0 }], { duration: 520, fill: 'forwards' }).finished.then(() => bolt.remove());
+      await sleep(260);
+      // bats scatter, the stone sinks into the ground
+      for (let i = 0; i < 9; i++) {
+        const b = fx('bat', BAT, { x: bx - 17, y: r.top + r.height * .3, w: 34 });
+        b.animate([
+          { opacity: 0, transform: 'translate(0,0) scale(.4)' },
+          { opacity: 1, transform: `translate(${rand(-60, 60)}px, ${rand(-40, -10)}px) scale(1)`, offset: .2 },
+          { opacity: 0, transform: `translate(${rand(-340, 340)}px, ${rand(-380, -160)}px) scale(.7)` },
+        ], { duration: rand(1100, 1600), easing: 'ease-in', fill: 'forwards' }).finished.then(() => b.remove());
+      }
+      plot.style.clipPath = 'inset(-300% -80% 0 -80%)';
+      const current = getComputedStyle(stone).transform;
+      await stone.animate([{ transform: current === 'none' ? 'none' : current }, { transform: 'translateY(108%)' }], { duration: 1100, easing: 'cubic-bezier(.55,0,.8,.4)', fill: 'forwards' }).finished;
+      plot.classList.add('gone');
+      // the crow on the fence calls once
+      const crow = $('fence-crow');
+      crow.classList.remove('caw'); void crow.offsetWidth; crow.classList.add('caw');
+      scene.classList.remove('hush');
+    } else if (plot) {
+      plot.classList.add('gone');
+    }
+    graves = graves.filter((x) => x.id !== id);
+    if (view === 'list') renderList();
+    toast('Grave deleted permanently.');
+    busy = false;
+    renderStats();
+  }
+
+  // ---------------------------------------------------------------- mass burial: fog rolls in, graves rise
+  async function buryIdle(limit = Infinity) {
+    if (busy || pool.length === 0) return;
+    busy = true;
+    renderStats();
+    const take = pool.slice(0, limit);
+    pool = pool.slice(take.length);
+    q.value = '';
+    camScale = 1; camera.style.transform = '';
+    if (!reduce) { scene.classList.add('fogroll'); await sleep(900); }
+    const t = now();
+    const fresh = take.map((p, i) => makeGrave(p.t, p.d, p.p, p.e, t - i * 1000, p.idle * H, p.dup));
+    graves = [...fresh, ...graves];
+    const before = stats.buried;
+    stats.buried += fresh.length;
+    render(new Set(fresh.map((g) => g.id)));
+    countUp($('st-buried'), before, stats.buried, (n) => n.toLocaleString('en-US'));
+    countUp($('st-ram'), before * EST_MB_PER_TAB, stats.buried * EST_MB_PER_TAB, fmtRam);
+    if (!reduce) {
+      crowFlight();
+      await sleep(600 + fresh.length * 170);
+      scene.classList.remove('fogroll');
+      await sleep(500);
+      for (const el of camera.querySelectorAll('.plot.rising')) el.classList.remove('rising');
+    }
+    toast(fresh.length === 1 ? 'Buried 1 tab.' : `Buried ${fresh.length} idle tabs.`);
+    busy = false;
+    renderStats();
+  }
+
+  // ---------------------------------------------------------------- wiring
+  camera.addEventListener('click', (e) => {
+    const stone = e.target.closest('.stone');
+    if (stone) openPlaque(stone.closest('.plot').dataset.id, stone);
+  });
+  $('pl-close').onclick = () => closePlaque();
+  $('pl-res').onclick = () => resurrect(selectedId);
+  $('pl-exo').onclick = () => exorcise(selectedId);
+  listBody.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-act]');
+    if (!b) return;
+    const id = b.closest('tr').dataset.id;
+    lastFocus = b;
+    if (b.dataset.act === 'res') resurrect(id); else exorcise(id);
+  });
+  // A click anywhere outside the plaque closes it. Clicking another stone opens that one instead,
+  // and clicks inside the confirm dialog leave the plaque alone.
+  document.addEventListener('click', (e) => {
+    if (plaque.hidden || busy) return;
+    if (e.target.closest('#plaque, .stone, dialog')) return;
+    closePlaque(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!plaque.hidden) closePlaque();
+    else if (!$('popup').hidden) togglePopup(false);
+  });
+
+  let searchTimer;
+  q.addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => applySearch(), 180); });
+  $('sort').onchange = renderList;
+
+  function setView(v) {
+    view = v;
+    $('v-land').setAttribute('aria-pressed', String(v === 'land'));
+    $('v-list').setAttribute('aria-pressed', String(v === 'list'));
+    scene.hidden = v !== 'land';
+    list.hidden = v !== 'list';
+    if (v === 'list') { closePlaque(false); renderList(); } else render();
+  }
+  $('v-land').onclick = () => setView('land');
+  $('v-list').onclick = () => setView('list');
+
+  function setTheme(t) {
+    document.documentElement.dataset.theme = t;
+    $('th-night').setAttribute('aria-pressed', String(t === 'night'));
+    $('th-dusk').setAttribute('aria-pressed', String(t === 'dusk'));
+  }
+  $('th-night').onclick = () => setTheme('night');
+  $('th-dusk').onclick = () => setTheme('dusk');
+  setTheme(matchMedia('(prefers-color-scheme: light)').matches ? 'dusk' : 'night');
+
+  $('clock').addEventListener('input', (e) => {
+    dayOffset = Number(e.target.value);
+    $('clock-out').textContent = `+${dayOffset} day${dayOffset === 1 ? '' : 's'}`;
+    closePlaque(false);
+    render();
+  });
+
+  const idleButtons = [$('bury-idle'), $('pop-bury-idle')];
+  for (const b of idleButtons) b.addEventListener('click', () => { if (b.getAttribute('aria-disabled') !== 'true') { if (view !== 'land') setView('land'); buryIdle(); } });
+  $('pop-bury-this').onclick = () => { if (pool.length) { if (view !== 'land') setView('land'); buryIdle(1); } else toast('There is no tab here to bury.'); };
+
+  function togglePopup(show) {
+    const p = $('popup');
+    const open = show ?? p.hidden;
+    p.hidden = !open;
+    $('show-popup').setAttribute('aria-expanded', String(open));
+    if (!open) $('show-popup').focus();
+  }
+  $('show-popup').onclick = () => togglePopup();
+  $('pop-open').onclick = (e) => { e.preventDefault(); togglePopup(false); setView('land'); };
+
+  let resizeTimer;
+  addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (view === 'land' && !busy) render(); }, 200); });
+
+  render();
+})();
+</script>
+</body>
+</html>
