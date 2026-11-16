@@ -1,7 +1,7 @@
 import type { Grave, Settings, Stats } from '../core/types.js';
 import { STORAGE_KEYS } from '../core/types.js';
 import { normalizeSettings } from '../core/settings.js';
-import { isValidGrave, normalizeStats } from '../core/validation.js';
+import { parseGrave, normalizeStats } from '../core/validation.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -16,7 +16,8 @@ type StorageChangeListener = () => void;
 /**
  * Read the Graves list from chrome.storage.local.
  *
- * Malformed Graves (those that fail isValidGrave) are skipped, not deleted.
+ * Each entry goes through parseGrave: malformed Graves are skipped (and
+ * dropped on the next write); a missing or bad duplicateCount becomes 1.
  * Returns an empty array if no Graves are stored.
  * Throws if the read fails.
  */
@@ -26,8 +27,7 @@ export async function getGraves(): Promise<Grave[]> {
 
   if (!Array.isArray(rawGraves)) return [];
 
-  // Filter to only valid Graves; skip malformed entries.
-  return rawGraves.filter(isValidGrave);
+  return rawGraves.map(parseGrave).filter((g): g is Grave => g !== null);
 }
 
 // ---------------------------------------------------------------------------

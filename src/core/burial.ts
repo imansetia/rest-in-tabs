@@ -4,7 +4,7 @@ import type { StorageAdapter, TabsAdapter, ExtractAdapter } from './adapters.js'
 import type { MessageResponse } from './messages.js';
 import { runQueue, writeQueue } from './queue.js';
 import { selectBurialCandidates, selectAutomaticCandidates, canBuryManually } from './selection.js';
-import { createGrave, addGrave } from './graves.js';
+import { createGrave, addGrave, countDuplicates } from './graves.js';
 
 // Burial orchestration. Adapters are injected so tests can use fakes.
 
@@ -56,9 +56,12 @@ export function buryTabs(
       stillBuriable = (fresh) => selectBurialCandidates([fresh], manual, Date.now()).length === 1;
     }
 
+    // Duplicate counts come from the same snapshot as the selection, so
+    // burying 3 identical tabs records 3 on the grave even after the first closes.
     let saved = 0;
     for (const tab of candidates) {
-      if ((await burySingleTab(storage, tabs, extract, tab, stillBuriable)) === 'saved') saved++;
+      const duplicates = countDuplicates(openTabs, tab.url);
+      if ((await burySingleTab(storage, tabs, extract, tab, stillBuriable, duplicates)) === 'saved') saved++;
     }
     return saved;
   });
@@ -79,11 +82,13 @@ export function buryTab(
   tabId: number,
 ): Promise<MessageResponse> {
   return runQueue.enqueue(async () => {
-    const tab = await tabs.getTab(tabId);
+    // All tabs are queried only to compute the Duplicate count.
+    const [tab, openTabs] = await Promise.all([tabs.getTab(tabId), tabs.queryTabs()]);
     if (tab === null) return { ok: false, error: 'not-found' };
     if (!canBuryManually(tab)) return { ok: false, error: 'not-allowed' };
 
-    const outcome = await burySingleTab(storage, tabs, extract, tab, () => true);
+    const duplicates = countDuplicates(openTabs, tab.url);
+    const outcome = await burySingleTab(storage, tabs, extract, tab, () => true, duplicates);
     if (outcome === 'saved') return { ok: true };
     return { ok: false, error: outcome === 'skipped' ? 'not-found' : 'save-failed' };
   });
@@ -103,6 +108,7 @@ async function burySingleTab(
   extract: ExtractAdapter,
   tab: TabInfo,
   stillBuriable: StillBuriable,
+  duplicateCount: number,
 ): Promise<Outcome> {
   let page: PageInfo;
   try {
@@ -118,7 +124,7 @@ async function burySingleTab(
   const fresh = await tabs.getTab(tab.id);
   if (fresh === null || fresh.url !== tab.url || !stillBuriable(fresh)) return 'skipped';
 
-  const grave = createGrave(fresh, page, Date.now(), crypto.randomUUID());
+  const grave = createGrave(fresh, page, Date.now(), crypto.randomUUID(), duplicateCount);
 
   try {
     await writeQueue.enqueue(async () => {

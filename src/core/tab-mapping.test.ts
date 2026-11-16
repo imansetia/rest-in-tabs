@@ -125,7 +125,7 @@ describe('tabToTabInfo', () => {
 
     // The grave produced from this tab must be valid.
     const page = { title: 'Test' };
-    const grave = createGrave(tabInfo!, page, now, 'test-id');
+    const grave = createGrave(tabInfo!, page, now, 'test-id', 1);
     expect(isValidGrave(grave)).toBe(true);
 
     // The tab must not be selected as idle at the same now.

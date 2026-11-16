@@ -30,6 +30,7 @@ export function makeGrave(id: string, overrides: Partial<Grave> = {}): Grave {
     lastAccessed: Date.now() - DAY,
     epitaph: `Epitaph ${id}`,
     epitaphSource: 'title',
+    duplicateCount: 1,
     ...overrides,
   };
 }

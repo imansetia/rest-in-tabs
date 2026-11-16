@@ -1,6 +1,7 @@
 import type { PageInfo, Grave, EpitaphSource, TabInfo } from './types.js';
 import { EPITAPH_MAX, EXCERPT_MAX } from './types.js';
 import { hostnameOf } from './url-utils.js';
+import { normalizeDuplicateCount } from './validation.js';
 
 // ---------------------------------------------------------------------------
 // fallbackEpitaph
@@ -59,14 +60,17 @@ export function fallbackEpitaph(page: PageInfo): { text: string; source: Epitaph
  *   unit — the excerpt is handled internally and never shown directly).
  * - buriedAt and lastAccessed are both in milliseconds epoch.
  * - id is provided by the caller (use crypto.randomUUID() in production).
+ * - duplicateCount comes from countDuplicates on the run's tab snapshot;
+ *   anything that is not an integer >= 1 is stored as 1.
  *
- * Validates: Requirements 3.1, 3.2, 5.1
+ * Validates: Requirements 3.1, 3.2, 5.1, 10.2
  */
 export function createGrave(
   tab: TabInfo,
   page: PageInfo,
   now: number,
   id: string,
+  duplicateCount: number,
 ): Grave {
   const { text: epitaph, source: epitaphSource } = fallbackEpitaph(page);
   const domain = hostnameOf(tab.url) ?? 'unknown';
@@ -83,7 +87,23 @@ export function createGrave(
     excerpt: page.excerpt !== undefined
       ? page.excerpt.slice(0, EXCERPT_MAX)
       : undefined,
+    duplicateCount: normalizeDuplicateCount(duplicateCount),
   };
+}
+
+// ---------------------------------------------------------------------------
+// countDuplicates
+// ---------------------------------------------------------------------------
+
+/**
+ * Number of tabs in the snapshot whose url is exactly `url`. The tab being
+ * buried is part of the snapshot, so the result is at least 1 even if the
+ * snapshot is stale and no longer contains it.
+ *
+ * Validates: Requirement 10.2
+ */
+export function countDuplicates(tabs: TabInfo[], url: string): number {
+  return Math.max(1, tabs.filter((tab) => tab.url === url).length);
 }
 
 // ---------------------------------------------------------------------------

@@ -18,6 +18,7 @@ function makeGrave(overrides: Partial<Grave> = {}): Grave {
     lastAccessed: Date.now() - 1000,
     epitaph: 'Some page',
     epitaphSource: 'title',
+    duplicateCount: 1,
     ...overrides,
   };
 }
@@ -38,6 +39,7 @@ const anyGrave: fc.Arbitrary<Grave> = fc.record<Grave>({
   epitaphSource: fc.constantFrom('ai', 'meta', 'paragraph', 'title') as fc.Arbitrary<Grave['epitaphSource']>,
   favIconUrl: fc.option(fc.webUrl(), { nil: undefined }),
   excerpt: fc.option(fc.string(), { nil: undefined }),
+  duplicateCount: fc.integer({ min: 1, max: 5 }),
 });
 
 // ---------------------------------------------------------------------------

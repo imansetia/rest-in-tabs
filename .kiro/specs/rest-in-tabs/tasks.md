@@ -78,7 +78,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - [x] 10.1 Add `causeOfDeath` and `formatDuration` in `src/core/cause.ts`, following design.md (draft rule matches whole path segments only)
     - Property-based tests: **Property 11: Cause of death follows the fixed rules**; **Property 12: Durations use the right unit and never shrink**, with a counter per kind and boundary
     - _Requirements: 10.1, 10.3_
-  - [ ] 10.2 Store the Duplicate count
+  - [x] 10.2 Store the Duplicate count
     - Add `duplicateCount` to `Grave`, `countDuplicates(tabs, url)`, and the `duplicateCount` parameter to `createGrave`
     - Burial runs count from the same tab snapshot used for selection; `buryTab` queries all tabs to count
     - Add `parseGrave` (missing or bad count becomes 1, the Grave is kept); `getGraves` uses it

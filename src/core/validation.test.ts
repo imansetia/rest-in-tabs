@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { isValidGrave, normalizeStats } from './validation.js';
+import { isValidGrave, parseGrave, normalizeStats } from './validation.js';
 import { createGrave } from './graves.js';
 import type { Grave, TabInfo, PageInfo } from './types.js';
 
@@ -18,6 +18,7 @@ function makeValidGrave(): Grave {
     lastAccessed: 999_999_000_000,
     epitaph: 'A test page',
     epitaphSource: 'title',
+    duplicateCount: 1,
   };
 }
 
@@ -196,7 +197,7 @@ describe('isValidGrave', () => {
 // ---------------------------------------------------------------------------
 
 describe('Property: createGrave always produces valid Graves', () => {
-  it('isValidGrave(createGrave(...)) is always true', () => {
+  it('createGrave output is valid and survives a JSON round trip through parseGrave', () => {
     // Arbitraries for TabInfo and PageInfo.
     const anyTab: fc.Arbitrary<TabInfo> = fc.record({
       id: fc.integer({ min: 1 }),
@@ -230,13 +231,45 @@ describe('Property: createGrave always produces valid Graves', () => {
         anyPage,
         fc.integer({ min: 0, max: 2_000_000_000_000 }), // now
         fc.uuid(), // id
-        (tab, page, now, id) => {
-          const grave = createGrave(tab, page, now, id);
+        // Counts from countDuplicates, plus values it never returns, to check createGrave's guard.
+        fc.oneof(fc.integer({ min: 1, max: 50 }), fc.constantFrom(0, -1, 2.5, NaN)),
+        (tab, page, now, id, duplicateCount) => {
+          const grave = createGrave(tab, page, now, id, duplicateCount);
           expect(isValidGrave(grave)).toBe(true);
+          expect(Number.isInteger(grave.duplicateCount) && grave.duplicateCount >= 1).toBe(true);
+          // What storage gives back is the same Grave.
+          expect(parseGrave(JSON.parse(JSON.stringify(grave)))).toEqual(grave);
         },
       ),
       { numRuns: 200 },
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseGrave
+// ---------------------------------------------------------------------------
+
+describe('parseGrave', () => {
+  it('keeps a valid duplicateCount', () => {
+    expect(parseGrave({ ...makeValidGrave(), duplicateCount: 4 })?.duplicateCount).toBe(4);
+  });
+
+  it('keeps an old Grave without duplicateCount and reads it as 1', () => {
+    const old: Record<string, unknown> = { ...makeValidGrave() };
+    delete old.duplicateCount;
+    expect(parseGrave(old)).toEqual({ ...makeValidGrave(), duplicateCount: 1 });
+  });
+
+  it('keeps a Grave with a bad duplicateCount and reads it as 1', () => {
+    for (const bad of [0, -3, 1.5, '3', null, NaN]) {
+      expect(parseGrave({ ...makeValidGrave(), duplicateCount: bad })?.duplicateCount).toBe(1);
+    }
+  });
+
+  it('returns null when a required field is invalid', () => {
+    expect(parseGrave({ ...makeValidGrave(), url: 'about:blank' })).toBeNull();
+    expect(parseGrave(null)).toBeNull();
   });
 });
 

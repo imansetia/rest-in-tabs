@@ -78,6 +78,12 @@ export interface Grave {
    * Deleted after the Epitaph is upgraded by the AI, or after EXCERPT_MAX_AGE_DAYS.
    */
   excerpt?: string;
+  /**
+   * Duplicate count: open tabs with exactly this url at burial, this one
+   * included. Integer >= 1. Graves saved before this field existed read as 1
+   * (see parseGrave).
+   */
+  duplicateCount: number;
 }
 
 // ---------------------------------------------------------------------------

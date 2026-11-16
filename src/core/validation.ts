@@ -5,6 +5,28 @@ import type { Grave, Stats } from './types.js';
 // ---------------------------------------------------------------------------
 
 /**
+ * A stored Grave that passed isValidGrave. Its duplicateCount has not been
+ * checked yet: it may be missing (old graves) or malformed.
+ */
+export type StoredGrave = Omit<Grave, 'duplicateCount'> & { duplicateCount?: unknown };
+
+/** A Duplicate count is an integer >= 1; anything else counts as 1. */
+export function normalizeDuplicateCount(value: unknown): number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 1 ? value : 1;
+}
+
+/**
+ * Turn a raw stored value into a Grave, or null when a required field is
+ * invalid. A missing or bad duplicateCount never makes a Grave invalid: it
+ * becomes 1, so old graves are kept (Requirement 10.4). The next write stores
+ * the defaulted value.
+ */
+export function parseGrave(raw: unknown): Grave | null {
+  if (!isValidGrave(raw)) return null;
+  return { ...raw, duplicateCount: normalizeDuplicateCount(raw.duplicateCount) };
+}
+
+/**
  * Check whether an unknown value has the shape of a valid Grave.
  *
  * A valid Grave must have:
@@ -19,11 +41,11 @@ import type { Grave, Stats } from './types.js';
  * - favIconUrl: optional string (any scheme accepted, e.g. https://, data:, chrome://)
  * - excerpt: optional string
  *
- * This is used by the storage adapter to filter out malformed Graves
- * without deleting them, per design Error Handling: "invalid Graves are
- * skipped, not deleted".
+ * duplicateCount is deliberately not checked here; parseGrave defaults it.
+ * The storage adapter reads graves through parseGrave, so malformed Graves
+ * are skipped when read and dropped on the next write.
  */
-export function isValidGrave(value: unknown): value is Grave {
+export function isValidGrave(value: unknown): value is StoredGrave {
   if (value === null || typeof value !== 'object') return false;
 
   const g = value as Record<string, unknown>;

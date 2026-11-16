@@ -96,6 +96,20 @@ describe('buryTabs', () => {
     expect(storage.graves()).toEqual([]);
   });
 
+  it('records the Duplicate count from the run snapshot: 3 identical tabs give 3', async () => {
+    const storage = fakeStorage({ installedAt: 0 });
+    const url = 'https://same.example.com/page';
+    const tabs = fakeTabs([makeTab(1, { url }), makeTab(2, { url }), makeTab(3, { url }), makeTab(4)]);
+
+    expect(await buryTabs(storage.adapter, tabs.adapter, fakeExtract(), true)).toBe(4);
+
+    // addGrave keeps one grave per url; it still records all 3 open copies.
+    const byUrl = new Map(storage.graves().map((g) => [g.url, g]));
+    expect(storage.graves()).toHaveLength(2);
+    expect(byUrl.get(url)?.duplicateCount).toBe(3);
+    expect(byUrl.get('https://site4.example.com/')?.duplicateCount).toBe(1);
+  });
+
   it('a grave keeps the real lastAccessed, not installedAt', async () => {
     const now = Date.now();
     const installedAt = now - 10 * DAY;
@@ -116,6 +130,15 @@ describe('buryTab', () => {
     expect(await buryTab(storage.adapter, tabs.adapter, fakeExtract(), 1)).toEqual({ ok: true });
     expect(tabs.removeCalls).toEqual([1]);
     expect(storage.stats().buried).toBe(1);
+  });
+
+  it('counts the other open tabs with the same url', async () => {
+    const storage = fakeStorage();
+    const url = 'https://same.example.com/page';
+    const tabs = fakeTabs([makeTab(1, { url, active: true }), makeTab(2, { url }), makeTab(3)]);
+
+    expect(await buryTab(storage.adapter, tabs.adapter, fakeExtract(), 1)).toEqual({ ok: true });
+    expect(storage.graves()[0].duplicateCount).toBe(2);
   });
 
   it('refuses private-window and non-http(s) tabs, and reports a missing tab', async () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { fallbackEpitaph, addGrave, createGrave } from './graves.js';
+import { fallbackEpitaph, addGrave, createGrave, countDuplicates } from './graves.js';
 import { EPITAPH_MAX, GRAVE_CAP, EXCERPT_MAX } from './types.js';
 import type { Grave, PageInfo, TabInfo } from './types.js';
 
@@ -23,6 +23,7 @@ function makeGrave(overrides: Partial<Grave> = {}): Grave {
     lastAccessed: Date.now() - 1000,
     epitaph: 'Some page',
     epitaphSource: 'title',
+    duplicateCount: 1,
     ...overrides,
   };
 }
@@ -103,6 +104,7 @@ const anyGrave: fc.Arbitrary<Grave> = fc.record<Grave>({
   epitaphSource: fc.constantFrom('ai', 'meta', 'paragraph', 'title') as fc.Arbitrary<Grave['epitaphSource']>,
   favIconUrl: fc.option(fc.webUrl(), { nil: undefined }),
   excerpt: fc.option(fc.string(), { nil: undefined }),
+  duplicateCount: fc.integer({ min: 1, max: 5 }),
 });
 
 // ---------------------------------------------------------------------------
@@ -228,7 +230,7 @@ describe('Property 5: Burial preserves the address (createGrave)', () => {
         fc.uuid(),
         (url, page, now, id) => {
           const tab = makeTab({ url });
-          const grave = createGrave(tab, page, now, id);
+          const grave = createGrave(tab, page, now, id, 1);
           expect(grave.url).toBe(tab.url);
         },
       ),
@@ -239,7 +241,7 @@ describe('Property 5: Burial preserves the address (createGrave)', () => {
   it('createGrave sets buriedAt to the supplied now', () => {
     fc.assert(
       fc.property(anyPageInfo, fc.integer({ min: 0, max: 2_000_000_000_000 }), fc.uuid(), (page, now, id) => {
-        const grave = createGrave(makeTab(), page, now, id);
+        const grave = createGrave(makeTab(), page, now, id, 1);
         expect(grave.buriedAt).toBe(now);
       }),
       { numRuns: 100 },
@@ -248,19 +250,40 @@ describe('Property 5: Burial preserves the address (createGrave)', () => {
 
   it('createGrave domain is the lower-cased hostname', () => {
     const tab = makeTab({ url: 'https://Docs.Example.COM/path' });
-    const grave = createGrave(tab, makePage(), 0, 'id-1');
+    const grave = createGrave(tab, makePage(), 0, 'id-1', 1);
     expect(grave.domain).toBe('docs.example.com');
   });
 
   it('createGrave excerpt is capped at EXCERPT_MAX', () => {
     const longExcerpt = 'x'.repeat(EXCERPT_MAX + 100);
-    const grave = createGrave(makeTab(), makePage({ excerpt: longExcerpt }), 0, 'id-2');
+    const grave = createGrave(makeTab(), makePage({ excerpt: longExcerpt }), 0, 'id-2', 1);
     expect(grave.excerpt!.length).toBeLessThanOrEqual(EXCERPT_MAX);
   });
 
   it('createGrave excerpt is undefined when page has no excerpt', () => {
-    const grave = createGrave(makeTab(), makePage(), 0, 'id-3');
+    const grave = createGrave(makeTab(), makePage(), 0, 'id-3', 1);
     expect(grave.excerpt).toBeUndefined();
+  });
+
+  it('createGrave stores the duplicate count, and 1 for anything below 1 or not an integer', () => {
+    expect(createGrave(makeTab(), makePage(), 0, 'id-4', 3).duplicateCount).toBe(3);
+    for (const bad of [0, -2, 1.5, NaN]) {
+      expect(createGrave(makeTab(), makePage(), 0, 'id-5', bad).duplicateCount).toBe(1);
+    }
+  });
+});
+
+describe('countDuplicates', () => {
+  it('counts tabs with exactly the same url, and never returns less than 1', () => {
+    const tabs = [
+      makeTab({ id: 1, url: 'https://a.example/x' }),
+      makeTab({ id: 2, url: 'https://a.example/x' }),
+      makeTab({ id: 3, url: 'https://a.example/x#top' }),
+      makeTab({ id: 4, url: 'https://A.example/x' }),
+    ];
+    expect(countDuplicates(tabs, 'https://a.example/x')).toBe(2);
+    expect(countDuplicates(tabs, 'https://a.example/x#top')).toBe(1);
+    expect(countDuplicates([], 'https://a.example/x')).toBe(1);
   });
 });
 
