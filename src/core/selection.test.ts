@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
 import { isProtected, canBuryManually, selectBurialCandidates } from './selection.js';
-import { DEFAULT_SETTINGS } from './settings.js';
+import { DEFAULT_SETTINGS, IDLE_MINUTES_MIN, IDLE_MINUTES_MAX } from './settings.js';
 import type { TabInfo, Settings } from './types.js';
 
 // ---------------------------------------------------------------------------
@@ -96,7 +96,7 @@ const anyTab: fc.Arbitrary<TabInfo> = fc.record<TabInfo>({
 /** Arbitrary valid Settings with autoBury on and no protected sites. */
 const settingsOn: fc.Arbitrary<Settings> = fc.record<Settings>({
   autoBury: fc.constant(true),
-  idleMinutes: fc.integer({ min: 5, max: 10080 }), // 5 minutes to 7 days
+  idleMinutes: fc.integer({ min: IDLE_MINUTES_MIN, max: IDLE_MINUTES_MAX }),
   protectedSites: fc.constant([]),
   retentionDays: fc.oneof(fc.integer({ min: 1, max: 365 }), fc.constant(null)),
 });
@@ -224,7 +224,7 @@ describe('Property 2: Selection is exactly the idle, unprotected tabs', () => {
           fc.record({ tabIndex: fc.nat({ max: 14 }), useParent: fc.boolean() }),
           { minLength: 0, maxLength: 5 },
         ),
-        fc.integer({ min: 5, max: 1440 }), // idleMinutes
+        fc.integer({ min: IDLE_MINUTES_MIN, max: IDLE_MINUTES_MAX }), // idleMinutes
         fc.integer({ min: 0, max: 1_000_000_000_000 }), // now
         (tabs, picks, idleMinutes, now) => {
           const { protectedSites, protectedTabIds } = deriveProtectedSites(tabs, picks);
@@ -385,6 +385,6 @@ describe('canBuryManually — targeted examples', () => {
   });
 
   it('blocks a tab with an unparseable URL', () => {
-    expect(canBuryManually(makeTab({ url: 'not-a-valid-url' }))).toBe(false);
+    expect(canBuryManually(makeTab({ url: 'https://:invalid' }))).toBe(false);
   });
 });

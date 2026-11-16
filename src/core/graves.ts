@@ -52,7 +52,8 @@ export function fallbackEpitaph(page: PageInfo): { text: string; source: Epitaph
  * Build a complete Grave from a tab and its extracted page info.
  *
  * - url and title come from the tab.
- * - domain is new URL(tab.url).hostname, lower-cased.
+ * - domain is the lower-cased hostname from hostnameOf(tab.url), or 'unknown'
+ *   if the URL cannot be parsed.
  * - epitaph and epitaphSource come from fallbackEpitaph.
  * - excerpt is page.excerpt cut to EXCERPT_MAX characters (by UTF-16 code
  *   unit — the excerpt is handled internally and never shown directly).

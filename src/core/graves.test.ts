@@ -61,10 +61,33 @@ const anyString = fc.oneof(
   fc.string({ unit: 'grapheme', maxLength: 300 }),
 );
 
+/**
+ * Text with random whitespace runs (spaces, tabs, newlines, multiple in a row),
+ * guaranteed to be over 200 code points to exercise truncation and whitespace collapse together.
+ */
+const longTextWithWhitespaceRuns = fc
+  .array(fc.string({ minLength: 1, maxLength: 20 }), { minLength: 15, maxLength: 30 })
+  .chain((words) => {
+    // Join with random whitespace runs: 1-5 of (space | tab | newline)
+    const whitespaceChars = [' ', '\t', '\n'];
+    return fc.tuple(
+      ...Array(words.length - 1).fill(
+        fc.array(fc.constantFrom(...whitespaceChars), { minLength: 1, maxLength: 5 })
+          .map((chars) => chars.join('')),
+      ),
+    ).map((runs) => {
+      let result = words[0];
+      for (let i = 0; i < runs.length; i++) {
+        result += runs[i] + words[i + 1];
+      }
+      return result;
+    });
+  });
+
 const anyPageInfo: fc.Arbitrary<PageInfo> = fc.record<PageInfo>({
-  title: anyString,
-  metaDescription: fc.option(anyString, { nil: undefined }),
-  firstParagraph: fc.option(anyString, { nil: undefined }),
+  title: fc.oneof(anyString, longTextWithWhitespaceRuns),
+  metaDescription: fc.option(fc.oneof(anyString, longTextWithWhitespaceRuns), { nil: undefined }),
+  firstParagraph: fc.option(fc.oneof(anyString, longTextWithWhitespaceRuns), { nil: undefined }),
   excerpt: fc.option(anyString, { nil: undefined }),
 });
 

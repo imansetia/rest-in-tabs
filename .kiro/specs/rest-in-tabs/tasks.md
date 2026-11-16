@@ -38,10 +38,10 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - **Property 6: Epitaphs are always valid**
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.7, 3.8, 5.1, 6.5**
 
-- [ ] 5. Implement decay, expiry, search and stats
-  - [ ] 5.1 Implement `decayStage`, `expiredGraves`, `sortGraves`, `searchGraves`, `estimateFreedMb`
+- [x] 5. Implement decay, expiry, search and stats
+  - [x] 5.1 Implement `decayStage`, `expiredGraves`, `sortGraves`, `searchGraves`, `estimateFreedMb`
     - _Requirements: 4.2, 4.3, 6.1, 6.3, 6.4, 7.1_
-  - [ ] 5.2 Write property tests
+  - [x] 5.2 Write property tests
     - **Property 7: Decay never reverses**
     - **Property 8: Expiry removes only old Graves**
     - **Property 9: Search returns matching Graves only**
