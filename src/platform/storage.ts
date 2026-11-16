@@ -103,6 +103,38 @@ export async function setStats(stats: Stats): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// getInstalledAt
+// ---------------------------------------------------------------------------
+
+/**
+ * Read installedAt from chrome.storage.local.
+ *
+ * Returns undefined if not set (should only happen before onInstalled runs).
+ * Throws if the read fails.
+ */
+export async function getInstalledAt(): Promise<number | undefined> {
+  const result = await chrome.storage.local.get(STORAGE_KEYS.installedAt);
+  const value = result[STORAGE_KEYS.installedAt];
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+  return undefined;
+}
+
+// ---------------------------------------------------------------------------
+// setInstalledAt
+// ---------------------------------------------------------------------------
+
+/**
+ * Write installedAt to chrome.storage.local.
+ *
+ * Throws if the write fails.
+ */
+export async function setInstalledAt(timestamp: number): Promise<void> {
+  await chrome.storage.local.set({ [STORAGE_KEYS.installedAt]: timestamp });
+}
+
+// ---------------------------------------------------------------------------
 // onChanged subscription
 // ---------------------------------------------------------------------------
 

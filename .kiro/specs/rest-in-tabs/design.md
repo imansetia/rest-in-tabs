@@ -30,13 +30,19 @@ flowchart LR
 1. Alarm fires (or Popup sends `buryIdle` / `buryTab`).
 2. Service worker loads settings and queries tabs.
 3. `selectBurialCandidates(tabs, settings, now)` returns the tabs to bury. When the trigger is a `buryIdle` message the handler calls `selectBurialCandidates` with `autoBury` forced to `true`, so idle tabs are buried even when Auto-Bury is disabled in settings (Requirement 2.2 applies regardless of Requirement 1.6).
-4. For each candidate: extract page info (2 s timeout) → `fallbackEpitaph` → `addGrave` → write storage → on success `tabs.remove`.
-5. `expiredGraves` runs on the same alarm and removes Graves past the Retention Period.
+4. For each candidate: extract page info (2 s timeout) → `fallbackEpitaph` → `addGrave` → enqueue write → on success `tabs.remove`.
+5. `expiredGraves` runs on the same alarm and removes Graves past the Retention Period, enqueued through the same write queue.
 
 ### Resurrection flow
 
 1. Graveyard sends `resurrect(id)`.
-2. Service worker calls `tabs.create({ url })`. On success it removes the Grave and increments `stats.resurrected`. On failure it replies with an error and the Grave stays.
+2. Service worker calls `tabs.create({ url })`. On success it enqueues a write to remove the Grave and increment `stats.resurrected`. On failure it replies with an error and the Grave stays.
+
+### Write queue
+
+ALL writes to `graves` and `stats` (burial, resurrect, exorcise, expiry, AI epitaph updates) go through a single queue in the service worker. Writes are serialized: each waits for the previous write to settle before beginning. This prevents race conditions where concurrent operations (e.g., burial and resurrect) each read an old state, modify it, and write back, causing one change to be lost.
+
+For task 13 (AI epitaph upgrade): the Graveyard page must send epitaph updates to the service worker as a message (e.g., `updateEpitaph(id, epitaph)`), not write storage itself.
 
 ### AI epitaph upgrade
 
@@ -84,8 +90,10 @@ estimateFreedMb(buried: number): number
 ### `src/background/service-worker.ts`
 
 - Registers the `bury-check` alarm (1 minute) on install and startup.
-- Handles messages: `buryTab`, `buryIdle`, `resurrect`, `exorcise`.
-- Serialises burial work in one queue so two alarms never write Graves concurrently.
+- Handles messages: `buryTab`, `buryIdle`, `resurrect`, `exorcise`, `updateEpitaph`.
+- Serializes all writes to graves and stats through a single queue.
+- Chains whole burial runs on a separate queue: a run starts only after the previous run finishes and queries tabs fresh, so two runs never bury the same tab.
+- Burial and resurrection flows take platform adapters as parameters (dependency injection) so they can be tested with fakes in task 8.4.
 
 ### UI pages
 
@@ -129,7 +137,9 @@ interface Settings {
 interface Stats { buried: number; resurrected: number }
 ```
 
-Storage keys: `graves`, `settings`, `stats`. Constants: `GRAVE_CAP = 2000`, `EPITAPH_MAX = 200`, `EST_MB_PER_TAB = 50` (shown as "≈", never as a measurement).
+Storage keys: `graves`, `settings`, `stats`, `installedAt`. Constants: `GRAVE_CAP = 2000`, `EPITAPH_MAX = 200`, `EST_MB_PER_TAB = 50` (shown as "≈", never as a measurement).
+
+`installedAt` (number, milliseconds epoch) is written in `onInstalled` only when it is not stored yet, so extension updates, browser updates and dev reloads do not reset it. For automatic burial the service worker measures idleness from `Math.max(tab.lastAccessed, installedAt)`, so existing tabs opened before install are never buried immediately. Manual burial uses the actual `tab.lastAccessed`. Graves always store the real `tab.lastAccessed`, never the clamped value.
 
 A domain matches Protected Sites when it equals a listed domain or is a subdomain of it (`docs.example.com` matches `example.com`).
 

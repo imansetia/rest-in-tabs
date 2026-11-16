@@ -33,6 +33,7 @@ Rest in Tabs is a Chrome/Edge extension that buries idle tabs in a spooky gravey
 4. WHEN the Extension buries a tab, THE Extension SHALL save the Grave before it closes the tab.
 5. IF saving the Grave fails, THEN THE Extension SHALL leave the tab open.
 6. WHILE Auto-Bury is disabled, THE Extension SHALL NOT bury any tab automatically.
+7. FOR automatic burial only, THE Extension SHALL measure a tab's idleness from the later of the tab's last use and the time the extension was installed, so that installing the extension never buries existing tabs immediately. Manual burial (Requirement 2) uses the tab's actual last-use time.
 
 ### Requirement 2: Manual burial
 

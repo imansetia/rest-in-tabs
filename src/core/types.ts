@@ -124,6 +124,7 @@ export const STORAGE_KEYS = {
   graves: 'graves',
   settings: 'settings',
   stats: 'stats',
+  installedAt: 'installedAt',
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
