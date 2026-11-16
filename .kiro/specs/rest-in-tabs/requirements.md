@@ -10,7 +10,14 @@ Rest in Tabs is a Chrome/Edge extension that buries idle tabs in a spooky gravey
 - **Bury**: save a Grave for a tab, then close the tab.
 - **Grave**: the saved record of one buried tab.
 - **Epitaph**: a summary of the buried page, at most 200 characters, shown on its tombstone.
-- **Graveyard**: the extension page that shows all Graves as tombstones.
+- **Graveyard**: the extension page that shows all Graves, as tombstones in the Landscape view or as rows in the List view.
+- **Landscape view**: the default Graveyard view, a night scene with Graves standing in rows.
+- **List view**: a table of all Graves, meant for searching and sorting.
+- **Plaque**: the details panel that opens at the bottom of the scene when the user selects a tombstone.
+- **Cause of death**: a one-line obituary for a Grave, chosen by fixed rules from stored data (see Requirement 10).
+- **Duplicate count**: the number of open tabs, including the buried one, that had the Grave's address at burial time.
+- **Theme**: the colour variant of the extension pages, Night or Dusk. Both are dark.
+- **Demo clock**: a Graveyard control, shown only when the Demo setting is on, that moves the time the Graveyard displays with forward.
 - **Resurrect**: reopen a Grave's page in a new tab and remove the Grave.
 - **Exorcise**: permanently delete a Grave without reopening it.
 - **Idle Threshold**: how long a tab must go unused before it can be buried automatically.
@@ -41,8 +48,8 @@ Rest in Tabs is a Chrome/Edge extension that buries idle tabs in a spooky gravey
 
 #### Acceptance Criteria
 
-1. WHEN the user chooses "Bury this tab" in the Popup, THE Extension SHALL bury the current tab even if it is active, pinned or on the Protected Sites list; the restrictions in criterion 3 of this requirement (private window, non-http(s) address) still apply.
-2. WHEN the user chooses "Bury idle tabs now" in the Popup, THE Extension SHALL immediately bury every tab that meets Requirement 1.2, regardless of whether Auto-Bury is enabled.
+1. WHEN the user chooses "Bury this tab" in the Popup, THE Extension SHALL bury the current tab even if it is active, pinned or on the Protected Sites list, and SHALL show "Tab buried."; the restrictions in criterion 3 of this requirement (private window, non-http(s) address) still apply.
+2. THE Popup and the Graveyard SHALL each show a "Bury N idle tabs" button, where N is the number of tabs it would bury at that moment (see Requirement 4.10). WHEN the user chooses it, THE Extension SHALL immediately bury every tab that meets Requirement 1.2, regardless of whether Auto-Bury is enabled, and SHALL show "Buried 1 idle tab." or "Buried N idle tabs."
 3. IF the current tab is in a private window or its address does not start with `http://` or `https://`, THEN THE Popup SHALL disable "Bury this tab" and show the reason.
 4. THE Popup SHALL show the number of Graves and a link that opens the Graveyard.
 
@@ -67,12 +74,18 @@ Rest in Tabs is a Chrome/Edge extension that buries idle tabs in a spooky gravey
 
 #### Acceptance Criteria
 
-1. THE Graveyard SHALL show each Grave as a tombstone with its title, domain, icon, Epitaph and the time since burial.
-2. THE Graveyard SHALL order tombstones from most recently buried to least recently buried.
-3. WHEN the user types in the search field, THE Graveyard SHALL show only the Graves whose title, domain or Epitaph contains the typed text, ignoring letter case.
-4. WHEN there are no Graves, THE Graveyard SHALL show a message that explains how tabs get buried.
-5. WHEN a search matches no Graves, THE Graveyard SHALL show a "no graves match" message and a control that clears the search.
-6. WHEN a Grave is added or removed while the Graveyard is open, THE Graveyard SHALL update without a page reload.
+1. WHEN the Graveyard opens, THE Graveyard SHALL show the Landscape view, where each Grave is a tombstone showing, from top to bottom: its icon, its title (up to 2 lines), the dates "last visited — buried", its Epitaph (up to 3 lines) and its Cause of death (up to 2 lines). Each tombstone SHALL be a button whose accessible name is the title, the decay stage and the time since burial, for example "Title. Fresh. Buried 5 hours ago."
+2. THE Landscape view SHALL place the most recently buried Graves in the front row and older Graves in rows further back, smaller and deeper in fog. The front row SHALL never be covered by fog.
+3. THE Graveyard SHALL offer a Landscape / List switch. The List view SHALL be a table with, for each Grave: icon, title and domain; Epitaph; Cause of death; time since burial (with the full date on hover); decay stage; and Resurrect and Exorcise buttons. The List view SHALL sort by newest first (default), oldest first, or name.
+4. WHEN the user types in the search field, THE Graveyard SHALL, 180 ms after typing stops, match Graves whose title, domain or Epitaph contains the typed text, ignoring letter case and surrounding spaces. In the List view only matching rows SHALL be shown. In the Landscape view the fog SHALL thin, non-matching Graves SHALL fade, and the view SHALL move toward the first match and enlarge it. WHEN the search is cleared, THE Landscape view SHALL return to its normal state.
+5. WHEN there are no Graves, THE Graveyard SHALL show "Nothing has died here yet. Give it time."
+6. WHEN a search matches no Graves, THE Graveyard SHALL show "No grave bears that name." and a "Clear search" button.
+7. WHEN a Grave is added or removed while the Graveyard is open, THE Graveyard SHALL update without a page reload.
+8. WHEN the user selects a tombstone, THE Graveyard SHALL open the Plaque with the Grave's title, domain, Epitaph, Cause of death, last visited date, burial date with time since burial, decay stage, and Resurrect and Exorcise buttons, and SHALL move focus to Resurrect. Selecting another tombstone SHALL switch the Plaque to that Grave.
+9. THE Plaque SHALL close when the user presses its close button, presses Esc, or clicks anywhere outside it. Clicks inside the Exorcise confirmation SHALL NOT close it. WHEN it closes by the close button or Esc, focus SHALL return to the tombstone that opened it.
+10. THE "Bury N idle tabs" button (Requirement 2.2) SHALL appear in the Graveyard header as well as the Popup and do the same thing in both. N SHALL be computed by the service worker with the same selection that the burial itself uses. WHEN N is 0, the button SHALL read "No idle tabs to bury" and be unavailable.
+11. WHEN a Resurrect completes, THE Landscape view SHALL show the Grave's plot as empty fresh soil, and WHEN an Exorcise completes, as bare ground, until the Landscape view is next re-rendered.
+12. THE Graveyard SHALL show each Grave's icon from the browser's own favicon store for the Grave's address (Chrome's `_favicon` endpoint with `pageUrl` set to the Grave's address), with the first letter of its domain on a muted disc underneath, so a missing or broken icon still shows the letter. THE Extension SHALL NOT use a third-party icon service.
 
 ### Requirement 5: Resurrect and exorcise
 
@@ -117,6 +130,8 @@ Rest in Tabs is a Chrome/Edge extension that buries idle tabs in a spooky gravey
 2. WHEN the user changes a setting, THE Extension SHALL apply it from the next check without a browser restart.
 3. IF the user enters a value outside the allowed range, THEN THE Extension SHALL reject it and show the allowed range.
 4. THE Extension SHALL keep the settings across browser restarts.
+5. THE Extension SHALL offer a Demo setting, off by default. WHILE it is on, THE Graveyard SHALL show the Demo clock, which moves the time the Graveyard displays with forward by 0 to 14 days. WHILE it is off, the Demo clock SHALL be hidden and the Graveyard SHALL display with the real time.
+6. THE Demo clock SHALL move decay stages (Requirement 6.1) and every time-since text (such as "Buried 5 hours ago") together. It SHALL NOT change burial, expiry, statistics or any stored data, and its offset SHALL NOT be saved.
 
 ### Requirement 9: Haunting, accessible interface
 
@@ -124,9 +139,29 @@ Rest in Tabs is a Chrome/Edge extension that buries idle tabs in a spooky gravey
 
 #### Acceptance Criteria
 
-1. THE Graveyard SHALL present a graveyard scene with tombstones, fog and ambient motion.
-2. WHILE the user's system requests reduced motion, THE Extension SHALL disable all non-essential animation.
+1. THE Landscape view SHALL present a night scene with a starry sky, a full moon, hills, bare trees, drifting fog, the Graves and a low iron fence with a crow, as described in the design steering file. At rest only the fog SHALL move. Resurrect, Exorcise and mass burial SHALL each have their own animation as described in the design steering file; warm amber light SHALL appear only during Resurrect.
+2. WHILE the user's system requests reduced motion, THE Extension SHALL turn off every animation or replace it with a short fade.
 3. THE Extension SHALL make every action reachable and operable with the keyboard, with a visible focus indicator.
 4. THE Extension SHALL keep text contrast at WCAG 2.1 AA level or better.
 5. THE Extension SHALL give every control an accessible name and announce the result of Resurrect and Exorcise to screen readers.
 6. THE Graveyard SHALL remain usable at widths from 360 pixels to full desktop width.
+7. THE Graveyard SHALL offer a Night / Dusk theme switch. WHEN no choice has been made, THE Extension SHALL use Dusk if the system prefers a light colour scheme and Night otherwise. THE Extension SHALL remember the user's choice on this device and apply it to all extension pages.
+8. THE Extension SHALL bundle the fonts Pirata One, Cinzel, Cormorant Garamond and Inter under `src/assets/fonts/`, each with its OFL licence file.
+9. Extension pages SHALL make no network requests.
+
+### Requirement 10: Cause of death
+
+**User Story:** As a user, I want each grave to say briefly why the tab died, so that the graveyard is fun to read and reminds me what I left unfinished.
+
+#### Acceptance Criteria
+
+1. THE Extension SHALL compute each Grave's Cause of death from stored data with the fixed rules in criterion 3. It SHALL NOT generate, invent or randomise the text.
+2. WHEN the Extension buries a tab, THE Extension SHALL store in the Grave its Duplicate count: the number of open tabs, including the buried one, whose address equalled the buried tab's address at that moment.
+3. THE Extension SHALL use the first rule that matches, checking the path of the Grave's address without regard to letter case:
+   1. Duplicate count greater than 1: "Died a duplicate. N identical tabs were open." where N is the Duplicate count.
+   2. Path contains `cart` or `checkout`: "Abandoned at checkout."
+   3. Path contains `/edit`, `/draft` or `/compose`: "Abandoned mid-draft."
+   4. Path contains `register`, `signup`, `sign-up` or `join`: "Abandoned during sign-up."
+   5. Otherwise: "Died of neglect. Unvisited for D." where D is the time from last use to burial: "less than an hour" below 1 hour, then in hours below 48 hours, in days below 60 days, and in months from then on.
+4. IF a Grave has no stored Duplicate count (for example, it was buried before this field existed), THEN THE Extension SHALL treat its Duplicate count as 1.
+5. THE Graveyard SHALL show the Cause of death on the tombstone, in the Plaque and in the List view.

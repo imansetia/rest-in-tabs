@@ -62,7 +62,9 @@ English only. Buttons and error messages are plain and literal, with no exceptio
   - No graves: "Nothing has died here yet. Give it time."
   - Search with no match: "No grave bears that name." plus a "Clear search" button.
 - Memory figure: `≈ 2.3 GB freed (estimated)`. Always the word "estimated", decimal point, MB below 1,000 MB.
-- Toasts: "Reopened in a new tab.", "Grave deleted permanently.", "Buried 12 idle tabs." / "Buried 1 tab."
+- Time since burial: "just now" under one hour, otherwise "5 hours ago", "3 days ago", "2 months ago" (same units as the cause of death).
+- If the idle count cannot be read yet, the button reads "Bury idle tabs" and stays usable.
+- Toasts: "Reopened in a new tab.", "Grave deleted permanently.", "Buried 12 idle tabs." / "Buried 1 idle tab." (Bury idle tabs), "Tab buried." (Bury this tab).
 
 ### Cause of death
 
@@ -70,9 +72,9 @@ A pure function in `src/core`. It picks the first rule that matches; it never in
 
 1. **Duplicate**: more than one open tab had the same URL at burial. "Died a duplicate. N identical tabs were open."
 2. **Abandoned at checkout**: path contains `cart` or `checkout`. "Abandoned at checkout."
-3. **Abandoned mid-draft**: path contains `/edit`, `/draft` or `/compose`. "Abandoned mid-draft."
+3. **Abandoned mid-draft**: a path segment is exactly `edit`, `draft` or `compose` (so `/document/d/1x9/edit` counts, `/editor` does not). "Abandoned mid-draft."
 4. **Abandoned during sign-up**: path contains `register`, `signup`, `sign-up` or `join`. "Abandoned during sign-up."
-5. **Neglect** (default): "Died of neglect. Unvisited for D." where D is `buriedAt - lastAccessed`: hours below 48 h, days below 60 days, then months.
+5. **Neglect** (default): "Died of neglect. Unvisited for D." where D is `buriedAt - lastAccessed`: "less than an hour" below 1 h, then hours below 48 h, days below 60 days, then months.
 
 ## The landscape (default view)
 
@@ -82,14 +84,14 @@ Layers from back to front: sky with a few stars, full moon (top right, soft blue
 
 - Base plot: 172 × 236 px, stone 196 px tall, scaled by the row factor `s`.
 - Row scales `s`: 1, 0.78, 0.62, 0.5, 0.41, 0.34. Fog veil per row: 0, 0.26, 0.5, 0.68, 0.8, 0.86.
-- The front row sits 58 px above the bottom. Each next row sits `236 × s × 0.7` px higher. Stop adding rows when a row would pass 80% of the scene height; the last row holds the rest.
+- The front row sits 58 px above the bottom. Each next row sits `236 × s × 0.7` px higher (`s` of the row in front). Before adding row `i > 0` at height `bottom`, stop if `bottom + 236 × s_i × 0.55 > 0.8 × sceneHeight`; the last row added holds the rest. (Same rule as `renderLandscape` in the mockup.)
 - Front row capacity: `floor((width − 40) / 202)`, at least 2. Row `i` holds `max(front, floor(front / s) + i)`. A last row with fewer than 3 graves joins the row in front of it.
 - Farther rows: darker, less saturated, slightly blurred, and covered by a fog veil. **The front row is always clear.**
 - Small deterministic jitter (tilt, vertical offset) from a hash of the grave id, so the yard looks placed by hand but stays stable between renders.
 
 **A tombstone shows**, top to bottom: favicon in a small round medallion, name (Pirata One, up to 2 lines), dates "last visited — buried", epitaph (Cormorant italic, up to 3 lines), cause of death (Inter, small, up to 2 lines). Each stone is a `<button>` whose accessible name is "Title. Condition. Buried 5 hours ago."
 
-**Favicon.** Use the grave's stored `favIconUrl`. Show the first letter of the domain underneath it on a muted colour disc, so a missing or broken icon still shows the letter.
+**Favicon.** Load it from Chrome's `_favicon` endpoint with `pageUrl` set to the grave's URL (extension origin, no network request). Show the first letter of the domain underneath it on a muted colour disc, so a missing or broken icon still shows the letter.
 
 ### Decay stages
 
@@ -108,6 +110,8 @@ The condition is also shown as a text label ("Fresh", "Weathered", "Crumbling") 
 **Search.** Matches title, domain or epitaph, ignoring case and surrounding spaces, 180 ms after typing stops. The fog thins, non-matching graves fade to about 28%, matching graves lose their veil, and the view glides (1.1 s) toward the first match, enlarging it up to 1.9× so a far grave comes forward. Clearing the search resets the view.
 
 **List view.** A switch Landscape / List. The list is a table: tab (favicon, title, domain), epitaph, cause of death, buried ("x ago", full date on hover), condition, actions (Resurrect, Exorcise). Sort: newest first, oldest first, name. It carries all serious searching; the landscape is for atmosphere.
+
+**Demo clock.** Only when the Demo setting is on. It shifts the time the Graveyard *displays* with: decay stages and every "x ago" text move together, so a Crumbling stone never says "Buried 2 hours ago". It never changes burial, expiry, statistics or stored data, and the offset is not saved.
 
 **Bury idle tabs.** The button shows the count: "Bury 12 idle tabs", or "No idle tabs to bury" when there are none (then unavailable). It appears in both the graveyard header and the popup and does the same thing.
 

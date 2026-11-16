@@ -20,23 +20,33 @@ flowchart LR
   SW --> X[platform/extract<br/>scripting.executeScript]
   SW --> S[(chrome.storage.local)]
   G[Graveyard page] --> S
-  G -- resurrect / exorcise --> SW
+  G -- countIdle / buryIdle / resurrect / exorcise --> SW
   G --> AI[platform/summarizer<br/>on-device, optional]
   O[Options page] --> S
 ```
 
 ### Burial flow
 
-1. Alarm fires (or Popup sends `buryIdle` / `buryTab`).
-2. Service worker loads settings and queries tabs.
-3. `selectBurialCandidates(tabs, settings, now)` returns the tabs to bury. When the trigger is a `buryIdle` message the handler calls `selectBurialCandidates` with `autoBury` forced to `true`, so idle tabs are buried even when Auto-Bury is disabled in settings (Requirement 2.2 applies regardless of Requirement 1.6).
-4. For each candidate: extract page info (2 s timeout) → fetch the tab again with `getTab` and skip it if it is gone, now shows a different URL, or (alarm runs and `buryIdle`, not `buryTab`) is now protected or no longer idle → `createGrave` → `addGrave` → enqueue one `setGravesAndStats` write → on success `tabs.remove`.
+1. Alarm fires, the Popup or Graveyard sends `buryIdle` (the "Bury N idle tabs" button), or the Popup sends `buryTab`.
+2. Service worker loads settings and queries all tabs. This one snapshot is used for selection and for Duplicate counts.
+3. The alarm uses `selectAutomaticCandidates(tabs, settings, installedAt, now)`. `buryIdle` uses `selectManualCandidates(tabs, settings, now)`, which is `selectBurialCandidates` with `autoBury` forced to `true`, so idle tabs are buried even when Auto-Bury is disabled (Requirement 2.2 applies regardless of Requirement 1.6). `countIdle` uses the same `selectManualCandidates`, so the button count and the burial agree.
+4. For each candidate: extract page info (2 s timeout) → fetch the tab again with `getTab` and skip it if it is gone, now shows a different URL, or (alarm runs and `buryIdle`, not `buryTab`) is now protected or no longer idle → `createGrave(tab, page, now, id, countDuplicates(snapshot, tab.url))` → `addGrave` → enqueue one `setGravesAndStats` write → on success `tabs.remove`. `buryTab` also queries all tabs, only to compute the Duplicate count.
 5. `expireGraves` runs on the same alarm, before burial, and removes Graves past the Retention Period through the same write queue.
 
 ### Resurrection flow
 
 1. Graveyard sends `resurrect(id)`.
 2. Service worker calls `tabs.create({ url })`. On success it enqueues a write to remove the Grave and increment `stats.resurrected`. On failure it replies with an error and the Grave stays.
+
+### Idle count (`countIdle`)
+
+The Popup and Graveyard label their "Bury N idle tabs" button with the reply to `countIdle` (Requirement 4.10).
+
+1. The page sends `countIdle`. The service worker loads settings, queries tabs, and replies `{ ok: true, count: selectManualCandidates(tabs, settings, now).length }`.
+2. `countIdle` only reads, so it does not wait in the run queue. While a burial run is in progress the count can include tabs that run is about to close. The button action itself always selects fresh, so a stale count never buries the wrong tab.
+3. When the pages ask:
+   - The Popup asks once when it opens and again after each request it sends.
+   - The Graveyard asks on load, when `graves` change in storage, when the page becomes visible again, and once a minute while visible, because tabs become idle as time passes.
 
 ### Write queue
 
@@ -63,20 +73,64 @@ The excerpt is dropped after 7 days either way to keep storage small. This pruni
 ### `src/core/` (pure, no `chrome.*`)
 
 ```ts
+// selection
 selectBurialCandidates(tabs: TabInfo[], settings: Settings, now: number): TabInfo[]
+selectAutomaticCandidates(tabs, settings, installedAt: number | undefined, now): TabInfo[]  // alarm runs (Req 1.7)
+selectManualCandidates(tabs, settings, now): TabInfo[]   // autoBury forced true; used by buryIdle AND countIdle
 isProtected(tab: TabInfo, protectedSites: string[]): boolean
 canBuryManually(tab: TabInfo): boolean            // http(s) and not incognito
+manualBurialBlock(tab: TabInfo | null): 'no-tab' | 'private' | 'unsupported-page' | null
+
+// graves
 fallbackEpitaph(page: PageInfo): { text: string; source: EpitaphSource }
-createGrave(tab: TabInfo, page: PageInfo, now: number, id: string): Grave  // builds a full Grave from a tab + extracted page info
+countDuplicates(tabs: TabInfo[], url: string): number  // open tabs with exactly this url; at least 1
+createGrave(tab: TabInfo, page: PageInfo, now: number, id: string, duplicateCount: number): Grave
 addGrave(graves: Grave[], grave: Grave, cap: number): Grave[]   // dedupe by url, enforce cap; never drops the new grave
-expiredGraves(graves: Grave[], retentionDays: number | null, now: number): Grave[]
+parseGrave(raw: unknown): Grave | null            // isValidGrave + duplicateCount defaulted to 1 (see Data Models)
+
+// cause of death (Requirement 10)
+causeOfDeath(grave: Pick<Grave, 'url' | 'buriedAt' | 'lastAccessed' | 'duplicateCount'>): { kind: CauseKind; text: string }
+formatDuration(ms: number): string                // "less than an hour" | "1 hour" | "N hours" | "N days" | "N months"
+
+// time, decay, expiry, search
 decayStage(buriedAt: number, now: number): 'fresh' | 'weathered' | 'crumbling'
+timeAgo(t: number, displayNow: number): string    // "just now" below 1 hour, else `${formatDuration(displayNow - t)} ago`
+expiredGraves(graves: Grave[], retentionDays: number | null, now: number): Grave[]
 searchGraves(graves: Grave[], query: string): Grave[]
 sortGraves(graves: Grave[]): Grave[]              // newest first
+
+// landscape layout (rules in the design steering file)
+layoutRows(graveCount: number, sceneWidth: number, sceneHeight: number): RowLayout[]
+plotJitter(graveId: string): { tiltDeg: number; offsetPx: number; hasCrow: boolean; hasCross: boolean }
+
+// icons
+faviconSrc(extensionBase: string, pageUrl: string, size: number): string  // `${base}_favicon/?pageUrl=…&size=…`
+letterFor(domain: string): string                 // first character after a leading "www.", upper-cased
+discColor(domain: string): string                 // one of the mockup's 8 muted colours, by char-code sum
+
+// settings, stats
 normalizeSettings(raw: unknown): Settings         // defaults + clamping
 validateSetting(key, value): { ok: true } | { ok: false; range: string }
 estimateFreedMb(buried: number): number
 ```
+
+`CauseKind` is `'duplicate' | 'checkout' | 'draft' | 'signup' | 'neglect'`. `causeOfDeath` lower-cases `new URL(url).pathname` (an unparseable URL gives an empty path, so only the duplicate and neglect rules can match), then applies the rules of Requirement 10.3 in order with plain substring checks, as the steering file writes them. The only variable parts of the text are N (`duplicateCount`) and D (`formatDuration(buriedAt - lastAccessed)`); a negative interval is clamped to 0.
+
+`formatDuration` rounds as the mockup does:
+- below 1 hour: "less than an hour"
+- otherwise `h = round(ms / 1 h)`; below 48: "1 hour" or "h hours"
+- otherwise `d = round(ms / 1 day)`; below 60: "d days"
+- otherwise "round(d / 30) months"
+
+`layoutRows` implements the row rule in the design steering file exactly. It returns, for each row, its scale `s`, fog veil, bottom offset in px and the number of graves it holds.
+
+`plotJitter` hashes the grave id with the mockup's hash: `h = 7`, then `h = (h × 31 + charCode) mod 9973` for each character. From it:
+- tilt: `((h mod 7) − 3) || 2` degrees
+- vertical offset: `(h mod 5) × 3` px
+- a crow on Crumbling stones when `h mod 3 = 0`
+- a fallen cross when `h mod 3 = 1`
+
+The mockup picks the cross from a counter, which the extension cannot keep stable between renders, so it uses the hash instead.
 
 ### `src/platform/` (adapters)
 
@@ -85,25 +139,82 @@ estimateFreedMb(buried: number): number
 | `tabs.ts` | `chrome.tabs.query/get/remove/create` | Maps `chrome.tabs.Tab` to `TabInfo` using `lastAccessed`; `getTab` returns `null` when the tab is gone |
 | `storage.ts` | `chrome.storage.local` | `getGraves/setGraves/getSettings/setSettings/getStats/setStats`, `setGravesAndStats` (one `set` call, used by burial and resurrect), `onChanged` subscription |
 | `extract.ts` | `chrome.scripting.executeScript` | Returns `PageInfo`; rejects after 2 s or on discarded tabs |
+| `messaging.ts` | `chrome.runtime.sendMessage` | `sendMessage(message)`; never rejects, malformed replies become `failed` |
+| `favicon.ts` | `chrome.runtime.getURL` | `iconSrc(pageUrl)` = `faviconSrc(chrome.runtime.getURL('/'), pageUrl, 32)` |
+| `theme.ts` | `chrome.storage.local`, `matchMedia` | `getTheme()`, `setTheme(t)`, system default from `prefers-color-scheme` |
 | `summarizer.ts` | `Summarizer` global | `checkAvailability(): Promise<"available"|"downloadable"|"downloading"|"unavailable">` wraps `Summarizer.availability()`; `createAndSummarize(text): Promise<string>` wraps `Summarizer.create()` + `.summarize()` with download-progress callback; throws when status is not `"available"` or `"downloadable"` |
 
 ### `src/background/service-worker.ts`
 
 - Registers the `bury-check` alarm (1 minute) on install and startup.
-- Handles messages: `buryTab`, `buryIdle`, `resurrect`, `exorcise` (and `updateEpitaph` in task 13). Messages are accepted only from the extension's own pages and are validated by `parseMessage`. Replies are `{ ok: true, count? }` or `{ ok: false, error }` with `error` one of `bad-request`, `not-found`, `not-allowed`, `open-failed`, `save-failed`, `failed`.
+- Handles messages: `buryTab`, `buryIdle`, `countIdle`, `resurrect`, `exorcise` (and `updateEpitaph` in task 13). `countIdle` replies `{ ok: true, count }` and never writes. Messages are accepted only from the extension's own pages and are validated by `parseMessage`. Replies are `{ ok: true, count? }` or `{ ok: false, error }` with `error` one of `bad-request`, `not-found`, `not-allowed`, `open-failed`, `save-failed`, `failed`.
 - Serializes all writes to graves and stats through a single queue.
 - Chains whole burial runs on a separate queue: a run starts only after the previous run finishes and queries tabs fresh, so two runs never bury the same tab.
 - Burial and resurrection flows take platform adapters as parameters (dependency injection) so they can be tested with fakes in task 8.4.
 
 ### UI pages
 
-- **Graveyard** (`src/graveyard/`): tombstone grid, search field, stats bar, live updates via `storage.onChanged`, an `aria-live` region for action results. Scene layers (sky, fog, ground) are CSS only; fog and flicker animations are wrapped in `@media (prefers-reduced-motion: no-preference)`.
-- **Popup** (`src/popup/`): grave count, "Bury this tab", "Bury idle tabs now", "Open graveyard".
-- **Options** (`src/options/`): the four settings with inline range errors.
+The design steering file and `design/mockup.html` define the look, copy, motion and interactions; this section only says where things live and what data they use.
+
+- **Graveyard** (`src/graveyard/`):
+  - Header: logo, tagline, stats, search, the Landscape / List switch, the Night / Dusk switch, the Demo clock (only when `settings.demo` is on), and the "Bury N idle tabs" button.
+  - Below the header, the Landscape view (scene, rows from `layoutRows`, Plaque, confirm dialog) or the List view.
+  - Toasts in one polite live region.
+  - Live updates via `storage.onChanged`. The page reads storage directly but sends every change to the service worker as a message.
+  - Search trims the query, waits 180 ms after typing stops, then calls `searchGraves`.
+  - Per-plot CSS custom properties (`--s`, `--veil`, `--tilt`, …) are set with `element.style.setProperty`, never through `style="…"` markup, so the CSP below can forbid inline styles.
+- **Popup** (`src/popup/`), following the steering file:
+  - "N tabs at rest" (grave count).
+  - "Bury N idle tabs" (primary; label from `countIdle`).
+  - "Bury this tab" (unavailable with its reason).
+  - "Last buried" with the newest Epitaph.
+  - "Open the graveyard".
+- **Options** (`src/options/`): the four settings with inline range errors, plus the Demo setting.
+
+### Display time and the Demo clock
+
+The Graveyard computes one `displayNow = Date.now() + demoDays × 1 day` per render and passes it to `decayStage` and `timeAgo`. Decay stages and every "x ago" text therefore move together (Requirement 8.6).
+- `demoDays` comes from a range input, 0 to 14 in steps of 1, labelled "+N days" as in the mockup. It lives in page memory only: it starts at 0, is never written to storage, and is never sent to the service worker.
+- The input is rendered only while `settings.demo` is true. Turning the setting off sets `demoDays` back to 0.
+- Burial, expiry and stats always use the service worker's real `Date.now()`.
+- Absolute dates ("15 NOV — 17 NOV", the Plaque dates) come from stored timestamps and do not move.
+
+### Icons
+
+Every icon (tombstone medallion, Plaque, List view, Popup, the ghost's eyes during Resurrect) is an `<img src="${iconSrc(grave.url)}" alt="">` over a disc showing `letterFor(grave.domain)` on `discColor(grave.domain)`.
+- `iconSrc` uses Chrome's `_favicon` endpoint, which serves the icon from the browser's own favicon store under the extension's origin ([Chrome docs: Fetching favicons](https://developer.chrome.com/docs/extensions/how-to/ui/favicons)). No third-party service is used.
+- The image starts transparent and becomes visible on `load`. On `error` it is removed, so the letter shows.
+- Known limit: Chrome returns a generic globe icon for pages it has no favicon for. In that case the globe, not the letter, is shown.
+- Edge support for `_favicon` is unverified and is checked in task 14. If Edge lacks it, every image errors and the letter shows.
+- `Grave.favIconUrl` is still stored but is not used for display, because loading it would be a network request to the site (Requirement 9.9).
+
+### Fonts
+
+The four families are stored as Latin-subset `woff2` files, each with its `OFL.txt`, under `src/assets/fonts/<family>/`:
+- Pirata One 400
+- Cinzel 400 and 600
+- Cormorant Garamond italic 500
+- Inter 400, 500 and 600
+
+`src/assets/fonts/fonts.css` declares them with `@font-face` (`font-display: swap`) and is imported by every page. Vite emits the font files into `dist/assets/`. A small inline plugin in `vite.config.ts` (no new dependency) copies each `OFL.txt` to `dist/licenses/<family>/`, so the licences ship with the build.
+
+### Theme
+
+The theme is stored in `chrome.storage.local` under `theme` (`'night' | 'dusk'`; absent means "follow the system"), so it is remembered per device and shared by all extension pages (Requirement 9.7).
+- Each page first sets `data-theme` from `prefers-color-scheme` (Dusk when the system prefers light, otherwise Night), then applies the stored choice once it is read.
+- The Graveyard writes `theme` directly through the storage adapter. It is not graves or stats, so it does not need the write queue.
 
 ### Permissions
 
-`tabs`, `storage`, `alarms`, `scripting`, and host permission `<all_urls>` (needed to read the meta description and first paragraph before closing). No network permissions are used for sending data.
+`tabs`, `storage`, `alarms`, `scripting`, `favicon`, and host permission `<all_urls>` (needed to read the meta description and first paragraph before closing). According to Chrome's favicon docs, `favicon` adds no permission warning when `tabs` is already requested. No network permissions are used for sending data.
+
+Requirement 9.9 (no network requests from extension pages) is enforced by the manifest's `content_security_policy.extension_pages`:
+
+```
+default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'
+```
+
+`img-src 'self'` allows the `_favicon` images, which are served from the extension's own origin. Anything else (remote fonts, remote icons, `fetch` to a server) is blocked by the browser, not only by convention.
 
 ## Data Models
 
@@ -125,6 +236,7 @@ interface Grave {
   epitaph: string;                 // 1..200 Unicode code points, internal whitespace collapsed
   epitaphSource: EpitaphSource;
   excerpt?: string;                // up to 4,000 chars, removed after AI upgrade or 7 days
+  duplicateCount: number;          // integer >= 1: open tabs with this exact url at burial, this one included
 }
 
 interface Settings {
@@ -132,12 +244,17 @@ interface Settings {
   idleMinutes: number;             // 5..10080 (7 days), default 180 (3 hours)
   protectedSites: string[];        // lower-case domains, default []
   retentionDays: number | null;    // 1..365 or null (Never), default 30
+  demo: boolean;                   // default false; shows the Demo clock in the Graveyard
 }
 
 interface Stats { buried: number; resurrected: number }
+
+type Theme = 'night' | 'dusk';     // stored under `theme`; absent = follow the system
 ```
 
-Storage keys: `graves`, `settings`, `stats`, `installedAt`. Constants: `GRAVE_CAP = 2000`, `EPITAPH_MAX = 200`, `EST_MB_PER_TAB = 50` (shown as "≈", never as a measurement).
+**Old graves and `duplicateCount`.** Graves saved before this field existed have no `duplicateCount`. When graves are read, `parseGrave` replaces it with 1 when it is missing or is not an integer >= 1 (Requirement 10.4). `isValidGrave` keeps checking only the other fields, so a bad or missing count never makes a Grave invalid and never causes it to be dropped. The next write stores the defaulted value. `normalizeSettings` gives `demo` its default of `false` in the same way.
+
+Storage keys: `graves`, `settings`, `stats`, `installedAt`, `theme`. Constants: `GRAVE_CAP = 2000`, `EPITAPH_MAX = 200`, `EST_MB_PER_TAB = 50` (shown as "≈", never as a measurement).
 
 `installedAt` (number, milliseconds epoch) is written in `onInstalled` only when it is not stored yet, so extension updates, browser updates and dev reloads do not reset it. For automatic burial the service worker measures idleness from `Math.max(tab.lastAccessed, installedAt)`, so existing tabs opened before install are never buried immediately. Manual burial uses the actual `tab.lastAccessed`. Graves always store the real `tab.lastAccessed`, never the clamped value.
 
@@ -180,12 +297,20 @@ For any Graves, retention and time, `expiredGraves` returns exactly the Graves o
 **Validates: Requirements 6.3, 6.4**
 
 **Property 9: Search returns matching Graves only.**
-For any Graves and query, every result contains the query (ignoring case) in title, domain or Epitaph, every Grave that matches is in the result, and an empty query returns all Graves.
-**Validates: Requirements 4.3**
+For any Graves and query, every result contains the query (ignoring case) in title, domain or Epitaph, every Grave that matches is in the result, and an empty query returns all Graves. (The Graveyard trims the query before calling `searchGraves`.)
+**Validates: Requirements 4.4**
 
 **Property 10: Settings are always in range.**
 For any input value, `normalizeSettings` returns settings inside the allowed ranges, and applying it twice gives the same result as applying it once.
 **Validates: Requirements 8.1, 8.3**
+
+**Property 11: Cause of death follows the fixed rules.**
+For any URL (including unparseable ones and paths with mixed case), `buriedAt`, `lastAccessed` and `duplicateCount` >= 1, `causeOfDeath` returns the `kind` of the first matching rule of Requirement 10.3, computed independently in the test from the lower-cased path. Its `text` equals that rule's fixed template with only N and D filled in. A `duplicateCount` > 1 always wins over the path rules. Generators must produce every kind, and paths that match several rules at once, with a counter per kind asserted to be > 0.
+**Validates: Requirements 10.1, 10.3**
+
+**Property 12: Durations use the right unit and never shrink.**
+For any interval `ms` >= 0, `formatDuration` returns "less than an hour" exactly when `ms` < 1 hour, hours exactly when the rounded hour count is below 48, days exactly when the rounded day count is below 60, and months otherwise. For `ms1 <= ms2`, the duration shown for `ms2` is never shorter than the one shown for `ms1`. Generators must cover both sides of 1 hour, 48 hours and 60 days.
+**Validates: Requirements 10.3**
 
 ## Error Handling
 
@@ -198,10 +323,23 @@ For any input value, `normalizeSettings` returns settings inside the allowed ran
 | Summarizer missing or throws | Fallback Epitaph kept, no error shown | 3.4 |
 | Stored data has an unexpected shape | `normalizeSettings` restores defaults; invalid Graves are skipped when read and dropped on the next write | 8.4 |
 | Service worker restarted | Alarm re-registered on `onStartup` and `onInstalled` | 1.1 |
+| Stored Grave has no or a bad `duplicateCount` | Treated as 1; the Grave is kept | 10.4 |
+| `countIdle` fails | Button keeps its last count; before the first reply it reads "Bury idle tabs" and stays available, because the action works without the count | 2.2, 4.10 |
+| `_favicon` image fails to load (or Edge lacks it) | Image removed; the domain letter on its disc shows | 4.12 |
+| A bundled font fails to load | The CSS fallback stack (`Cinzel, serif`, `system-ui, sans-serif`) is used; no network fallback | 9.8, 9.9 |
+| Stored `theme` missing or not `night`/`dusk` | Follow the system colour scheme | 9.7 |
 
 ## Testing Strategy
 
-- **Property-based tests (fast-check, 100+ runs each):** the ten properties above, one test per property, each tagged `Feature: rest-in-tabs, Property N`.
+- **Property-based tests (fast-check, 100+ runs each):** the twelve properties above, one test per property, each tagged `Feature: rest-in-tabs, Property N`.
+- **Unit tests for the new pure functions:** `layoutRows` (row capacities, the 80% stop, folding a short last row), `plotJitter` (same id gives the same result), `countDuplicates`, `parseGrave` (missing and bad `duplicateCount` become 1), `timeAgo` ("just now" below 1 hour), `faviconSrc` (pageUrl is URL-encoded).
 - **Unit tests (Vitest):** concrete examples and edge cases for the same functions: boundary at exactly the Idle Threshold, subdomain matching, 200-character truncation on a multi-byte string, empty Grave list.
 - **Orchestration tests:** service worker burial and resurrection flows with fake `platform/` adapters, covering "save fails → tab not closed" and "create fails → Grave kept".
-- **Manual checks before submission:** load unpacked in Chrome and Edge; keyboard-only pass through Graveyard, Popup and Options; reduced-motion on; 360 px width; contrast check on tombstone text.
+- **Manual checks before submission:**
+  - Load unpacked in Chrome and Edge.
+  - Keyboard-only pass through Graveyard, Popup and Options.
+  - Reduced motion on.
+  - 360 px width.
+  - Contrast check on tombstone text in Night and Dusk.
+  - `_favicon` icons show in Edge (otherwise only letters).
+  - The DevTools Network panel on the Graveyard and Popup shows no requests outside the extension.

@@ -40,12 +40,12 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
 
 - [x] 5. Implement decay, expiry, search and stats
   - [x] 5.1 Implement `decayStage`, `expiredGraves`, `sortGraves`, `searchGraves`, `estimateFreedMb`
-    - _Requirements: 4.2, 4.3, 6.1, 6.3, 6.4, 7.1_
+    - _Requirements: 4.2, 4.4, 6.1, 6.3, 6.4, 7.1_
   - [x] 5.2 Write property tests
     - **Property 7: Decay never reverses**
     - **Property 8: Expiry removes only old Graves**
     - **Property 9: Search returns matching Graves only**
-    - **Validates: Requirements 4.3, 6.1, 6.3, 6.4**
+    - **Validates: Requirements 4.4, 6.1, 6.3, 6.4**
 
 - [x] 6. Checkpoint: all core tests pass
   - Run `npm test`; ask the user if anything is unclear before touching `chrome.*`.
