@@ -58,14 +58,14 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - [x] 7.3 `platform/extract.ts`: read title, meta description, first paragraph and excerpt with a 2-second timeout
     - _Requirements: 3.2, 3.7_
 
-- [ ] 8. Build the service worker
+- [x] 8. Build the service worker
   - [x] 8.1 Register the one-minute `bury-check` alarm on install and startup; write `installedAt` on install
     - _Requirements: 1.1, 1.7_
   - [x] 8.2 Implement the burial flow: select → extract → `createGrave` → `addGrave` → enqueue write → close. For automatic burial, measure idleness from `Math.max(tab.lastAccessed, installedAt)`. All writes to graves and stats go through a single queue. Adapters are injected as parameters for testing.
     - _Requirements: 1.2, 1.4, 1.5, 1.7, 3.1_
-  - [ ] 8.3 Implement expiry on each alarm and the `buryTab`, `buryIdle`, `resurrect`, `exorcise` message handlers, updating stats. The `buryIdle` handler calls `selectBurialCandidates` with `autoBury` forced to `true` so "Bury idle tabs now" works even when Auto-Bury is disabled.
+  - [x] 8.3 Implement expiry on each alarm and the `buryTab`, `buryIdle`, `resurrect`, `exorcise` message handlers, updating stats. The `buryIdle` handler calls `selectBurialCandidates` with `autoBury` forced to `true` so "Bury idle tabs now" works even when Auto-Bury is disabled.
     - _Requirements: 2.1, 2.2, 5.1, 5.2, 5.4, 6.3, 7.1_
-  - [ ] 8.4 Write orchestration tests with fake adapters
+  - [x] 8.4 Write orchestration tests with fake adapters
     - Save fails → tab is not closed; create fails → Grave is kept
     - `buryIdle` buries idle tabs even when `settings.autoBury` is false
     - _Requirements: 1.5, 2.2, 5.2_

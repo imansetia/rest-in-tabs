@@ -1,18 +1,28 @@
-import { getInstalledAt, setInstalledAt, getGraves, setGraves, getSettings, getStats, setStats } from '../platform/storage.js';
-import { queryTabs, removeTab } from '../platform/tabs.js';
-import { extractPageInfo } from '../platform/extract.js';
-import { buryTabs } from '../core/burial.js';
-import type { StorageAdapter, TabsAdapter, ExtractAdapter } from '../core/burial.js';
+// Thin wiring layer: connects chrome.* events to core orchestration.
+// No decision logic lives here.
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
+import {
+  getInstalledAt,
+  setInstalledAt,
+  getGraves,
+  setGraves,
+  getSettings,
+  getStats,
+  setGravesAndStats,
+} from '../platform/storage.js';
+import { queryTabs, getTab, removeTab, createTab } from '../platform/tabs.js';
+import { extractPageInfo } from '../platform/extract.js';
+import type { StorageAdapter, TabsAdapter, ExtractAdapter } from '../core/adapters.js';
+import { buryTabs, buryTab } from '../core/burial.js';
+import { resurrect, exorcise, expireGraves } from '../core/grave-actions.js';
+import { parseMessage } from '../core/messages.js';
+import type { Message, MessageResponse } from '../core/messages.js';
 
 const ALARM_NAME = 'bury-check';
 const ALARM_PERIOD_MINUTES = 1;
 
 // ---------------------------------------------------------------------------
-// Platform adapter instances
+// Adapters
 // ---------------------------------------------------------------------------
 
 const storage: StorageAdapter = {
@@ -20,21 +30,16 @@ const storage: StorageAdapter = {
   setGraves,
   getSettings,
   getStats,
-  setStats,
+  setGravesAndStats,
   getInstalledAt,
 };
 
-const tabs: TabsAdapter = {
-  queryTabs,
-  removeTab,
-};
+const tabs: TabsAdapter = { queryTabs, getTab, removeTab, createTab };
 
-const extract: ExtractAdapter = {
-  extractPageInfo,
-};
+const extract: ExtractAdapter = { extractPageInfo };
 
 // ---------------------------------------------------------------------------
-// Install and startup handlers
+// Install, startup, alarm
 // ---------------------------------------------------------------------------
 
 /**
@@ -53,39 +58,62 @@ chrome.runtime.onInstalled.addListener(async () => {
   await registerAlarm();
 });
 
-/**
- * On startup, register the alarm (in case it was cleared by browser restart).
- */
 chrome.runtime.onStartup.addListener(async () => {
   await registerAlarm();
 });
 
-// ---------------------------------------------------------------------------
-// Alarm registration
-// ---------------------------------------------------------------------------
-
-/**
- * Register the periodic bury-check alarm.
- */
 async function registerAlarm(): Promise<void> {
-  await chrome.alarms.create(ALARM_NAME, {
-    periodInMinutes: ALARM_PERIOD_MINUTES,
-  });
+  await chrome.alarms.create(ALARM_NAME, { periodInMinutes: ALARM_PERIOD_MINUTES });
 }
 
-// ---------------------------------------------------------------------------
-// Alarm handler
-// ---------------------------------------------------------------------------
-
 chrome.alarms.onAlarm.addListener(async (alarm) => {
-  if (alarm.name === ALARM_NAME) {
-    try {
-      const count = await buryTabs(storage, tabs, extract, true);
-      if (count > 0) {
-        console.log(`Buried ${count} idle tab(s)`);
-      }
-    } catch (err) {
-      console.error('Bury-check alarm failed:', err);
-    }
+  if (alarm.name !== ALARM_NAME) return;
+
+  try {
+    await expireGraves(storage);
+  } catch (err) {
+    console.error('Expiry failed:', err);
+  }
+
+  try {
+    await buryTabs(storage, tabs, extract, true);
+  } catch (err) {
+    console.error('Automatic burial failed:', err);
   }
 });
+
+// ---------------------------------------------------------------------------
+// Messages from the Popup and Graveyard
+// ---------------------------------------------------------------------------
+
+chrome.runtime.onMessage.addListener((raw, sender, sendResponse) => {
+  // Accept messages only from this extension's own pages.
+  const fromOwnPage =
+    sender.id === chrome.runtime.id && sender.url?.startsWith(chrome.runtime.getURL('')) === true;
+  if (!fromOwnPage) return false;
+
+  const message = parseMessage(raw);
+  if (message === null) {
+    sendResponse({ ok: false, error: 'bad-request' } satisfies MessageResponse);
+    return false;
+  }
+
+  handleMessage(message).then(sendResponse, (err: unknown) => {
+    console.error(`Message ${message.type} failed:`, err);
+    sendResponse({ ok: false, error: 'failed' } satisfies MessageResponse);
+  });
+  return true; // keep the channel open for the async response
+});
+
+async function handleMessage(message: Message): Promise<MessageResponse> {
+  switch (message.type) {
+    case 'buryTab':
+      return buryTab(storage, tabs, extract, message.tabId);
+    case 'buryIdle':
+      return { ok: true, count: await buryTabs(storage, tabs, extract, false) };
+    case 'resurrect':
+      return resurrect(storage, tabs, message.graveId);
+    case 'exorcise':
+      return exorcise(storage, message.graveId);
+  }
+}

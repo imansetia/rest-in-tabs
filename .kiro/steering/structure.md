@@ -8,8 +8,11 @@ inclusion: always
 public/        manifest.json (copied to dist/ unchanged)
 src/
   core/          pure logic (selection, decay, epitaph, stats) + *.test.ts
+                 orchestration with injected adapters: burial.ts (bury runs, buryTab),
+                 grave-actions.ts (resurrect, exorcise, expiry); shared queues in queue.ts,
+                 adapter interfaces in adapters.ts, test-only fakes in test-fakes.ts
   platform/      chrome.* adapters (tabs, storage, alarms, summarizer)
-  background/    service worker: alarm handler, bury/resurrect orchestration
+  background/    service worker: only wires platform adapters and chrome.* events to core
   content/       content script: extracts title, meta description, first paragraph
   graveyard/     graveyard page (html, ts, css, assets)
   popup/         toolbar popup

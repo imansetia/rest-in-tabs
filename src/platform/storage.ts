@@ -44,6 +44,23 @@ export async function setGraves(graves: Grave[]): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// setGravesAndStats
+// ---------------------------------------------------------------------------
+
+/**
+ * Write graves and stats in one chrome.storage.local.set call, so a burial or
+ * resurrection never saves one without the other.
+ *
+ * Throws if the write fails.
+ */
+export async function setGravesAndStats(graves: Grave[], stats: Stats): Promise<void> {
+  await chrome.storage.local.set({
+    [STORAGE_KEYS.graves]: graves,
+    [STORAGE_KEYS.stats]: stats,
+  });
+}
+
+// ---------------------------------------------------------------------------
 // getSettings
 // ---------------------------------------------------------------------------
 

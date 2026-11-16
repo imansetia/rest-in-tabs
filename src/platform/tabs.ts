@@ -18,6 +18,25 @@ export async function queryTabs(queryInfo: chrome.tabs.QueryInfo = {}): Promise<
 }
 
 // ---------------------------------------------------------------------------
+// getTab
+// ---------------------------------------------------------------------------
+
+/**
+ * Read one tab by id.
+ *
+ * Returns null when the tab no longer exists (chrome.tabs.get rejects) or has
+ * no id or url. Callers treat null as "do not bury", the safe direction.
+ */
+export async function getTab(tabId: number): Promise<TabInfo | null> {
+  try {
+    const tab = await chrome.tabs.get(tabId);
+    return tabToTabInfo(tab, Date.now());
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // removeTab
 // ---------------------------------------------------------------------------
 

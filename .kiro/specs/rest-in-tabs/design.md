@@ -30,8 +30,8 @@ flowchart LR
 1. Alarm fires (or Popup sends `buryIdle` / `buryTab`).
 2. Service worker loads settings and queries tabs.
 3. `selectBurialCandidates(tabs, settings, now)` returns the tabs to bury. When the trigger is a `buryIdle` message the handler calls `selectBurialCandidates` with `autoBury` forced to `true`, so idle tabs are buried even when Auto-Bury is disabled in settings (Requirement 2.2 applies regardless of Requirement 1.6).
-4. For each candidate: extract page info (2 s timeout) → `fallbackEpitaph` → `addGrave` → enqueue write → on success `tabs.remove`.
-5. `expiredGraves` runs on the same alarm and removes Graves past the Retention Period, enqueued through the same write queue.
+4. For each candidate: extract page info (2 s timeout) → fetch the tab again with `getTab` and skip it if it is gone, now shows a different URL, or (automatic runs only) is now protected or no longer idle → `createGrave` → `addGrave` → enqueue one `setGravesAndStats` write → on success `tabs.remove`.
+5. `expireGraves` runs on the same alarm, before burial, and removes Graves past the Retention Period through the same write queue.
 
 ### Resurrection flow
 
@@ -82,15 +82,15 @@ estimateFreedMb(buried: number): number
 
 | Module | Wraps | Notes |
 |---|---|---|
-| `tabs.ts` | `chrome.tabs.query/remove/create` | Maps `chrome.tabs.Tab` to `TabInfo` using `lastAccessed` |
-| `storage.ts` | `chrome.storage.local` | `getGraves/setGraves/getSettings/setSettings/getStats/setStats`, `onChanged` subscription |
+| `tabs.ts` | `chrome.tabs.query/get/remove/create` | Maps `chrome.tabs.Tab` to `TabInfo` using `lastAccessed`; `getTab` returns `null` when the tab is gone |
+| `storage.ts` | `chrome.storage.local` | `getGraves/setGraves/getSettings/setSettings/getStats/setStats`, `setGravesAndStats` (one `set` call, used by burial and resurrect), `onChanged` subscription |
 | `extract.ts` | `chrome.scripting.executeScript` | Returns `PageInfo`; rejects after 2 s or on discarded tabs |
 | `summarizer.ts` | `Summarizer` global | `checkAvailability(): Promise<"available"|"downloadable"|"downloading"|"unavailable">` wraps `Summarizer.availability()`; `createAndSummarize(text): Promise<string>` wraps `Summarizer.create()` + `.summarize()` with download-progress callback; throws when status is not `"available"` or `"downloadable"` |
 
 ### `src/background/service-worker.ts`
 
 - Registers the `bury-check` alarm (1 minute) on install and startup.
-- Handles messages: `buryTab`, `buryIdle`, `resurrect`, `exorcise`, `updateEpitaph`.
+- Handles messages: `buryTab`, `buryIdle`, `resurrect`, `exorcise` (and `updateEpitaph` in task 13). Messages are accepted only from the extension's own pages and are validated by `parseMessage`. Replies are `{ ok: true, count? }` or `{ ok: false, error }` with `error` one of `bad-request`, `not-found`, `not-allowed`, `open-failed`, `save-failed`, `failed`.
 - Serializes all writes to graves and stats through a single queue.
 - Chains whole burial runs on a separate queue: a run starts only after the previous run finishes and queries tabs fresh, so two runs never bury the same tab.
 - Burial and resurrection flows take platform adapters as parameters (dependency injection) so they can be tested with fakes in task 8.4.

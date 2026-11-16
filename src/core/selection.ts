@@ -79,3 +79,27 @@ export function selectBurialCandidates(
     (tab) => !isProtected(tab, settings.protectedSites) && now - tab.lastAccessed >= idleMs,
   );
 }
+
+/**
+ * Selection for automatic runs. Idleness is measured from the later of
+ * tab.lastAccessed and installedAt, so tabs that were already idle before
+ * install are not buried right away. Returns the original tab objects, so
+ * graves keep the real lastAccessed.
+ *
+ * Validates: Requirement 1.7
+ */
+export function selectAutomaticCandidates(
+  tabs: TabInfo[],
+  settings: Settings,
+  installedAt: number | undefined,
+  now: number,
+): TabInfo[] {
+  if (installedAt === undefined) return selectBurialCandidates(tabs, settings, now);
+
+  const measured = tabs.map((tab) => ({
+    ...tab,
+    lastAccessed: Math.max(tab.lastAccessed, installedAt),
+  }));
+  const selected = new Set(selectBurialCandidates(measured, settings, now));
+  return tabs.filter((_, i) => selected.has(measured[i]));
+}
