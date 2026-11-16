@@ -18,7 +18,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - **Property 10: Settings are always in range**
     - **Validates: Requirements 8.1, 8.3**
 
-- [ ] 3. Implement tab selection
+- [x] 3. Implement tab selection
   - [x] 3.1 Implement `isProtected` (including subdomain matching), `canBuryManually` and `selectBurialCandidates`
     - _Requirements: 1.2, 1.3, 1.6, 2.2_
   - [x] 3.2 Write property tests for selection
@@ -50,7 +50,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
 - [x] 6. Checkpoint: all core tests pass
   - Run `npm test`; ask the user if anything is unclear before touching `chrome.*`.
 
-- [ ] 7. Build the platform adapters
+- [x] 7. Build the platform adapters
   - [x] 7.1 `platform/storage.ts`: typed get/set for graves, settings, stats and an `onChanged` subscription
     - _Requirements: 7.3, 8.4_
   - [x] 7.2 `platform/tabs.ts`: query → `TabInfo[]`, remove, create
@@ -75,7 +75,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - _Requirements: 2.1, 2.2, 2.3, 2.4_
 
 - [ ] 10. Update finished code for the revised spec
-  - [ ] 10.1 Add `causeOfDeath` and `formatDuration` in `src/core/cause.ts`, following design.md (draft rule matches whole path segments only)
+  - [x] 10.1 Add `causeOfDeath` and `formatDuration` in `src/core/cause.ts`, following design.md (draft rule matches whole path segments only)
     - Property-based tests: **Property 11: Cause of death follows the fixed rules**; **Property 12: Durations use the right unit and never shrink**, with a counter per kind and boundary
     - _Requirements: 10.1, 10.3_
   - [ ] 10.2 Store the Duplicate count
