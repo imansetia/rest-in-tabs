@@ -21,10 +21,12 @@ type Outcome = 'saved' | 'skipped' | 'save-failed';
  * Bury idle tabs.
  *
  * - Automatic run (isAutomatic=true): stored settings; idleness measured from
- *   max(lastAccessed, installedAt) (Requirement 1.7). Right before saving, each
- *   tab is checked again and skipped if it became protected or is no longer idle.
+ *   max(lastAccessed, installedAt) (Requirement 1.7).
  * - Manual run (isAutomatic=false): autoBury forced to true (Requirement 2.2);
  *   the tab's real lastAccessed is used.
+ *
+ * In both, each tab is checked again right before saving and skipped if it
+ * became protected or is no longer idle.
  *
  * Runs never overlap. Returns the number of graves saved.
  */
@@ -49,8 +51,9 @@ export function buryTabs(
       stillBuriable = (fresh) =>
         selectAutomaticCandidates([fresh], settings, installedAt, Date.now()).length === 1;
     } else {
-      candidates = selectBurialCandidates(openTabs, { ...settings, autoBury: true }, now);
-      stillBuriable = () => true;
+      const manual = { ...settings, autoBury: true };
+      candidates = selectBurialCandidates(openTabs, manual, now);
+      stillBuriable = (fresh) => selectBurialCandidates([fresh], manual, Date.now()).length === 1;
     }
 
     let saved = 0;

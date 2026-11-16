@@ -1,0 +1,44 @@
+import type { ErrorCode } from './messages.js';
+import type { ManualBlockReason } from './selection.js';
+
+// User-facing text for the Popup (and later the Graveyard). Plain and short:
+// puns belong in epitaphs, not in buttons or errors.
+
+const ERROR_TEXT: Record<ErrorCode, string> = {
+  'bad-request': 'The request was not understood. Please try again.',
+  'not-found': 'That tab or grave is no longer there.',
+  'not-allowed': 'This page cannot be buried.',
+  'open-failed': 'Could not reopen this page.',
+  'save-failed': 'Could not save the change. Nothing was lost.',
+  failed: 'Something went wrong. Please try again.',
+};
+
+const BLOCK_TEXT: Record<ManualBlockReason, string> = {
+  'no-tab': 'There is no tab to bury here.',
+  private: 'Tabs in private windows are never buried.',
+  'unsupported-page': 'Only web pages (http or https) can be buried.',
+};
+
+export const WORKING_TEXT = 'Working…';
+export const BURY_TAB_DONE_TEXT = 'Tab buried.';
+export const COUNT_UNAVAILABLE_TEXT = 'Could not read the graveyard.';
+
+export function errorText(code: ErrorCode): string {
+  return ERROR_TEXT[code];
+}
+
+export function blockReasonText(reason: ManualBlockReason): string {
+  return BLOCK_TEXT[reason];
+}
+
+export function graveCountText(count: number): string {
+  if (count === 0) return 'No graves yet.';
+  if (count === 1) return '1 grave';
+  return `${count.toLocaleString('en-US')} graves`;
+}
+
+export function buryIdleResultText(count: number): string {
+  if (count === 0) return 'No idle tabs to bury.';
+  if (count === 1) return 'Buried 1 idle tab.';
+  return `Buried ${count.toLocaleString('en-US')} idle tabs.`;
+}

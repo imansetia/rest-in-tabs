@@ -1,0 +1,70 @@
+/* Minimal, readable styling. The haunting theme arrives in task 11.
+   All text colors meet WCAG AA against their backgrounds. No animation. */
+
+:root {
+  color-scheme: light;
+  font: 14px/1.4 system-ui, sans-serif;
+  color: #111; /* 18.9:1 on #fff */
+  background: #fff;
+}
+
+body {
+  margin: 0;
+  width: 280px;
+}
+
+main {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+p {
+  margin: 0;
+}
+
+.actions {
+  display: grid;
+  gap: 8px;
+}
+
+button {
+  font: inherit;
+  padding: 8px 12px;
+  border: 1px solid #555; /* 7.5:1 on #fff */
+  border-radius: 6px;
+  background: #f2f2f2;
+  color: #111;
+  text-align: left;
+  cursor: pointer;
+}
+
+button[aria-disabled='true'] {
+  color: #555; /* 6.0:1 on #e6e6e6 */
+  background: #e6e6e6;
+  border-color: #888;
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: 3px solid #1a5fb4; /* 6.4:1 on #fff */
+  outline-offset: 2px;
+}
+
+.reason {
+  color: #444; /* 9.7:1 on #fff */
+  font-size: 0.9rem;
+}
+
+#status.error {
+  color: #a51d2d; /* 7.6:1 on #fff */
+}
+
+a {
+  color: #1a5fb4;
+}

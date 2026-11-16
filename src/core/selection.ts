@@ -53,6 +53,21 @@ export function canBuryManually(tab: TabInfo): boolean {
   return true;
 }
 
+export type ManualBlockReason = 'no-tab' | 'private' | 'unsupported-page';
+
+/**
+ * Why "Bury this tab" is not allowed for this tab, or null when it is.
+ * Agrees with canBuryManually.
+ *
+ * Validates: Requirement 2.3
+ */
+export function manualBurialBlock(tab: TabInfo | null): ManualBlockReason | null {
+  if (tab === null) return 'no-tab';
+  if (tab.incognito) return 'private';
+  if (!canBuryManually(tab)) return 'unsupported-page';
+  return null;
+}
+
 /**
  * Returns the tabs that the auto-burial alarm should close on this run.
  *

@@ -4,8 +4,25 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Rest in Tabs</title>
+    <link rel="stylesheet" href="./popup.css" />
+    <script type="module" src="./popup.ts"></script>
   </head>
   <body>
-    <h1>Rest in Tabs</h1>
+    <main>
+      <h1>Rest in Tabs</h1>
+      <p id="grave-count">Counting graves…</p>
+
+      <div class="actions">
+        <button type="button" id="bury-this" aria-disabled="true" aria-describedby="bury-this-reason">
+          Bury this tab
+        </button>
+        <p id="bury-this-reason" class="reason" hidden></p>
+        <button type="button" id="bury-idle">Bury idle tabs now</button>
+      </div>
+
+      <p id="status" role="status" aria-live="polite"></p>
+
+      <a href="../graveyard/index.html" target="_blank" rel="noopener">Open graveyard</a>
+    </main>
   </body>
 </html>

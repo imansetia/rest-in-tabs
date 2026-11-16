@@ -30,7 +30,7 @@ flowchart LR
 1. Alarm fires (or Popup sends `buryIdle` / `buryTab`).
 2. Service worker loads settings and queries tabs.
 3. `selectBurialCandidates(tabs, settings, now)` returns the tabs to bury. When the trigger is a `buryIdle` message the handler calls `selectBurialCandidates` with `autoBury` forced to `true`, so idle tabs are buried even when Auto-Bury is disabled in settings (Requirement 2.2 applies regardless of Requirement 1.6).
-4. For each candidate: extract page info (2 s timeout) → fetch the tab again with `getTab` and skip it if it is gone, now shows a different URL, or (automatic runs only) is now protected or no longer idle → `createGrave` → `addGrave` → enqueue one `setGravesAndStats` write → on success `tabs.remove`.
+4. For each candidate: extract page info (2 s timeout) → fetch the tab again with `getTab` and skip it if it is gone, now shows a different URL, or (alarm runs and `buryIdle`, not `buryTab`) is now protected or no longer idle → `createGrave` → `addGrave` → enqueue one `setGravesAndStats` write → on success `tabs.remove`.
 5. `expireGraves` runs on the same alarm, before burial, and removes Graves past the Retention Period through the same write queue.
 
 ### Resurrection flow

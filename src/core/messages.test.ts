@@ -1,5 +1,26 @@
 import { describe, it, expect } from 'vitest';
-import { parseMessage } from './messages.js';
+import { parseMessage, parseResponse, ERROR_CODES } from './messages.js';
+
+describe('parseResponse', () => {
+  it('keeps well-formed replies', () => {
+    expect(parseResponse({ ok: true })).toEqual({ ok: true });
+    expect(parseResponse({ ok: true, count: 3 })).toEqual({ ok: true, count: 3 });
+    for (const error of ERROR_CODES) {
+      expect(parseResponse({ ok: false, error })).toEqual({ ok: false, error });
+    }
+  });
+
+  it('drops a bad count but keeps ok: true', () => {
+    expect(parseResponse({ ok: true, count: -1 })).toEqual({ ok: true });
+    expect(parseResponse({ ok: true, count: '3' })).toEqual({ ok: true });
+  });
+
+  it('turns anything else into a generic failure', () => {
+    for (const raw of [undefined, null, 'ok', {}, { ok: 'yes' }, { ok: false }, { ok: false, error: 'boom' }]) {
+      expect(parseResponse(raw)).toEqual({ ok: false, error: 'failed' });
+    }
+  });
+});
 
 describe('parseMessage', () => {
   it('accepts each well-formed message', () => {

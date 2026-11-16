@@ -18,6 +18,19 @@ export async function queryTabs(queryInfo: chrome.tabs.QueryInfo = {}): Promise<
 }
 
 // ---------------------------------------------------------------------------
+// getActiveTab
+// ---------------------------------------------------------------------------
+
+/**
+ * The active tab of the window the calling page (e.g. the Popup) belongs to,
+ * or null if there is none. Throws if the query fails.
+ */
+export async function getActiveTab(): Promise<TabInfo | null> {
+  const [tab] = await queryTabs({ active: true, currentWindow: true });
+  return tab ?? null;
+}
+
+// ---------------------------------------------------------------------------
 // getTab
 // ---------------------------------------------------------------------------
 

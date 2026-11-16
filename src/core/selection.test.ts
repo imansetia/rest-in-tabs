@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { isProtected, canBuryManually, selectBurialCandidates } from './selection.js';
+import { isProtected, canBuryManually, selectBurialCandidates, manualBurialBlock } from './selection.js';
 import { DEFAULT_SETTINGS, IDLE_MINUTES_MIN, IDLE_MINUTES_MAX } from './settings.js';
 import type { TabInfo, Settings } from './types.js';
 
@@ -386,5 +386,28 @@ describe('canBuryManually — targeted examples', () => {
 
   it('blocks a tab with an unparseable URL', () => {
     expect(canBuryManually(makeTab({ url: 'https://:invalid' }))).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// manualBurialBlock
+// ---------------------------------------------------------------------------
+
+describe('manualBurialBlock', () => {
+  it('gives a reason for each blocked case', () => {
+    expect(manualBurialBlock(null)).toBe('no-tab');
+    expect(manualBurialBlock(makeTab({ incognito: true }))).toBe('private');
+    expect(manualBurialBlock(makeTab({ url: 'chrome://extensions/' }))).toBe('unsupported-page');
+    expect(manualBurialBlock(makeTab({ url: 'https://:invalid' }))).toBe('unsupported-page');
+    expect(manualBurialBlock(makeTab({ active: true, pinned: true }))).toBeNull();
+  });
+
+  it('blocks exactly the tabs canBuryManually refuses', () => {
+    fc.assert(
+      fc.property(anyTab, (tab) => {
+        expect(manualBurialBlock(tab) === null).toBe(canBuryManually(tab));
+      }),
+      { numRuns: 200 },
+    );
   });
 });

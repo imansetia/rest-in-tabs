@@ -70,7 +70,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - `buryIdle` buries idle tabs even when `settings.autoBury` is false
     - _Requirements: 1.5, 2.2, 5.2_
 
-- [ ] 9. Build the Popup
+- [x] 9. Build the Popup
   - Grave count, "Bury this tab" (disabled with reason when not allowed), "Bury idle tabs now", "Open graveyard"
   - _Requirements: 2.1, 2.2, 2.3, 2.4_
 

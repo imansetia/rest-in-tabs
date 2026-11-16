@@ -50,7 +50,10 @@ describe('buryTabs', () => {
     expect(storage.graves()).toEqual([]);
   });
 
-  it('skips a selected tab that the user switches to during the run', async () => {
+  it.each([
+    ['automatic', true],
+    ['manual', false],
+  ])('%s run: skips a selected tab that the user switches to during the run', async (_, isAutomatic) => {
     const storage = fakeStorage({ installedAt: 0 });
     const tabs = fakeTabs([makeTab(1), makeTab(2), makeTab(3)]);
     // While tab 1 is being read, the user switches to tab 3.
@@ -58,11 +61,26 @@ describe('buryTabs', () => {
       if (id === 1) tabs.update(3, { active: true, lastAccessed: Date.now() });
     });
 
-    expect(await buryTabs(storage.adapter, tabs.adapter, extract, true)).toBe(2);
+    expect(await buryTabs(storage.adapter, tabs.adapter, extract, isAutomatic)).toBe(2);
     expect(tabs.removeCalls).toEqual([1, 2]);
     expect(tabs.open.has(3)).toBe(true);
     expect(storage.stats().buried).toBe(2);
     expect(storage.graves().map((g) => g.url)).not.toContain('https://site3.example.com/');
+  });
+
+  it('skips a selected tab that navigates to a different URL during extraction', async () => {
+    const storage = fakeStorage({ installedAt: 0 });
+    const tabs = fakeTabs([makeTab(1), makeTab(2)]);
+    // Tab 1 navigates while it is being read; it stays inactive and idle, so
+    // only the URL check can stop the burial.
+    const extract = fakeExtract((id) => {
+      if (id === 1) tabs.update(1, { url: 'https://elsewhere.example.org/' });
+    });
+
+    expect(await buryTabs(storage.adapter, tabs.adapter, extract, true)).toBe(1);
+    expect(tabs.removeCalls).toEqual([2]);
+    expect(tabs.open.get(1)?.url).toBe('https://elsewhere.example.org/');
+    expect(storage.graves().map((g) => g.url)).toEqual(['https://site2.example.com/']);
   });
 
   it('an automatic run right after install buries no tab that was idle before install', async () => {
