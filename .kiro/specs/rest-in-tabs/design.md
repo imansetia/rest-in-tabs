@@ -114,7 +114,7 @@ validateSetting(key, value): { ok: true } | { ok: false; range: string }
 estimateFreedMb(buried: number): number
 ```
 
-`CauseKind` is `'duplicate' | 'checkout' | 'draft' | 'signup' | 'neglect'`. `causeOfDeath` lower-cases `new URL(url).pathname` (an unparseable URL gives an empty path, so only the duplicate and neglect rules can match), then applies the rules of Requirement 10.3 in order with plain substring checks, as the steering file writes them. The only variable parts of the text are N (`duplicateCount`) and D (`formatDuration(buriedAt - lastAccessed)`); a negative interval is clamped to 0.
+`CauseKind` is `'duplicate' | 'checkout' | 'draft' | 'signup' | 'neglect'`. `causeOfDeath` lower-cases `new URL(url).pathname` (an unparseable URL gives an empty path, so only the duplicate and neglect rules can match), then applies the rules of Requirement 10.3 in order. The checkout and sign-up rules are plain substring checks on the path. The draft rule splits the path on `/` and matches only a segment exactly equal to `edit`, `draft` or `compose`, so `/document/d/1x9/edit` is a draft and `/editor` is not. The only variable parts of the text are N (`duplicateCount`) and D (`formatDuration(buriedAt - lastAccessed)`); a negative interval is clamped to 0.
 
 `formatDuration` rounds as the mockup does:
 - below 1 hour: "less than an hour"
@@ -305,7 +305,7 @@ For any input value, `normalizeSettings` returns settings inside the allowed ran
 **Validates: Requirements 8.1, 8.3**
 
 **Property 11: Cause of death follows the fixed rules.**
-For any URL (including unparseable ones and paths with mixed case), `buriedAt`, `lastAccessed` and `duplicateCount` >= 1, `causeOfDeath` returns the `kind` of the first matching rule of Requirement 10.3, computed independently in the test from the lower-cased path. Its `text` equals that rule's fixed template with only N and D filled in. A `duplicateCount` > 1 always wins over the path rules. Generators must produce every kind, and paths that match several rules at once, with a counter per kind asserted to be > 0.
+For any URL (including unparseable ones and paths with mixed case), `buriedAt`, `lastAccessed` and `duplicateCount` >= 1, `causeOfDeath` returns the `kind` of the first matching rule of Requirement 10.3, computed independently in the test from the lower-cased path. Its `text` equals that rule's fixed template with only N and D filled in. A `duplicateCount` > 1 always wins over the path rules. Generators must produce every kind, paths that match several rules at once, and near misses for the draft rule (`/editor`, `/drafts`, `/recompose`), with a counter per kind asserted to be > 0.
 **Validates: Requirements 10.1, 10.3**
 
 **Property 12: Durations use the right unit and never shrink.**

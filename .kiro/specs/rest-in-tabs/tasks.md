@@ -74,43 +74,158 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - Grave count, "Bury this tab" (disabled with reason when not allowed), "Bury idle tabs now", "Open graveyard"
   - _Requirements: 2.1, 2.2, 2.3, 2.4_
 
-- [ ] 10. Build the Graveyard page
-  - [ ] 10.1 Render tombstones (title, domain, icon, Epitaph, time since burial, decay label), newest first, with live updates from storage
-    - _Requirements: 4.1, 4.2, 4.6, 6.2_
-  - [ ] 10.2 Add search, empty state and no-match state with a clear-search control
-    - _Requirements: 4.3, 4.4, 4.5_
-  - [ ] 10.3 Add Resurrect and Exorcise (with confirmation), error message on failure, and screen-reader announcements
-    - _Requirements: 5.1, 5.2, 5.3, 5.4, 9.5_
-  - [ ] 10.4 Add the stats bar with the memory figure labelled as an estimate
-    - _Requirements: 7.1, 7.2_
+- [ ] 10. Update finished code for the revised spec
+  - [ ] 10.1 Add `causeOfDeath` and `formatDuration` in `src/core/cause.ts`, following design.md (draft rule matches whole path segments only)
+    - Property-based tests: **Property 11: Cause of death follows the fixed rules**; **Property 12: Durations use the right unit and never shrink**, with a counter per kind and boundary
+    - _Requirements: 10.1, 10.3_
+  - [ ] 10.2 Store the Duplicate count
+    - Add `duplicateCount` to `Grave`, `countDuplicates(tabs, url)`, and the `duplicateCount` parameter to `createGrave`
+    - Burial runs count from the same tab snapshot used for selection; `buryTab` queries all tabs to count
+    - Add `parseGrave` (missing or bad count becomes 1, the Grave is kept); `getGraves` uses it
+    - Update the existing tests: the createGrave → isValidGrave property, and a burial test where 3 identical tabs give `duplicateCount` 3
+    - _Requirements: 3.1, 10.2, 10.4_
+  - [ ] 10.3 Add `Settings.demo` (default `false`) to `types.ts`, `normalizeSettings`, `validateSetting` and the Property 10 generators
+    - _Requirements: 8.5_
+  - [ ] 10.4 Add `selectManualCandidates`, shared by `buryIdle` and a new `countIdle` message
+    - `parseMessage` accepts `countIdle`; the service worker replies `{ ok: true, count }` without writing and without waiting in the run queue
+    - Test with fake adapters: for the same tabs, the `countIdle` count equals the number a manual run buries
+    - _Requirements: 2.2, 4.10_
+  - [ ] 10.5 Manifest: add the `favicon` permission and the `content_security_policy.extension_pages` from design.md
+    - Add `src/no-inline.test.ts`, which fails if any file under `src/` contains a `style="` attribute or an inline `on…=` event handler
+    - Rebuild and confirm the Popup still works under the new policy
+    - _Requirements: 4.12, 9.9_
+  - [ ] 10.6 Popup idle button and toasts
+    - The label comes from `countIdle`: "Bury N idle tabs", "No idle tabs to bury" (unavailable) when N is 0, and "Bury idle tabs" (usable) before the first reply or if it fails
+    - Refresh the count after each request
+    - Toasts: "Buried 1 idle tab." / "Buried N idle tabs." for the idle button, "Tab buried." for "Bury this tab"
+    - Update `copy.ts` and its tests
+    - _Requirements: 2.1, 2.2, 4.10_
 
-- [ ] 11. Apply the haunting theme
-  - [ ] 11.1 Graveyard scene: night sky, layered fog, three tombstone styles for the decay stages, candle flicker, a "rising" animation on Resurrect
-    - _Requirements: 9.1, 6.2_
-  - [ ] 11.2 Accessibility pass: reduced-motion media query, visible focus, keyboard order, AA contrast, layout from 360 px
-    - _Requirements: 9.2, 9.3, 9.4, 9.6_
+- [ ] 11. Build the Graveyard page
+  - Follow `.kiro/steering/design.md` and copy values from `design/mockup.html`. Keep one module per concern under `src/graveyard/` and every file under ~200 lines.
+  - Rules for every sub-task:
+    - No inline `style` attributes and no inline event handlers. Set per-plot custom properties with `element.style.setProperty` and attach handlers with `addEventListener`.
+    - Decorations are `aria-hidden`.
+    - Every animation has a reduced-motion version.
+    - Each sub-task ends with a short review stop.
+  - [ ] 11.1 Tokens, fonts and theme
+    - Shared `tokens.css` with the Night and Dusk values from the steering file
+    - Fonts and their `OFL.txt` files under `src/assets/fonts/`, with `fonts.css`
+    - An inline Vite plugin that copies the licence files to `dist/licenses/`
+    - `platform/theme.ts`; the Night / Dusk switch (`aria-pressed`), defaulting from `prefers-color-scheme` and stored under `theme`
+    - The Popup and Options pages load the same tokens and fonts
+    - Check the AA contrast of every text pairing in both themes
+    - No animation in this step
+    - _Requirements: 9.4, 9.7, 9.8, 9.9_
+  - [ ] 11.2 Page shell and header
+    - Logo, tagline and stats; the memory figure reads "≈ 2.3 GB freed (estimated)" (a pure formatter in `src/core` with tests)
+    - The "Bury N idle tabs" button (same label rules as 10.6, `countIdle` refresh schedule from design.md)
+    - The toast live region; live updates via `onStorageChanged`
+    - Reduced motion: toasts appear without sliding
+    - _Requirements: 2.2, 4.7, 4.10, 7.1, 7.2, 9.5_
+  - [ ] 11.3 Scene and row layout
+    - Static scene layers: sky with stars, moon, hills, three trees, fog bands, fence with a crow
+    - `layoutRows` and `plotJitter` in `src/core`, with unit tests for row capacities, the 80% stop and folding a short last row
+    - Rows rendered newest first, front row clear, back rows veiled
+    - "Nothing has died here yet. Give it time." when empty
+    - Fog drift of 55 to 90 s per loop; reduced motion: fog stands still
+    - _Requirements: 4.2, 4.5, 9.1, 9.2, 9.6_
+  - [ ] 11.4 Tombstones and decay stages
+    - Each stone is a `<button>` showing: icon medallion (`platform/favicon.ts` with the `_favicon` endpoint, letter disc underneath), name, Cinzel dates "15 NOV — 17 NOV", epitaph, cause of death
+    - Accessible name "Title. Condition. Buried 5 hours ago."
+    - Fresh, Weathered and Crumbling looks, with crow and fallen cross from `plotJitter`
+    - `timeAgo`, `faviconSrc`, `letterFor` and `discColor` with unit tests
+    - Every displayed time uses one `displayNow`, so the Demo clock in task 15 can shift it
+    - Reduced motion: no hover-glow transition
+    - _Requirements: 4.1, 4.12, 6.1, 6.2, 10.5_
+  - [ ] 11.5 Plaque, Resurrect and Exorcise (no animation yet)
+    - Plaque fields and focus rules; it closes on ×, Esc or a click outside; another stone switches it; clicks in the confirm dialog do not close it
+    - The `<dialog>` confirm ("Keep it" has default focus)
+    - `resurrect` / `exorcise` messages, with error codes shown through `errorText`
+    - Toasts "Reopened in a new tab." and "Grave deleted permanently."
+    - The plot shows empty soil after Resurrect and bare ground after Exorcise
+    - _Requirements: 4.8, 4.9, 4.11, 5.1, 5.2, 5.3, 5.4, 9.3, 9.5_
+  - [ ] 11.6 Search in the landscape
+    - Trimmed query, 180 ms after typing stops
+    - Fog thins, non-matching graves fade to about 28%, and matching graves lose their veil
+    - The camera glides (1.1 s) to the first match, enlarging it up to 1.9×
+    - "No grave bears that name." with "Clear search"; clearing resets the view
+    - Reduced motion: the camera jumps without gliding, and fades are instant
+    - _Requirements: 4.4, 4.6, 9.2_
+  - [ ] 11.7 List view
+    - The Landscape / List switch
+    - A table with icon, title and domain, epitaph, cause of death, "x ago" (full date on hover), condition label, and Resurrect / Exorcise
+    - Sort newest, oldest or name; the same search and empty states
+    - Stacked rows below 760 px
+    - No animation
+    - _Requirements: 4.3, 4.4, 4.5, 4.6, 6.2, 9.6, 10.5_
+  - [ ] 11.8 Mass burial animation
+    - Graves that are new since the last render (own button or the alarm) rise out of the ground: fog rolls in (0.9 s), graves rise 170 ms apart, newest and front row first, counts tick up, a crow crosses the moon, the fog recedes
+    - Storage-driven re-renders wait until a running animation ends
+    - Reduced motion: new graves fade in, and numbers jump to their final value
+    - _Requirements: 4.7, 9.1, 9.2_
+  - [ ] 11.9 Resurrect animation (about 3 s)
+    - Amber glow (the only warm light) → the stone slides aside → the ghost rises with favicon eyes and marigold petals → it flies off the top edge, then `resurrect` is sent
+    - On an error reply the stone returns and the error toast shows; on success the plot becomes fresh soil
+    - Reduced motion: a short fade of the stone, then the same message and result
+    - _Requirements: 4.11, 5.1, 5.2, 9.1, 9.2_
+  - [ ] 11.10 Exorcise animation
+    - After confirmation, `exorcise` is sent; on success: a moment of silence (0.8 s), one lightning strike with a flash limited to the scene, bats scatter, the stone sinks (1.1 s), bare ground, the fence crow calls once
+    - On an error reply there is no animation and the error toast shows
+    - Reduced motion: the stone fades out, and the toast still shows
+    - _Requirements: 4.11, 5.3, 5.4, 9.1, 9.2_
+  - [ ] 11.11 Popup in the graveyard style
+    - 320 px wide, with tokens and fonts, the fence strip, and the ghost mascot with "N tabs at rest"
+    - Primary "Bury N idle tabs" (Cinzel, spectral outline), secondary "Bury this tab"
+    - "Last buried" with the newest epitaph; "Open the graveyard"
+    - No animation
+    - _Requirements: 2.2, 2.3, 2.4, 9.3, 9.4, 9.7_
+  - [ ] 11.12 Accessibility and layout pass
+    - Keyboard-only run through every action; `--spectral` focus ring; decorations hidden from screen readers
+    - AA contrast in Night and Dusk
+    - 360 px width
+    - Reduced motion on for every animation above
+    - `no-inline.test.ts` passes
+    - _Requirements: 9.2, 9.3, 9.4, 9.5, 9.6_
 
 - [ ] 12. Build the Options page
-  - Auto-Bury toggle, Idle Threshold, Protected Sites editor, Retention Period; inline range errors; changes apply on the next check
-  - _Requirements: 8.1, 8.2, 8.3, 8.4_
+  - Auto-Bury toggle, Idle Threshold, Protected Sites editor, Retention Period and the Demo setting
+  - Inline range errors from `validateSetting`; changes apply on the next check
+  - Same tokens, fonts and theme as the Graveyard; keyboard and AA contrast as in 11.12
+  - No animation
+  - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 9.3, 9.4, 9.7_
 
 - [ ] 13. Add on-device AI epitaphs
   - [ ] 13.1 Implement `platform/summarizer.ts`: `checkAvailability()` wrapping `Summarizer.availability()`, and `createAndSummarize(text)` wrapping `Summarizer.create()` + `.summarize()` with `downloadprogress` callback
     - _Requirements: 3.4, 3.5_
-  - [ ] 13.2 On Graveyard load, call `checkAvailability()`:
-    - `"available"` → iterate Graves with an excerpt, call `createAndSummarize`, save updated Epitaph (`epitaphSource: "ai"`), delete excerpt
-    - `"downloadable"` → render "Enable AI epitaphs" button; on click call `createAndSummarize` (triggers download), show progress, then upgrade Epitaphs as above
-    - `"downloading"` / `"unavailable"` → do nothing; fallback Epitaph stays
+  - [ ] 13.2 Add the `updateEpitaph(graveId, epitaph)` message
+    - `parseMessage` validates it
+    - The service worker cleans the text with the same rules as `fallbackEpitaph` (collapsed whitespace, at most 200 code points), sets `epitaphSource: "ai"`, deletes the excerpt, and writes through the write queue
+    - Orchestration tests with fake adapters
+    - _Requirements: 3.3, 3.4_
+  - [ ] 13.3 On Graveyard load, call `checkAvailability()`:
+    - `"available"` → for each Grave with an excerpt, call `createAndSummarize` and send `updateEpitaph`; the page never writes graves itself
+    - `"downloadable"` → render an "Enable AI epitaphs" button in the header style; on click call `createAndSummarize` (triggers the download), show progress as text, then upgrade Epitaphs as above
+    - `"downloading"` / `"unavailable"` → do nothing; the fallback Epitaph stays
+    - Updated stones re-render through the normal live update, with no extra animation
     - _Requirements: 3.4, 3.5_
-  - [ ] 13.3 Add excerpt pruning in the service-worker alarm handler (separate step from `expiredGraves`): remove `excerpt` from any Grave where `now - buriedAt > 7 * 24 * 60 * 60 * 1000`  
+  - [ ] 13.4 Add excerpt pruning in the service-worker alarm handler (separate step from `expiredGraves`): remove `excerpt` from any Grave where `now - buriedAt > 7 * 24 * 60 * 60 * 1000`  
     - _Requirements: 3.4_
 
 - [ ] 14. Checkpoint: full manual test
   - Load unpacked in Chrome and Edge; run the manual checks from the design's Testing Strategy; ask the user about anything that fails.
 
-- [ ]* 15. Demo helpers
-  - A "demo mode" setting that sets the Idle Threshold to 10 seconds for the video
-  - Sound effects toggle (off by default)
+- [ ] 15. Demo helpers
+  - [ ] 15.1 Demo clock
+    - A range input of 0 to 14 days, labelled "+N days", shown only while `settings.demo` is on
+    - It shifts `displayNow`, so decay stages and every "x ago" text move together
+    - Kept in page memory only and reset to 0 when Demo is turned off; never sent to the service worker or stored
+    - Moving it closes the Plaque and re-renders without animation (reduced motion needs nothing extra)
+    - _Requirements: 8.5, 8.6, 6.1, 6.2_
+  - [ ]* 15.2 Sound (optional), off by default, with a toggle in the Graveyard header
+    - Wind, a distant owl, one crow call on burial, a soft rising tone on resurrect, a low cello drone
+    - Bundled files with their licences; no jump scares
+    - _Requirements: none (design steering file, Sound); 9.9 applies (no network)_
 
 - [ ] 16. Prepare the submission
   - Finish README (features, install, how Kiro was used: specs, steering, hooks, property-based tests)

@@ -160,7 +160,7 @@ Rest in Tabs is a Chrome/Edge extension that buries idle tabs in a spooky gravey
 3. THE Extension SHALL use the first rule that matches, checking the path of the Grave's address without regard to letter case:
    1. Duplicate count greater than 1: "Died a duplicate. N identical tabs were open." where N is the Duplicate count.
    2. Path contains `cart` or `checkout`: "Abandoned at checkout."
-   3. Path contains `/edit`, `/draft` or `/compose`: "Abandoned mid-draft."
+   3. A path segment is exactly `edit`, `draft` or `compose` (so `/document/d/1x9/edit` matches and `/editor` does not): "Abandoned mid-draft."
    4. Path contains `register`, `signup`, `sign-up` or `join`: "Abandoned during sign-up."
    5. Otherwise: "Died of neglect. Unvisited for D." where D is the time from last use to burial: "less than an hour" below 1 hour, then in hours below 48 hours, in days below 60 days, and in months from then on.
 4. IF a Grave has no stored Duplicate count (for example, it was buried before this field existed), THEN THE Extension SHALL treat its Duplicate count as 1.
