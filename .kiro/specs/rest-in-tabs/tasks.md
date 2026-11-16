@@ -47,11 +47,11 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - **Property 9: Search returns matching Graves only**
     - **Validates: Requirements 4.3, 6.1, 6.3, 6.4**
 
-- [ ] 6. Checkpoint: all core tests pass
+- [x] 6. Checkpoint: all core tests pass
   - Run `npm test`; ask the user if anything is unclear before touching `chrome.*`.
 
 - [ ] 7. Build the platform adapters
-  - [ ] 7.1 `platform/storage.ts`: typed get/set for graves, settings, stats and an `onChanged` subscription
+  - [x] 7.1 `platform/storage.ts`: typed get/set for graves, settings, stats and an `onChanged` subscription
     - _Requirements: 7.3, 8.4_
   - [ ] 7.2 `platform/tabs.ts`: query → `TabInfo[]`, remove, create
     - _Requirements: 1.2, 5.1_

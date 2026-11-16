@@ -186,7 +186,7 @@ For any input value, `normalizeSettings` returns settings inside the allowed ran
 | `tabs.create` fails on Resurrect | Grave kept; Graveyard shows "Could not reopen this page" | 5.2 |
 | Tab closed by the user mid-burial | Grave is kept (the page is still recoverable) | 1.4 |
 | Summarizer missing or throws | Fallback Epitaph kept, no error shown | 3.4 |
-| Stored data has an unexpected shape | `normalizeSettings` restores defaults; invalid Graves are skipped, not deleted | 8.4 |
+| Stored data has an unexpected shape | `normalizeSettings` restores defaults; invalid Graves are skipped when read and dropped on the next write | 8.4 |
 | Service worker restarted | Alarm re-registered on `onStartup` and `onInstalled` | 1.1 |
 
 ## Testing Strategy
