@@ -236,4 +236,5 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - Confirm `.kiro/` is committed and not in `.gitignore`; confirm the license shows in the repo About section
   - Build a release zip (`npm run zip` → `rest-in-tabs.zip`, manifest at the root; checked to load unpacked in Edge)
   - Result: README done; all of `.kiro/` (hooks, specs, steering) is tracked and not ignored; GitHub detects the licence as MIT (repo API `license.spdx_id` = MIT), so it shows in the About section
-  - [ ] 16.1 Attach `rest-in-tabs.zip` to a GitHub release as the testable build (done by hand by the user; the README's "latest release" link points there)
+  - [x] 16.1 Attach `rest-in-tabs.zip` to a GitHub release as the testable build (done by hand by the user; the README's "latest release" link points there)
+    - Result: release v0.1.0 carries `rest-in-tabs.zip` (169,114 bytes), byte-identical to the local `npm run zip` output
