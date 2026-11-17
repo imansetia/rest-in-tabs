@@ -66,7 +66,7 @@ main { position: relative; }
 .fog.f-near { bottom: 0; height: 14%; z-index: 65; opacity: .35; animation-duration: 55s; }
 @keyframes drift { from { transform: translateX(0); } to { transform: translateX(25%); } }
 
-.fence { position: absolute; left: 0; right: 0; bottom: 0; height: 58px; z-index: 70; pointer-events: none; }
+.fence { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 58px; z-index: 70; pointer-events: none; }
 .fence-crow { position: absolute; right: 9%; bottom: 46px; width: 46px; z-index: 71; transform-origin: 60% 90%; }
 
 /* ------------------------------------------------------------------ camera, rows, plots */
@@ -97,26 +97,7 @@ main { position: relative; }
     linear-gradient(to top, rgba(var(--fog), calc(var(--veil) * .55)), transparent 70%);
   transition: opacity .9s ease;
 }
-.mound {
-  position: absolute; z-index: 0; left: -10%; right: -10%; bottom: calc(-10px * var(--s));
-  height: calc(30px * var(--s)); border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 30%, #2b2219, var(--soil-dark) 72%);
-}
-/* The stone's shape only; its contents, decay looks and button behaviour come in task 11.4. */
-.stone {
-  position: relative; z-index: 2; width: 100%;
-  height: calc(196px * var(--s));
-  padding: calc(20px * var(--s)) calc(13px * var(--s)) calc(10px * var(--s));
-  border: 0; border-radius: 48% 48% 6px 6px / 30% 30% 6px 6px;
-  background: linear-gradient(165deg, var(--stone-1), var(--stone-2) 68%, var(--stone-edge));
-  box-shadow:
-    inset 0 0 0 calc(3px * var(--s)) rgba(255, 255, 255, .045),
-    inset 0 calc(-12px * var(--s)) calc(20px * var(--s)) rgba(0, 0, 0, .35),
-    0 calc(8px * var(--s)) calc(16px * var(--s)) rgba(0, 0, 0, .55);
-  color: var(--bone); text-align: center;
-  display: flex; flex-direction: column; align-items: center; gap: calc(4px * var(--s));
-  transform-origin: 50% 100%;
-}
+/* Mound, stone and decay looks: stone.css */
 
 .scene-msg {
   position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); z-index: 80;

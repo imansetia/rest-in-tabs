@@ -130,7 +130,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - "Nothing has died here yet. Give it time." when empty
     - Fog drift of 55 to 90 s per loop; reduced motion: fog stands still
     - _Requirements: 4.2, 4.5, 9.1, 9.2, 9.6_
-  - [ ] 11.4 Tombstones and decay stages
+  - [x] 11.4 Tombstones and decay stages
     - Each stone is a `<button>` showing: icon medallion (`platform/favicon.ts` with the `_favicon` endpoint, letter disc underneath), name, Cinzel dates "15 NOV — 17 NOV", epitaph, cause of death
     - Accessible name "Title. Condition. Buried 5 hours ago."
     - Fresh, Weathered and Crumbling looks, with crow and fallen cross from `plotJitter`

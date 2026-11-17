@@ -3,10 +3,11 @@
 
 import { getGraves } from '../platform/storage.js';
 import { sortGraves } from '../core/decay.js';
-import { layoutRows, plotJitter } from '../core/layout.js';
+import { layoutRows } from '../core/layout.js';
 import type { RowLayout } from '../core/layout.js';
 import type { Grave } from '../core/types.js';
 import { NO_GRAVES_TEXT } from '../core/copy.js';
+import { plotElement } from './stone.js';
 
 const RESIZE_DEBOUNCE_MS = 200;
 
@@ -16,11 +17,20 @@ export interface LandscapeElements {
   message: HTMLElement;
 }
 
-export function startLandscape(els: LandscapeElements): { refresh(): Promise<void> } {
+/**
+ * `displayClock` gives the time the page displays with. Each render reads it
+ * once, so decay stages and every "x ago" agree (the Demo clock in task 15.1
+ * passes a shifted clock).
+ */
+export function startLandscape(
+  els: LandscapeElements,
+  displayClock: () => number = () => Date.now(),
+): { refresh(): Promise<void>; render(): void } {
   let graves: Grave[] | null = null;
 
   function render(): void {
     if (graves === null) return; // not read yet: show neither graves nor the empty message
+    const displayNow = displayClock();
     const sorted = sortGraves(graves);
     const rows = layoutRows(sorted.length, els.scene.clientWidth, els.scene.clientHeight);
 
@@ -28,7 +38,7 @@ export function startLandscape(els: LandscapeElements): { refresh(): Promise<voi
     const rowElements = rows.map((row) => {
       const items = sorted.slice(next, next + row.count);
       next += row.count;
-      return rowElement(row, items);
+      return rowElement(row, items, displayNow);
     });
     els.camera.replaceChildren(...rowElements.reverse());
 
@@ -53,10 +63,10 @@ export function startLandscape(els: LandscapeElements): { refresh(): Promise<voi
   });
 
   void refresh();
-  return { refresh };
+  return { refresh, render };
 }
 
-function rowElement(row: RowLayout, graves: Grave[]): HTMLElement {
+function rowElement(row: RowLayout, graves: Grave[], displayNow: number): HTMLElement {
   const el = document.createElement('div');
   el.className = 'row';
   el.dataset.s = String(row.scale);
@@ -65,24 +75,6 @@ function rowElement(row: RowLayout, graves: Grave[]): HTMLElement {
   el.style.setProperty('--veil', String(row.veil));
   el.style.bottom = `${row.bottom}px`;
   el.style.zIndex = String(60 - row.index * 10);
-  for (const grave of graves) el.append(plotElement(grave, row.index));
+  for (const grave of graves) el.append(plotElement(grave, row.index, displayNow));
   return el;
-}
-
-function plotElement(grave: Grave, depth: number): HTMLElement {
-  const jitter = plotJitter(grave.id);
-  const plot = document.createElement('div');
-  plot.className = 'plot';
-  plot.dataset.id = grave.id;
-  plot.style.setProperty('--d', String(depth));
-  plot.style.setProperty('--tilt', `${jitter.tiltDeg}deg`);
-  plot.style.setProperty('--jy', `${jitter.offsetPx}px`);
-
-  const mound = document.createElement('span');
-  mound.className = 'mound';
-  // Task 11.4 turns this into a <button> with the grave's details and decay look.
-  const stone = document.createElement('div');
-  stone.className = 'stone';
-  plot.append(mound, stone);
-  return plot;
 }
