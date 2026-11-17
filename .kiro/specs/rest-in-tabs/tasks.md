@@ -198,7 +198,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 9.3, 9.4, 9.7_
 
 - [x] 13. Add on-device AI epitaphs
-  - [x] 13.1 Implement `platform/summarizer.ts`: `checkAvailability()` wrapping `Summarizer.availability()`, and `createAndSummarize(text)` wrapping `Summarizer.create()` + `.summarize()` with `downloadprogress` callback
+  - [x] 13.1 Implement `platform/summarizer.ts`: `checkAvailability()` wrapping `Summarizer.availability()`, and `openSummarizer(onProgress?)` calling `Summarizer.create()` once, with a `downloadprogress` callback, and returning one shared session (`summarize(text)`, `destroy()`) that every grave reuses
     - _Requirements: 3.4, 3.5_
   - [x] 13.2 Add the `updateEpitaph(graveId, epitaph)` message
     - `parseMessage` validates it
@@ -206,8 +206,8 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - Orchestration tests with fake adapters
     - _Requirements: 3.3, 3.4_
   - [x] 13.3 On Graveyard load, call `checkAvailability()`:
-    - `"available"` → for each Grave with an excerpt, call `createAndSummarize` and send `updateEpitaph`; the page never writes graves itself
-    - `"downloadable"` → render an "Enable AI epitaphs" button in the header style; on click call `createAndSummarize` (triggers the download), show progress as text, then upgrade Epitaphs as above
+    - `"available"` → call `openSummarizer()` once, then for each Grave with an excerpt call the shared session's `summarize(excerpt)` and send `updateEpitaph`; the page never writes graves itself
+    - `"downloadable"` → render an "Enable AI epitaphs" button in the header style; on click call `openSummarizer(onProgress)` (triggers the download), show progress as text, then upgrade Epitaphs as above with the same session
     - `"downloading"` / `"unavailable"` → do nothing; the fallback Epitaph stays
     - Updated stones re-render through the normal live update, with no extra animation
     - _Requirements: 3.4, 3.5_
@@ -231,7 +231,9 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - Bundled files with their licences; no jump scares
     - _Requirements: none (design steering file, Sound); 9.9 applies (no network)_
 
-- [ ] 16. Prepare the submission
+- [x] 16. Prepare the submission
   - Finish README (features, install, how Kiro was used: specs, steering, hooks, property-based tests)
   - Confirm `.kiro/` is committed and not in `.gitignore`; confirm the license shows in the repo About section
-  - Build a release zip and attach it to a GitHub release as the testable build
+  - Build a release zip (`npm run zip` → `rest-in-tabs.zip`, manifest at the root; checked to load unpacked in Edge)
+  - Result: README done; all of `.kiro/` (hooks, specs, steering) is tracked and not ignored; GitHub detects the licence as MIT (repo API `license.spdx_id` = MIT), so it shows in the About section
+  - [ ] 16.1 Attach `rest-in-tabs.zip` to a GitHub release as the testable build (done by hand by the user; the README's "latest release" link points there)

@@ -149,7 +149,7 @@ The mockup picks the cross from a counter, which the extension cannot keep stabl
 | `messaging.ts` | `chrome.runtime.sendMessage` | `sendMessage(message)`; never rejects, malformed replies become `failed` |
 | `favicon.ts` | `chrome.runtime.getURL` | `iconSrc(pageUrl)` = `faviconSrc(chrome.runtime.getURL('/'), pageUrl, 32)` |
 | `theme.ts` | `chrome.storage.local`, `matchMedia` | `getTheme()`, `setTheme(t)`, system default from `prefers-color-scheme` |
-| `summarizer.ts` | `Summarizer` global | `checkAvailability(): Promise<"available"|"downloadable"|"downloading"|"unavailable">` wraps `Summarizer.availability()`; `createAndSummarize(text): Promise<string>` wraps `Summarizer.create()` + `.summarize()` with download-progress callback; throws when status is not `"available"` or `"downloadable"` |
+| `summarizer.ts` | `Summarizer` global | `checkAvailability(): Promise<"available"|"downloadable"|"downloading"|"unavailable">` wraps `Summarizer.availability()`; `openSummarizer(onProgress?: (loaded: number, total: number) => void): Promise<OpenSummarizer>` calls `Summarizer.create()` once (the same options as `availability()`, a `monitor` that reports `downloadprogress` to `onProgress`) and returns one shared session, `{ summarize(text): Promise<string>; destroy(): void }`, that every grave reuses; throws when status is not `"available"` or `"downloadable"`, or when `create()` fails |
 
 ### `src/background/service-worker.ts`
 
