@@ -1,4 +1,4 @@
-﻿# Requirements Document
+# Requirements Document
 
 ## Introduction
 
@@ -77,7 +77,7 @@ Rest in Tabs is a Chrome/Edge extension that buries idle tabs in a spooky gravey
 1. WHEN the Graveyard opens, THE Graveyard SHALL show the Landscape view, where each Grave is a tombstone showing, from top to bottom: its icon, its title (up to 2 lines), the dates "last visited — buried", its Epitaph (up to 3 lines) and its Cause of death (up to 2 lines). Each tombstone SHALL be a button whose accessible name is the title, the decay stage and the time since burial, for example "Title. Fresh. Buried 5 hours ago."
 2. THE Landscape view SHALL place the most recently buried Graves in the front row and older Graves in rows further back, smaller and deeper in fog. The front row SHALL never be covered by fog.
 3. THE Graveyard SHALL offer a Landscape / List switch. The List view SHALL be a table with, for each Grave: icon, title and domain; Epitaph; Cause of death; time since burial (with the full date on hover); decay stage; and Resurrect and Exorcise buttons. The List view SHALL sort by newest first (default), oldest first, or name.
-4. WHEN the user types in the search field, THE Graveyard SHALL, 180 ms after typing stops, match Graves whose title, domain or Epitaph contains the typed text, ignoring letter case and surrounding spaces. In the List view only matching rows SHALL be shown. In the Landscape view the fog SHALL thin, non-matching Graves SHALL fade, and the view SHALL move toward the first match and enlarge it. WHEN the search is cleared, THE Landscape view SHALL return to its normal state.
+4. WHEN the user types in the search field, THE Graveyard SHALL, 180 ms after typing stops, match Graves whose title, domain or Epitaph contains the typed text, ignoring letter case and surrounding spaces. In the List view only matching rows SHALL be shown. In the Landscape view the fog SHALL thin, non-matching Graves SHALL fade, and the view SHALL move toward the newest match and enlarge it. WHEN the search is cleared, THE Landscape view SHALL return to its normal state.
 5. WHEN there are no Graves, THE Graveyard SHALL show "Nothing has died here yet. Give it time."
 6. WHEN a search matches no Graves, THE Graveyard SHALL show "No grave bears that name." and a "Clear search" button.
 7. WHEN a Grave is added or removed while the Graveyard is open, THE Graveyard SHALL update without a page reload.

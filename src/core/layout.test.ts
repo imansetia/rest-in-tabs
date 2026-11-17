@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { layoutRows, plotJitter, ROWS } from './layout.js';
+import { layoutRows, graveRows, plotJitter, ROWS } from './layout.js';
 
 const counts = (rows: ReturnType<typeof layoutRows>) => rows.map((r) => r.count);
 
@@ -63,6 +63,32 @@ describe('layoutRows — a short last row', () => {
 
   it('a single row is never folded away', () => {
     expect(counts(layoutRows(1, 1280, 900))).toEqual([1]);
+  });
+});
+
+describe('graveRows (page order)', () => {
+  it('front row first with the newest graves, so Tab reaches the newest first', () => {
+    const ids = Array.from({ length: 16 }, (_, i) => `n${i}`); // newest first
+    const placed = graveRows(ids, layoutRows(ids.length, 1280, 900));
+    expect(placed.map((r) => r.row.index)).toEqual([0, 1]);
+    expect(placed[0].graves).toEqual(['n0', 'n1', 'n2', 'n3', 'n4', 'n5']);
+    expect(placed[1].graves[0]).toBe('n6');
+  });
+
+  it('the page order is exactly newest first, every grave once', () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 0, max: 200 }), fc.integer({ min: 360, max: 2560 }), fc.integer({ min: 540, max: 900 }), (n, width, height) => {
+        const ids = Array.from({ length: n }, (_, i) => i);
+        const rows = layoutRows(n, width, height);
+        const placed = graveRows(ids, rows);
+        expect(placed.flatMap((r) => r.graves)).toEqual(ids);
+        placed.forEach((r, i) => {
+          expect(r.row.index).toBe(i); // front row first
+          expect(r.graves).toHaveLength(r.row.count);
+        });
+      }),
+      { numRuns: 200 },
+    );
   });
 });
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { decayStage, expiredGraves, sortGraves, searchGraves, estimateFreedMb, type DecayStage } from './decay.js';
+import { decayStage, expiredGraves, sortGraves, searchGraves, newestMatch, estimateFreedMb, type DecayStage } from './decay.js';
 import type { Grave } from './types.js';
 
 // ---------------------------------------------------------------------------
@@ -323,6 +323,37 @@ describe('Property 9: Search returns matching Graves only', () => {
   it('case-insensitive: "EXAMPLE" matches "example.com"', () => {
     const grave = makeGrave({ domain: 'example.com' });
     expect(searchGraves([grave], 'EXAMPLE')).toEqual([grave]);
+  });
+});
+
+describe('newestMatch (where the search camera goes)', () => {
+  it('is the most recently buried match, whatever the input order', () => {
+    const old = makeGrave({ title: 'Lisbon weather', buriedAt: 1000 });
+    const newer = makeGrave({ title: 'Lisbon flights', buriedAt: 3000 });
+    const other = makeGrave({ title: 'Porto', buriedAt: 5000 });
+    expect(newestMatch([old, newer, other], 'lisbon')).toBe(newer);
+    expect(newestMatch([other, newer, old], 'LISBON')).toBe(newer);
+  });
+
+  it('null for an empty query or no match', () => {
+    const g = makeGrave({ title: 'Porto' });
+    expect(newestMatch([g], '')).toBeNull();
+    expect(newestMatch([g], 'zzz')).toBeNull();
+  });
+
+  it('always a match with the latest burial time among the matches', () => {
+    fc.assert(
+      fc.property(fc.array(anyGrave, { minLength: 1, maxLength: 20 }), fc.constantFrom('a', 'e', 'co', '.', 'zz'), (graves, query) => {
+        const matches = searchGraves(graves, query);
+        const result = newestMatch(graves, query);
+        if (matches.length === 0) expect(result).toBeNull();
+        else {
+          expect(matches).toContain(result);
+          expect(result!.buriedAt).toBe(Math.max(...matches.map((g) => g.buriedAt)));
+        }
+      }),
+      { numRuns: 200 },
+    );
   });
 });
 

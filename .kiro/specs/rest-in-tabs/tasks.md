@@ -148,7 +148,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - [x] 11.6 Search in the landscape
     - Trimmed query, 180 ms after typing stops
     - Fog thins, non-matching graves fade to about 28%, and matching graves lose their veil
-    - The camera glides (1.1 s) to the first match, enlarging it up to 1.9×
+    - The camera glides (1.1 s) to the newest match, enlarging it up to 1.9×
     - "No grave bears that name." with "Clear search"; clearing resets the view
     - Reduced motion: the camera jumps without gliding, and fades are instant
     - _Requirements: 4.4, 4.6, 9.2_
@@ -190,7 +190,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - Closing the Plaque by a click outside it leaves focus where the user clicked (do not move it)
     - _Requirements: 9.2, 9.3, 9.4, 9.5, 9.6_
 
-- [ ] 12. Build the Options page
+- [x] 12. Build the Options page
   - Auto-Bury toggle, Idle Threshold, Protected Sites editor, Retention Period and the Demo setting
   - Inline range errors from `validateSetting`; changes apply on the next check
   - Same tokens, fonts and theme as the Graveyard; keyboard and AA contrast as in 11.12

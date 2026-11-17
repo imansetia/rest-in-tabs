@@ -13,6 +13,77 @@
   <body>
     <main>
       <h1>Settings</h1>
+      <p class="intro">Changes are saved at once and apply from the next check, within a minute.</p>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+
+      <!-- Shown until the settings have been read, so the form never shows false values. -->
+      <p id="loading" class="loading">Reading settings…</p>
+
+      <form id="form" novalidate hidden>
+        <section class="card" aria-labelledby="h-auto">
+          <h2 id="h-auto">Automatic burial</h2>
+          <label class="check">
+            <input type="checkbox" id="auto-bury" />
+            <span>Bury idle tabs automatically</span>
+          </label>
+          <p class="help">Active, pinned and playing tabs are never buried as idle tabs.</p>
+
+          <div class="field">
+            <label for="idle-amount">Bury tabs unused for</label>
+            <div class="inline">
+              <input type="number" id="idle-amount" min="0" step="any" inputmode="decimal" aria-describedby="idle-help idle-error" />
+              <select id="idle-unit" aria-label="Unit">
+                <option value="minutes">minutes</option>
+                <option value="hours">hours</option>
+                <option value="days">days</option>
+              </select>
+            </div>
+            <p class="help" id="idle-help">5 minutes to 7 days. "Bury idle tabs" uses it too.</p>
+            <p class="error" id="idle-error" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="h-sites">
+          <h2 id="h-sites">Protected sites</h2>
+          <p class="help" id="sites-help">Tabs on these sites, and on their subdomains, are never buried by the extension. "Bury this tab" in the popup still works.</p>
+          <div class="field">
+            <label for="site-input">Add a site</label>
+            <div class="inline">
+              <input type="text" id="site-input" placeholder="example.com" autocomplete="off" spellcheck="false" aria-describedby="sites-help site-error" />
+              <button type="button" class="btn" id="site-add">Add</button>
+            </div>
+            <p class="error" id="site-error" aria-live="polite"></p>
+          </div>
+          <ul class="sites" id="sites" aria-label="Protected sites"></ul>
+          <p class="empty" id="sites-empty">No protected sites.</p>
+        </section>
+
+        <section class="card" aria-labelledby="h-keep">
+          <h2 id="h-keep">Keeping graves</h2>
+          <div class="field">
+            <label for="retention-days">Delete graves after</label>
+            <div class="inline">
+              <input type="number" id="retention-days" min="1" max="365" step="1" inputmode="numeric" aria-describedby="retention-help retention-error" />
+              <span>days</span>
+            </div>
+            <p class="help" id="retention-help">1 to 365 days.</p>
+            <p class="error" id="retention-error" aria-live="polite"></p>
+          </div>
+          <label class="check">
+            <input type="checkbox" id="retention-never" />
+            <span>Never delete graves</span>
+          </label>
+        </section>
+
+        <section class="card" aria-labelledby="h-demo">
+          <h2 id="h-demo">Demo</h2>
+          <label class="check">
+            <input type="checkbox" id="demo" aria-describedby="demo-help" />
+            <span>Show the Demo clock in the graveyard</span>
+          </label>
+          <p class="help" id="demo-help">Moves the time the graveyard displays forward by up to 14 days, to show how graves decay. Nothing saved changes.</p>
+        </section>
+      </form>
     </main>
   </body>
 </html>

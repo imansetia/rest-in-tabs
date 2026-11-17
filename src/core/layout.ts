@@ -72,6 +72,21 @@ export function layoutRows(graveCount: number, sceneWidth: number, sceneHeight: 
 }
 
 /**
+ * The graves of each row, front row first, newest first within a row. This is
+ * also the page order: the front row comes first in the page, so Tab reaches
+ * the newest graves first (rows stack visually by z-index, not page order).
+ * `newestFirst` is sorted newest first; `rows` comes from layoutRows.
+ */
+export function graveRows<T>(newestFirst: readonly T[], rows: readonly RowLayout[]): Array<{ row: RowLayout; graves: T[] }> {
+  let next = 0;
+  return rows.map((row) => {
+    const graves = newestFirst.slice(next, next + row.count);
+    next += row.count;
+    return { row, graves };
+  });
+}
+
+/**
  * Deterministic, hand-placed look for one plot, from a hash of the grave id
  * (the mockup's hash: h = 7, then h = (h × 31 + charCode) mod 9973).
  * - tiltDeg: ((h mod 7) − 3) || 2, used by Weathered and Crumbling stones

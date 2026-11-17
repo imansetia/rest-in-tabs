@@ -1,4 +1,45 @@
-/* Options page. The settings form arrives in task 12. */
+/* Options page (task 12): the same tokens, fonts and theme as the Graveyard.
+   Plain controls in panels; no animation. Every text colour on --sky-1 and
+   --panel is checked for AA in tokens.test.ts. */
 
-main { max-width: 640px; padding: 18px 24px; }
+main { max-width: 640px; padding: 18px 24px 40px; }
 h1 { margin: 0; font-size: 34px; line-height: 1; }
+.intro { margin: 8px 0 0; color: var(--muted); }
+.status { margin: 6px 0 0; min-height: 1.5em; color: var(--spectral); font-size: 14px; }
+.status.error { color: var(--danger); }
+.loading { color: var(--muted); }
+
+form { display: grid; gap: 16px; margin-top: 10px; }
+.card { padding: 16px 18px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); display: grid; gap: 10px; }
+.card h2 { margin: 0; font-size: 24px; line-height: 1.1; }
+
+.field { display: grid; gap: 6px; }
+.field > label { color: var(--text); font-weight: 500; }
+.inline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+input[type="number"], input[type="text"], select {
+  padding: 7px 10px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--panel-2); color: var(--text);
+}
+input[type="number"] { width: 7em; }
+input[type="text"] { flex: 1 1 180px; min-width: 0; }
+input::placeholder { color: var(--muted); }
+input:disabled { opacity: .5; }
+input[aria-invalid="true"] { border-color: var(--danger); }
+
+.check { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.check input { width: 18px; height: 18px; margin: 0; accent-color: var(--spectral-dim); }
+
+.help { margin: 0; color: var(--muted); font-size: 14px; }
+/* Always in the page (empty when fine), so screen readers announce a new error. */
+.error { margin: 0; color: var(--danger); font-size: 14px; }
+
+.sites { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.sites li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 6px 6px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-2); }
+.sites li span { overflow-wrap: anywhere; }
+.sites .btn { padding: 5px 10px; font-size: 13px; }
+.empty { margin: 0; font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 18px; color: var(--bone-dim); }
+
+@media (max-width: 640px) {
+  main { padding: 16px 16px 32px; }
+}

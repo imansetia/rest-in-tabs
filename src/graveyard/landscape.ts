@@ -1,10 +1,11 @@
 // Landscape view: graves from storage, sorted newest first, placed in rows by
-// layoutRows (Requirement 4.2). Back rows first in the DOM, as in the mockup.
+// layoutRows (Requirement 4.2). Front row first in the page (Tab order: newest
+// first); rows stack visually by z-index, as in the mockup.
 // Graves that are new since the last read rise in a mass burial (task 11.8).
 
 import { getGraves } from '../platform/storage.js';
 import { sortGraves } from '../core/decay.js';
-import { layoutRows } from '../core/layout.js';
+import { layoutRows, graveRows } from '../core/layout.js';
 import { riseDelays } from '../core/burial-motion.js';
 import type { Grave } from '../core/types.js';
 import { NO_GRAVES_TEXT } from '../core/copy.js';
@@ -46,13 +47,8 @@ export function startLandscape(els: LandscapeElements, displayClock: () => numbe
     const delays = riseDelays(sorted.map((g) => g.id), rising);
     const rows = layoutRows(sorted.length, els.scene.clientWidth, els.scene.clientHeight);
 
-    let next = 0;
-    const rowElements = rows.map((row) => {
-      const items = sorted.slice(next, next + row.count);
-      next += row.count;
-      return rowElement(row, items, displayNow, delays);
-    });
-    els.camera.replaceChildren(...rowElements.reverse());
+    // Front row first in the page, so Tab reaches the newest graves first.
+    els.camera.replaceChildren(...graveRows(sorted, rows).map(({ row, graves: items }) => rowElement(row, items, displayNow, delays)));
 
     els.message.textContent = NO_GRAVES_TEXT;
     els.message.hidden = sorted.length > 0;

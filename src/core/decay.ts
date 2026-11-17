@@ -91,6 +91,18 @@ export function searchGraves(graves: Grave[], query: string): Grave[] {
   });
 }
 
+/**
+ * Where the Landscape's search camera goes: the most recently buried Grave
+ * that matches (design steering file, Search), or null when none matches or
+ * the query is empty. Ties keep the input order.
+ */
+export function newestMatch(graves: Grave[], query: string): Grave | null {
+  if (query === '') return null;
+  let newest: Grave | null = null;
+  for (const g of searchGraves(graves, query)) if (newest === null || g.buriedAt > newest.buriedAt) newest = g;
+  return newest;
+}
+
 // ---------------------------------------------------------------------------
 // Statistics
 // ---------------------------------------------------------------------------

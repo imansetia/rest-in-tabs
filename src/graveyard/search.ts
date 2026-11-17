@@ -3,11 +3,11 @@
 // - matches title, domain or epitaph, ignoring case and surrounding spaces,
 //   180 ms after typing stops;
 // - the fog thins, non-matching graves fade, matching graves lose their veil;
-// - the camera glides (1.1 s, CSS) to the first match in page order (the
-//   farthest row first), enlarging it up to 1.9x;
+// - the camera glides (1.1 s, CSS) to the newest match (newestMatch),
+//   enlarging it up to 1.9x so a far grave comes forward;
 // - no match: "No grave bears that name." with "Clear search"; clearing resets the view.
 
-import { searchGraves } from '../core/decay.js';
+import { searchGraves, newestMatch } from '../core/decay.js';
 import { cameraFocus } from '../core/camera.js';
 import { NO_MATCH_TEXT, CLEAR_SEARCH_LABEL } from '../core/copy.js';
 import type { Landscape } from './landscape.js';
@@ -77,22 +77,23 @@ export function startSearch(els: SearchElements, landscape: Landscape): Search {
     const searching = term !== '';
     const graves = landscape.graves();
     const matches = new Set(searching ? searchGraves(graves, term).map((g) => g.id) : []);
+    const newestId = newestMatch(graves, term)?.id;
 
     els.scene.classList.toggle('searching', searching);
-    let first: HTMLElement | null = null;
+    let target: HTMLElement | null = null;
     for (const plot of els.camera.querySelectorAll<HTMLElement>('.plot')) {
-      const hit = matches.has(plot.dataset.id ?? '');
-      plot.classList.toggle('match', hit);
-      if (hit && first === null) first = plot;
+      const id = plot.dataset.id ?? '';
+      plot.classList.toggle('match', matches.has(id));
+      if (id === newestId) target = plot;
     }
 
     // With no graves at all the landscape shows its own empty message.
     if (graves.length > 0) {
-      if (searching && first === null) showNoMatch();
+      if (searching && matches.size === 0) showNoMatch();
       else els.message.hidden = true;
     }
     // The camera only moves while the Landscape is shown (it has no size in the List view).
-    if (walk && !els.scene.hidden) walkTo(first);
+    if (walk && !els.scene.hidden) walkTo(target);
     for (const listener of applyListeners) listener();
   }
 
