@@ -1,16 +1,11 @@
-/* Minimal, readable styling. The haunting theme arrives in task 11.
-   All text colors meet WCAG AA against their backgrounds. No animation. */
-
-:root {
-  color-scheme: light;
-  font: 14px/1.4 system-ui, sans-serif;
-  color: #111; /* 18.9:1 on #fff */
-  background: #fff;
-}
+/* Popup. Task 11.1: colours and fonts from the shared tokens (values from
+   design/mockup.html). Layout, fence strip and mascot arrive in task 11.11.
+   No animation. */
 
 body {
-  margin: 0;
   width: 280px;
+  min-height: 0;
+  background: var(--panel);
 }
 
 main {
@@ -21,7 +16,8 @@ main {
 
 h1 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 27px;
+  line-height: 1.05;
 }
 
 p {
@@ -33,38 +29,38 @@ p {
   gap: 8px;
 }
 
+/* .btn from the mockup */
 button {
-  font: inherit;
-  padding: 8px 12px;
-  border: 1px solid #555; /* 7.5:1 on #fff */
+  padding: 8px 14px;
   border-radius: 6px;
-  background: #f2f2f2;
-  color: #111;
-  text-align: left;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
   cursor: pointer;
+  font-weight: 500;
+  text-align: left;
 }
 
+button:hover {
+  border-color: #46526a;
+}
+
+/* Unavailable controls are exempt from the contrast minimum (WCAG 1.4.3). */
 button[aria-disabled='true'] {
-  color: #555; /* 6.0:1 on #e6e6e6 */
-  background: #e6e6e6;
-  border-color: #888;
+  opacity: .5;
   cursor: not-allowed;
 }
 
-:focus-visible {
-  outline: 3px solid #1a5fb4; /* 6.4:1 on #fff */
-  outline-offset: 2px;
-}
-
 .reason {
-  color: #444; /* 9.7:1 on #fff */
-  font-size: 0.9rem;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 #status.error {
-  color: #a51d2d; /* 7.6:1 on #fff */
+  color: var(--danger);
 }
 
 a {
-  color: #1a5fb4;
+  color: var(--spectral);
+  font-size: 14px;
 }

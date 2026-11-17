@@ -37,6 +37,8 @@ Defined as CSS custom properties on `:root`, overridden under `[data-theme="dusk
 
 Text must meet WCAG AA on its background. Check every new pairing.
 
+**Text on stone.** All text on a tombstone uses `--bone` (it passes AA on `--stone-1` in both themes). `--bone-dim`, `--muted` and `--spectral` do not pass on stone, so they are never used there: dates and cause of death are told apart from the name by size and typeface, not by a dimmer colour. The faded letters of Weathered (78%) and Crumbling (42%) stones are a deliberate exception: the full text is always in the stone's accessible name, the plaque and the list view.
+
 ## Typography
 
 All fonts are bundled with the extension under `src/assets/fonts/` with their OFL licence files. Never load fonts from the network.
@@ -44,9 +46,11 @@ All fonts are bundled with the extension under `src/assets/fonts/` with their OF
 | Role | Font | Notes |
 |---|---|---|
 | Logo, grave names, plaque / popup / dialog titles | Pirata One 400 | blackletter, letter-spacing ~0.01em |
-| Dates on stones | Cinzel 400–600, capitals | spaced like carved numerals, `15 NOV — 17 NOV` |
-| Epitaphs, tagline, empty states | Cormorant Garamond italic 500 | elegant; the dry lines need grace, not shouting |
+| Dates on stones, primary button | Cinzel 400–700, capitals | spaced like carved numerals, `15 NOV — 17 NOV` |
+| Epitaphs, tagline, empty states | Cormorant Garamond italic 500–600 | elegant; the dry lines need grace, not shouting |
 | Everything else (body, buttons, labels) | Inter 400–600 | plain and readable at small sizes |
+
+Bundled as one Latin variable `woff2` per family (these weight ranges), about 122 KB in total.
 
 The primary "Bury N idle tabs" button uses Cinzel capitals with the spectral outline.
 

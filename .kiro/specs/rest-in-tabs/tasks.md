@@ -108,7 +108,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - Decorations are `aria-hidden`.
     - Every animation has a reduced-motion version.
     - Each sub-task ends with a short review stop.
-  - [ ] 11.1 Tokens, fonts and theme
+  - [x] 11.1 Tokens, fonts and theme
     - Shared `tokens.css` with the Night and Dusk values from the steering file
     - Fonts and their `OFL.txt` files under `src/assets/fonts/`, with `fonts.css`
     - An inline Vite plugin that copies the licence files to `dist/licenses/`

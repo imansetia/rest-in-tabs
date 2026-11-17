@@ -136,6 +136,14 @@ export const STORAGE_KEYS = {
   settings: 'settings',
   stats: 'stats',
   installedAt: 'installedAt',
+  theme: 'theme',
 } as const;
+
+// ---------------------------------------------------------------------------
+// Theme
+// ---------------------------------------------------------------------------
+
+/** Both themes are dark (design steering file: "Always night"). */
+export type Theme = 'night' | 'dusk';
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

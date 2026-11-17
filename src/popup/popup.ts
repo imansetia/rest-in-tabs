@@ -4,6 +4,7 @@
 import { getGraves, onStorageChanged } from '../platform/storage.js';
 import { getActiveTab } from '../platform/tabs.js';
 import { sendMessage } from '../platform/messaging.js';
+import { startTheme } from '../platform/theme.js';
 import { manualBurialBlock } from '../core/selection.js';
 import {
   errorText,
@@ -149,6 +150,7 @@ buryIdleButton.addEventListener('click', () => {
 // Start
 // ---------------------------------------------------------------------------
 
+startTheme();
 onStorageChanged(() => {
   void refreshCount();
 });

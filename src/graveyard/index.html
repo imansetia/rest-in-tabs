@@ -4,8 +4,24 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Graveyard - Rest in Tabs</title>
+    <link rel="stylesheet" href="../assets/fonts/fonts.css" />
+    <link rel="stylesheet" href="../assets/tokens.css" />
+    <link rel="stylesheet" href="../assets/base.css" />
+    <link rel="stylesheet" href="./graveyard.css" />
+    <script type="module" src="./graveyard.ts"></script>
   </head>
   <body>
-    <h1>Graveyard</h1>
+    <header class="top">
+      <div class="brand">
+        <h1>Rest in Tabs</h1>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Theme">
+        <button type="button" id="th-night" aria-pressed="false">Night</button>
+        <button type="button" id="th-dusk" aria-pressed="false">Dusk</button>
+      </div>
+    </div>
   </body>
 </html>

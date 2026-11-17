@@ -1,0 +1,48 @@
+/* Colour tokens, copied from design/mockup.html (and the table in
+   .kiro/steering/design.md). Night is the default; Dusk overrides a few.
+   Every text pairing is checked for WCAG AA in tokens.test.ts. */
+
+:root {
+  --sky-1: #03050b;
+  --sky-2: #0a1222;
+  --sky-3: #15233a;
+  --hill-far: #0c1424;
+  --hill-near: #080d17;
+  --ground: #070a10;
+  --fog: 190 202 216;
+  --bone: #ece6d8;
+  --bone-dim: #b8b2a4;
+  --stone-1: #4b5361;
+  --stone-2: #343b47;
+  --stone-edge: #20252e;
+  --soil: #1d1712;
+  --soil-dark: #0d0a07;
+  --moss: 84 112 66;
+  --spectral: #a9ecd1;
+  --spectral-dim: #6bbf9f;
+  --ice: #a3d3ff;
+  --amber: #ffb547;
+  --marigold: #ff9a1f;
+  --text: #e7e2d6;
+  --muted: #a7adba;
+  --panel: #0c121d;
+  --panel-2: #121a28;
+  --line: #2b3444;
+  --iron: #05070b;
+  --danger: #e6b4b4;
+  color-scheme: dark;
+}
+
+[data-theme="dusk"] {
+  --sky-1: #121a2b;
+  --sky-2: #222c42;
+  --sky-3: #3a4561;
+  --hill-far: #1a2336;
+  --hill-near: #121a29;
+  --ground: #0f1520;
+  --stone-1: #5c6474;
+  --stone-2: #464d5b;
+  --panel: #151d2c;
+  --panel-2: #1c2638;
+  --line: #3a4559;
+}
