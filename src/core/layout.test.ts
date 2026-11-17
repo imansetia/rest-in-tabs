@@ -41,10 +41,15 @@ describe('layoutRows — the 80% stop', () => {
   });
 });
 
-describe('layoutRows — folding a short last row', () => {
-  it('a last row with fewer than 3 graves joins the row in front of it', () => {
-    expect(counts(layoutRows(6 + 2, 1280, 900))).toEqual([8]);
-    expect(counts(layoutRows(6 + 8 + 1, 1280, 900))).toEqual([6, 9]);
+describe('layoutRows — a short last row', () => {
+  it('7 graves at 1250 px: front row 5, back row 2 (the front row never grows wider than the scene)', () => {
+    // front = floor(1210 / 202) = 5; joining would make 7 > 5.
+    expect(counts(layoutRows(7, 1250, 900))).toEqual([5, 2]);
+  });
+
+  it('stays its own row when the row in front is full', () => {
+    expect(counts(layoutRows(6 + 2, 1280, 900))).toEqual([6, 2]);
+    expect(counts(layoutRows(6 + 8 + 1, 1280, 900))).toEqual([6, 8, 1]);
   });
 
   it('a last row with 3 or more stays', () => {
@@ -81,10 +86,15 @@ describe('layoutRows — invariants', () => {
             if (i > 0) expect(row.bottom).toBeGreaterThan(rows[i - 1].bottom);
           });
           if (rows.length > 0) expect(rows[0].veil).toBe(0); // the front row is always clear
-          if (rows.length > 1) {
-            multiRow++;
-            expect(rows[rows.length - 1].count).toBeGreaterThanOrEqual(3);
-          }
+          // At 540 px or taller at least two rows fit, so the front row has a finite capacity
+          // and never holds more than fits across the scene.
+          const front = Math.max(2, Math.floor((width - 40) / 202));
+          if (rows.length > 0) expect(rows[0].count).toBeLessThanOrEqual(front);
+          // Every row but the last is full; only the last row may be short.
+          rows.slice(0, -1).forEach((row) => {
+            expect(row.count).toBe(Math.max(front, Math.floor(front / row.scale) + row.index));
+          });
+          if (rows.length > 1) multiRow++;
         },
       ),
       { numRuns: 300 },

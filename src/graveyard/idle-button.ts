@@ -18,7 +18,7 @@ export function startIdleButton(
   button: HTMLButtonElement,
   toast: Toast,
   holdUpdates: () => () => Promise<void>,
-): { refresh(): Promise<void> } {
+): { refresh(): Promise<void>; burialStarted(): void } {
   let count: number | null = null;
   let busy = false;
   let latestRequest = 0;
@@ -69,5 +69,9 @@ export function startIdleButton(
   render();
   schedule();
   void refresh();
-  return { refresh };
+  return {
+    refresh,
+    // The scene is the feedback while the graves rise: hide our "Working…" when the fog rolls in.
+    burialStarted: () => toast.dismiss(WORKING_TEXT),
+  };
 }

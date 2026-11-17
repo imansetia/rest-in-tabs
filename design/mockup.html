@@ -806,9 +806,9 @@ dialog .actions { display: flex; justify-content: flex-end; gap: 10px; }
       while (rows[ri].items.length >= rows[ri].cap) ri++;
       rows[ri].items.push(g);
     }
-    // A lone stone in the back row looks lost; fold a short last row into the one in front, but only if it still fits there.
+    // A lone stone in the back row looks lost; fold a short last row into the one in front, unless that is the front row and it would no longer fit.
     const used = rows.filter((r) => r.items.length);
-    if (used.length > 1 && used[used.length - 1].items.length < 3 && used[used.length - 2].items.length + used[used.length - 1].items.length <= used[used.length - 2].cap) {
+    if (used.length > 1 && used[used.length - 1].items.length < 3 && (used[used.length - 2].i > 0 || used[used.length - 2].items.length + used[used.length - 1].items.length <= used[used.length - 2].cap)) {
       used[used.length - 2].items.push(...used.pop().items);
       rows.length = used.length;
     }

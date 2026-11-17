@@ -10,48 +10,11 @@ import type { Grave } from '../core/types.js';
 import { NO_GRAVES_TEXT } from '../core/copy.js';
 import { rowElement, sameGraves } from './row.js';
 import { playMassBurial } from './mass-burial.js';
+import type { Landscape, LandscapeElements } from './landscape-api.js';
+
+export type { Landscape, LandscapeElements } from './landscape-api.js';
 
 const RESIZE_DEBOUNCE_MS = 200;
-
-export interface LandscapeElements {
-  scene: HTMLElement;
-  camera: HTMLElement;
-  message: HTMLElement;
-  /** The crow that crosses the moon during a mass burial. */
-  flyer: Element;
-}
-
-export interface Landscape {
-  refresh(): Promise<void>;
-  render(): void;
-  /** The grave shown with this id, if any. */
-  grave(id: string): Grave | undefined;
-  /** All graves currently known (empty until the first read). */
-  graves(): Grave[];
-  /** Run after every render (search re-applies its matches). */
-  onRender(callback: () => void): void;
-  /** Run whenever the graves are read, even when the landscape does not re-render (the List view). */
-  onData(callback: () => void): void;
-  /** Run when a mass burial starts (the search is cleared, as in the mockup). */
-  onBurialStart(callback: () => void): void;
-  /**
-   * Hold storage-driven updates until the returned function is called, e.g.
-   * while our own "Bury idle tabs" request runs, so its graves rise together.
-   * Releasing reads storage again and resolves once the view has settled
-   * (any mass burial it started has ended), so the result toast comes after it.
-   */
-  holdUpdates(): () => Promise<void>;
-  /**
-   * Call before sending resurrect/exorcise for this grave. While it is
-   * expected to leave, a storage change that only removes it does not
-   * re-render, so its plot can show soil or bare ground (Requirement 4.11).
-   */
-  expectLeaving(id: string): void;
-  /** The request failed: stop expecting the grave to leave. */
-  cancelLeaving(id: string): void;
-  /** Show the plot as fresh empty soil ('emptied') or bare ground ('gone'). */
-  vacate(id: string, look: 'emptied' | 'gone'): void;
-}
 
 /**
  * `displayClock` gives the time the page displays with. Each render reads it
@@ -149,12 +112,16 @@ export function startLandscape(els: LandscapeElements, displayClock: () => numbe
     }
   }
 
+  const findPlot = (id: string) => els.camera.querySelector<HTMLElement>(`.plot[data-id="${CSS.escape(id)}"]`);
+
   let resizeTimer: ReturnType<typeof setTimeout> | undefined;
+  // Lay out again after a resize, but never under a running animation or a hold.
+  const relayout = () => {
+    resizeTimer = animating || holds > 0 ? setTimeout(relayout, RESIZE_DEBOUNCE_MS) : (render(), undefined);
+  };
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      if (!animating) render();
-    }, RESIZE_DEBOUNCE_MS);
+    resizeTimer = setTimeout(relayout, RESIZE_DEBOUNCE_MS);
   });
 
   void refresh();
@@ -188,8 +155,11 @@ export function startLandscape(els: LandscapeElements, displayClock: () => numbe
     expectLeaving: (id) => void leaving.add(id),
     cancelLeaving: (id) => void leaving.delete(id),
     vacate(id, look) {
-      const plot = els.camera.querySelector(`.plot[data-id="${CSS.escape(id)}"]`);
+      const plot = findPlot(id);
       plot?.classList.add(look);
+      // Fresh soil carries no decay (moss mound, weeds), as in the mockup.
+      if (look === 'emptied') plot?.classList.remove('stage-weathered', 'stage-crumbling');
     },
+    visiblePlot: (id) => (!els.scene.hidden && document.visibilityState === 'visible' ? findPlot(id) : null),
   };
 }

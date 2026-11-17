@@ -129,6 +129,7 @@ search.onApply(() => list.render());
 landscape.onBurialStart(() => {
   plaque.close(false);
   search.clear();
+  idleButton.burialStarted();
 });
 
 startViewSwitch(

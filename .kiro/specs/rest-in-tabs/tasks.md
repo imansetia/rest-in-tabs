@@ -164,7 +164,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - Storage-driven re-renders wait until a running animation ends
     - Reduced motion: new graves fade in, and numbers jump to their final value
     - _Requirements: 4.7, 9.1, 9.2_
-  - [ ] 11.9 Resurrect animation (about 3 s)
+  - [x] 11.9 Resurrect animation (about 3 s)
     - Amber glow (the only warm light) → the stone slides aside → the ghost rises with favicon eyes and marigold petals → it flies off the top edge, then `resurrect` is sent
     - On an error reply the stone returns and the error toast shows; on success the plot becomes fresh soil
     - Reduced motion: a short fade of the stone, then the same message and result

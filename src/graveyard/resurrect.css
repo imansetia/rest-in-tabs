@@ -1,0 +1,30 @@
+/* Resurrect: up into warm light (task 11.9), copied from design/mockup.html.
+   The glow is the only warm light on the page. Every element here is created
+   only when motion is allowed (resurrect-fx.ts); reduced motion fades the stone. */
+
+.fx { position: fixed; z-index: 125; pointer-events: none; }
+.warm-glow {
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 196, 102, .85) 0%, rgba(255, 154, 31, .45) 35%, rgba(255, 140, 20, 0) 70%);
+  mix-blend-mode: screen;
+}
+.ghost { filter: drop-shadow(0 0 18px rgba(255, 220, 160, .45)); }
+.ghost svg { display: block; width: 100%; }
+/* The eyes: the site's icon over its letter, as on the stone's medallion. */
+.ghost .eye {
+  position: absolute; top: 31%; width: 15%; aspect-ratio: 1; border-radius: 22%; overflow: hidden;
+  display: grid; place-items: center; font: 700 9px/1 Inter, sans-serif; color: #10141b; background: var(--c);
+  box-shadow: 0 0 0 2px rgba(16, 20, 27, .55);
+}
+.ghost .eye img {
+  position: absolute; inset: 0; width: 100%; height: 100%; padding: 14%;
+  object-fit: contain; background: var(--bone); border-radius: inherit;
+  opacity: 0; transition: opacity .3s;
+}
+.ghost .eye img.ok { opacity: 1; }
+.ghost .eye.l { left: 30%; }
+.ghost .eye.r { left: 55%; }
+.petal { width: 10px; height: 14px; border-radius: 60% 60% 50% 50%; background: radial-gradient(circle at 40% 30%, #ffc04d, var(--marigold) 70%); }
+
+/* While its ghost is out, the stone takes no clicks. */
+.plot.resurrecting .stone { pointer-events: none; }

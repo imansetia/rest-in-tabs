@@ -7,6 +7,8 @@ const FADE_MS = 300;
 export interface Toast {
   /** Show a message. `sticky` keeps it until the next message (e.g. "Working…"). */
   show(text: string, options?: { sticky?: boolean }): void;
+  /** Hide the toast now, but only if it still shows `text`. */
+  dismiss(text: string): void;
 }
 
 export function createToast(el: HTMLElement): Toast {
@@ -18,7 +20,21 @@ export function createToast(el: HTMLElement): Toast {
     el.classList.add('show');
   };
 
+  const hide = () => {
+    el.classList.remove('show');
+    // Empty the region after the fade, so screen readers do not find stale text.
+    clearTimer = setTimeout(() => {
+      el.textContent = '';
+    }, FADE_MS + 100);
+  };
+
   return {
+    dismiss(text) {
+      if (el.textContent !== text) return;
+      clearTimeout(hideTimer);
+      clearTimeout(clearTimer);
+      hide();
+    },
     show(text, { sticky = false } = {}) {
       clearTimeout(hideTimer);
       clearTimeout(clearTimer);
@@ -30,13 +46,7 @@ export function createToast(el: HTMLElement): Toast {
         write(text);
       }
       if (sticky) return;
-      hideTimer = setTimeout(() => {
-        el.classList.remove('show');
-        // Empty the region after the fade, so screen readers do not find stale text.
-        clearTimer = setTimeout(() => {
-          el.textContent = '';
-        }, FADE_MS + 100);
-      }, SHOW_MS);
+      hideTimer = setTimeout(hide, SHOW_MS);
     },
   };
 }
