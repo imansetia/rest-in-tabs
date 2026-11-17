@@ -27,6 +27,10 @@ export interface Landscape {
   render(): void;
   /** The grave shown with this id, if any. */
   grave(id: string): Grave | undefined;
+  /** All graves currently known (empty until the first read). */
+  graves(): Grave[];
+  /** Run after every render (search re-applies its matches). */
+  onRender(callback: () => void): void;
   /**
    * Call before sending resurrect/exorcise for this grave. While it is
    * expected to leave, a storage change that only removes it does not
@@ -45,6 +49,7 @@ export function startLandscape(
 ): Landscape {
   let graves: Grave[] | null = null;
   const leaving = new Set<string>();
+  const renderListeners: Array<() => void> = [];
 
   function render(): void {
     if (graves === null) return; // not read yet: show neither graves nor the empty message
@@ -63,6 +68,7 @@ export function startLandscape(
 
     els.message.textContent = NO_GRAVES_TEXT;
     els.message.hidden = sorted.length > 0;
+    for (const listener of renderListeners) listener();
   }
 
   async function refresh(): Promise<void> {
@@ -90,6 +96,8 @@ export function startLandscape(
     refresh,
     render,
     grave: (id) => graves?.find((g) => g.id === id),
+    graves: () => graves ?? [],
+    onRender: (callback) => void renderListeners.push(callback),
     expectLeaving: (id) => void leaving.add(id),
     cancelLeaving: (id) => void leaving.delete(id),
     vacate(id, look) {

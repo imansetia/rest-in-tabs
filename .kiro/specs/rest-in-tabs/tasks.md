@@ -145,7 +145,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - Toasts "Reopened in a new tab." and "Grave deleted permanently."
     - The plot shows empty soil after Resurrect and bare ground after Exorcise
     - _Requirements: 4.8, 4.9, 4.11, 5.1, 5.2, 5.3, 5.4, 9.3, 9.5_
-  - [ ] 11.6 Search in the landscape
+  - [x] 11.6 Search in the landscape
     - Trimmed query, 180 ms after typing stops
     - Fog thins, non-matching graves fade to about 28%, and matching graves lose their veil
     - The camera glides (1.1 s) to the first match, enlarging it up to 1.9×
@@ -186,6 +186,8 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - 360 px width
     - Reduced motion on for every animation above
     - `no-inline.test.ts` passes
+    - Focus after Exorcise moves to the nearest stone: the next one, else the previous one
+    - Closing the Plaque by a click outside it leaves focus where the user clicked (do not move it)
     - _Requirements: 9.2, 9.3, 9.4, 9.5, 9.6_
 
 - [ ] 12. Build the Options page

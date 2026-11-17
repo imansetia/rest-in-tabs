@@ -65,6 +65,8 @@ main { position: relative; }
 .fog.f-mid { bottom: 27%; height: 20%; z-index: 35; opacity: .7; animation-duration: 70s; animation-direction: reverse; }
 .fog.f-near { bottom: 0; height: 14%; z-index: 65; opacity: .35; animation-duration: 55s; }
 @keyframes drift { from { transform: translateX(0); } to { transform: translateX(25%); } }
+/* Searching: the fog thins (task 11.6). */
+.scene.searching .fog { opacity: .18; }
 
 .fence { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 58px; z-index: 70; pointer-events: none; }
 .fence-crow { position: absolute; right: 9%; bottom: 46px; width: 46px; z-index: 71; transform-origin: 60% 90%; }
@@ -97,6 +99,11 @@ main { position: relative; }
     linear-gradient(to top, rgba(var(--fog), calc(var(--veil) * .55)), transparent 70%);
   transition: opacity .9s ease;
 }
+/* Searching: matches lose their veil and come clear; the rest fade to about 28%. */
+.scene.searching .plot.match { filter: none; }
+.scene.searching .plot::after { opacity: .3; }
+.scene.searching .plot.match::after { opacity: 0; }
+.scene.searching .plot:not(.match) { opacity: .28; }
 /* Mound, stone and decay looks: stone.css */
 
 .scene-msg {
@@ -104,8 +111,12 @@ main { position: relative; }
   margin: 0; font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 24px;
   color: var(--bone); text-align: center; text-shadow: 0 2px 12px #000;
 }
+.scene-msg button { display: block; margin: 12px auto 0; font-family: Inter, sans-serif; font-style: normal; font-size: 14px; }
 
+/* Reduced motion: the fog stands still, the camera jumps without gliding, and
+   the search fades are instant. */
 @media (prefers-reduced-motion: reduce) {
-  .fog { animation: none !important; }
+  .fog { animation: none !important; transition: none; }
   .camera { transition: none; }
+  .plot, .plot::after { transition: none; }
 }

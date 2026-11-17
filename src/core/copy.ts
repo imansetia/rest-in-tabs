@@ -24,6 +24,9 @@ export const BURY_TAB_DONE_TEXT = 'Tab buried.';
 export const COUNT_UNAVAILABLE_TEXT = 'Could not read the graveyard.';
 /** Graveyard empty state (Requirement 4.5). */
 export const NO_GRAVES_TEXT = 'Nothing has died here yet. Give it time.';
+/** Search with no match (Requirement 4.6). */
+export const NO_MATCH_TEXT = 'No grave bears that name.';
+export const CLEAR_SEARCH_LABEL = 'Clear search';
 /** Toasts after the Plaque's actions (design steering file, Copy). */
 export const RESURRECT_DONE_TEXT = 'Reopened in a new tab.';
 export const EXORCISE_DONE_TEXT = 'Grave deleted permanently.';

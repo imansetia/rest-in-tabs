@@ -10,6 +10,7 @@ import { startIdleButton } from './idle-button.js';
 import { startLandscape } from './landscape.js';
 import { createPlaque } from './plaque.js';
 import { graveActions } from './actions.js';
+import { startSearch } from './search.js';
 
 function byId<T extends HTMLElement = HTMLElement>(id: string): T {
   const el = document.getElementById(id);
@@ -93,6 +94,11 @@ const plaque = createPlaque(
   },
   displayClock,
   actions,
+);
+
+startSearch(
+  { input: byId<HTMLInputElement>('q'), scene: byId('scene'), camera: byId('camera'), message: byId('scene-msg') },
+  landscape,
 );
 
 // A stone opens (or switches) the Plaque.

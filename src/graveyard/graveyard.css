@@ -23,6 +23,13 @@
   padding: 10px 24px 14px; border-bottom: 1px solid var(--line); background: var(--sky-1);
 }
 
+.search { position: relative; flex: 1 1 220px; max-width: 340px; }
+.search input {
+  width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--text);
+}
+.search input::placeholder { color: var(--muted); }
+
 /* ------------------------------------------------------------------ toast */
 .toast {
   position: fixed; z-index: 140; left: 50%; bottom: 24px; transform: translate(-50%, 20px);
