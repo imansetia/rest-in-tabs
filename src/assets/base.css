@@ -10,6 +10,8 @@ body {
   min-height: 100vh;
 }
 button, input, select { font: inherit; color: inherit; }
+/* Keep `hidden` working on elements that set their own display. */
+[hidden] { display: none !important; }
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
@@ -29,3 +31,21 @@ h1, h2 {
 }
 .seg button + button { border-left: 1px solid var(--line); }
 .seg button[aria-pressed="true"] { background: var(--panel-2); color: var(--bone); }
+
+.spacer { flex: 1 1 0; }
+
+/* Buttons. Unavailable controls are exempt from the contrast minimum (WCAG 1.4.3). */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 8px 14px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--text); cursor: pointer; font-weight: 500;
+}
+.btn:hover { border-color: #46526a; }
+.btn.primary {
+  border-color: var(--spectral-dim); color: var(--spectral);
+  font-family: Cinzel, serif; font-weight: 600; letter-spacing: .06em;
+  box-shadow: 0 0 18px rgba(169, 236, 209, .12);
+}
+.btn.primary:hover { background: rgba(169, 236, 209, .07); }
+.btn.danger { color: var(--danger); }
+.btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; box-shadow: none; }

@@ -190,11 +190,11 @@ Every icon (tombstone medallion, Plaque, List view, Popup, the ghost's eyes duri
 
 ### Fonts
 
-The four families are stored as Latin-subset `woff2` files, each with its `OFL.txt`, under `src/assets/fonts/<family>/`:
+The four families are stored as one Latin-subset variable `woff2` file per family (about 122 KB in total), each with its `OFL.txt`, under `src/assets/fonts/<family>/`:
 - Pirata One 400
-- Cinzel 400 and 600
-- Cormorant Garamond italic 500
-- Inter 400, 500 and 600
+- Cinzel 400–700
+- Cormorant Garamond italic 500–600
+- Inter 400–600
 
 `src/assets/fonts/fonts.css` declares them with `@font-face` (`font-display: swap`) and is imported by every page. Vite emits the font files into `dist/assets/`. A small inline plugin in `vite.config.ts` (no new dependency) copies each `OFL.txt` to `dist/licenses/<family>/`, so the licences ship with the build.
 

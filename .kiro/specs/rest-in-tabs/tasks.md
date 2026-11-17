@@ -117,7 +117,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - Check the AA contrast of every text pairing in both themes
     - No animation in this step
     - _Requirements: 9.4, 9.7, 9.8, 9.9_
-  - [ ] 11.2 Page shell and header
+  - [x] 11.2 Page shell and header
     - Logo, tagline and stats; the memory figure reads "≈ 2.3 GB freed (estimated)" (a pure formatter in `src/core` with tests)
     - The "Bury N idle tabs" button (same label rules as 10.6, `countIdle` refresh schedule from design.md)
     - The toast live region; live updates via `onStorageChanged`

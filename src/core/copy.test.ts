@@ -1,10 +1,14 @@
 import { describe, it, expect } from 'vitest';
+import * as fc from 'fast-check';
 import {
   errorText,
   blockReasonText,
   graveCountText,
   buryIdleResultText,
   idleButtonState,
+  formatCount,
+  formatMemory,
+  freedMemoryText,
   BURY_TAB_DONE_TEXT,
 } from './copy.js';
 import { ERROR_CODES } from './messages.js';
@@ -52,6 +56,39 @@ describe('buryIdleResultText', () => {
 
   it('"Bury this tab" has its own toast', () => {
     expect(BURY_TAB_DONE_TEXT).toBe('Tab buried.');
+  });
+});
+
+describe('stats bar', () => {
+  it('formats counts with thousands separators', () => {
+    expect(formatCount(0)).toBe('0');
+    expect(formatCount(46)).toBe('46');
+    expect(formatCount(1204)).toBe('1,204');
+  });
+
+  it('shows memory as whole MB below 1,000 MB and GB with one decimal from there', () => {
+    expect(formatMemory(0)).toBe('0 MB');
+    expect(formatMemory(50)).toBe('50 MB');
+    expect(formatMemory(950)).toBe('950 MB');
+    expect(formatMemory(1000)).toBe('1.0 GB');
+    expect(formatMemory(2300)).toBe('2.3 GB'); // 46 buried, as in the mockup
+    expect(formatMemory(1_000_000)).toBe('1,000.0 GB');
+  });
+
+  it('always uses MB below 1,000 MB and a decimal point in GB', () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 0, max: 100_000 }).map((buried) => buried * 50), (mb) => {
+        const text = formatMemory(mb);
+        if (mb < 1000) expect(text).toMatch(/^\d{1,3} MB$/);
+        else expect(text).toMatch(/^[\d,]+\.\d GB$/);
+      }),
+      { numRuns: 300 },
+    );
+  });
+
+  it('labels the figure as an estimate', () => {
+    expect(freedMemoryText(2300)).toBe('≈ 2.3 GB freed (estimated)');
+    expect(freedMemoryText(0)).toBe('≈ 0 MB freed (estimated)');
   });
 });
 

@@ -14,6 +14,13 @@
     <header class="top">
       <div class="brand">
         <h1>Rest in Tabs</h1>
+        <p>Final resting place of tabs that were going to be read later.</p>
+      </div>
+      <!-- Shown once the statistics have been read, so a failed read never shows false numbers. -->
+      <div class="stats" id="stats" role="group" aria-label="Statistics" hidden>
+        <span><b id="st-buried"></b> buried</span>
+        <span><b id="st-res"></b> resurrected</span>
+        <span>≈ <b id="st-ram"></b> freed (estimated)</span>
       </div>
     </header>
 
@@ -22,6 +29,12 @@
         <button type="button" id="th-night" aria-pressed="false">Night</button>
         <button type="button" id="th-dusk" aria-pressed="false">Dusk</button>
       </div>
+      <span class="spacer"></span>
+      <button type="button" class="btn primary" id="bury-idle">Bury idle tabs</button>
     </div>
+
+    <main id="main"></main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </body>
 </html>

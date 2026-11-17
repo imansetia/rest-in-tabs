@@ -50,6 +50,26 @@ export function idleButtonState(count: number | null): { label: string; availabl
   return { label: `Bury ${count.toLocaleString('en-US')} idle tabs`, available: true };
 }
 
+/** Whole numbers in the stats bar: "46", "1,204". */
+export function formatCount(n: number): string {
+  return n.toLocaleString('en-US');
+}
+
+/**
+ * Memory amount, as the mockup's fmtRam: whole MB below 1,000 MB, otherwise
+ * GB with one decimal ("950 MB", "1.0 GB", "2.3 GB").
+ */
+export function formatMemory(mb: number): string {
+  if (mb < 1000) return `${Math.round(mb)} MB`;
+  const gb = mb / 1000;
+  return `${gb.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} GB`;
+}
+
+/** The stats-bar memory figure, always labelled as an estimate (Requirement 7.2). */
+export function freedMemoryText(mb: number): string {
+  return `≈ ${formatMemory(mb)} freed (estimated)`;
+}
+
 /** Toast after the idle button. "Bury this tab" uses BURY_TAB_DONE_TEXT instead. */
 export function buryIdleResultText(count: number): string {
   if (count === 0) return 'No idle tabs to bury.';

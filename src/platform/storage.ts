@@ -7,7 +7,8 @@ import { parseGrave, normalizeStats } from '../core/validation.js';
 // Types
 // ---------------------------------------------------------------------------
 
-type StorageChangeListener = () => void;
+type WatchedKey = 'graves' | 'settings' | 'stats';
+type StorageChangeListener = (changedKeys: WatchedKey[]) => void;
 
 // ---------------------------------------------------------------------------
 // getGraves
@@ -155,11 +156,14 @@ export async function setInstalledAt(timestamp: number): Promise<void> {
 // onChanged subscription
 // ---------------------------------------------------------------------------
 
+const WATCHED_KEYS = [STORAGE_KEYS.graves, STORAGE_KEYS.settings, STORAGE_KEYS.stats] as const;
+
 /**
  * Subscribe to storage changes.
  *
  * The listener is called whenever any of the extension's storage keys
- * (graves, settings, stats) are modified in chrome.storage.local.
+ * (graves, settings, stats) are modified in chrome.storage.local, with the
+ * keys that changed. (The theme key is watched by platform/theme.ts.)
  *
  * Returns an unsubscribe function.
  */
@@ -170,13 +174,8 @@ export function onStorageChanged(listener: StorageChangeListener): () => void {
   ) => {
     // Only fire for chrome.storage.local changes to our keys.
     if (areaName !== 'local') return;
-    if (
-      STORAGE_KEYS.graves in changes ||
-      STORAGE_KEYS.settings in changes ||
-      STORAGE_KEYS.stats in changes
-    ) {
-      listener();
-    }
+    const changed = WATCHED_KEYS.filter((key) => key in changes);
+    if (changed.length > 0) listener(changed);
   };
 
   chrome.storage.onChanged.addListener(handler);
