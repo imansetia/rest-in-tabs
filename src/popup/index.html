@@ -11,21 +11,30 @@
     <script type="module" src="./popup.ts"></script>
   </head>
   <body>
+    <!-- Iron fence strip, from the mockup's popup preview. -->
+    <svg class="strip" viewBox="0 0 320 26" preserveAspectRatio="none" aria-hidden="true">
+      <defs><pattern id="pbars" width="16" height="26" patternUnits="userSpaceOnUse"><rect x="7" y="7" width="2.5" height="19" fill="#05070b"/><path d="M8.2 0 L11.5 7 L5 7Z" fill="#05070b"/></pattern></defs>
+      <rect width="320" height="26" fill="url(#pbars)"/><rect y="14" width="320" height="2.5" fill="#05070b"/>
+    </svg>
     <main>
-      <h1>Rest in Tabs</h1>
-      <p id="grave-count">Counting graves…</p>
-
-      <div class="actions">
-        <button type="button" id="bury-this" aria-disabled="true" aria-describedby="bury-this-reason">
-          Bury this tab
-        </button>
-        <p id="bury-this-reason" class="reason" hidden></p>
-        <button type="button" id="bury-idle">Bury idle tabs</button>
+      <div class="head">
+        <!-- Ghost mascot: friendly, not scary. -->
+        <svg viewBox="0 0 100 124" aria-hidden="true"><path d="M50 4 C23 4 11 27 11 52 L11 112 Q19 103 27 112 Q35 121 43 112 Q51 103 59 112 Q67 121 75 112 Q83 103 89 112 L89 52 C89 27 77 4 50 4Z" fill="#ece6d8"/><ellipse cx="38" cy="46" rx="6" ry="8" fill="#10141b"/><ellipse cx="62" cy="46" rx="6" ry="8" fill="#10141b"/></svg>
+        <div>
+          <h1>Rest in Tabs</h1>
+          <p id="grave-count">Counting graves…</p>
+        </div>
       </div>
 
-      <p id="status" role="status" aria-live="polite"></p>
+      <button type="button" class="btn primary" id="bury-idle">Bury idle tabs</button>
+      <button type="button" class="btn" id="bury-this" aria-disabled="true" aria-describedby="bury-this-reason">Bury this tab</button>
+      <p id="bury-this-reason" class="reason" hidden></p>
 
-      <a href="../graveyard/index.html" target="_blank" rel="noopener">Open graveyard</a>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+
+      <p class="last" id="last" hidden><span class="label">Last buried</span><span class="epi" id="last-epitaph"></span></p>
+
+      <a href="../graveyard/index.html" target="_blank" rel="noopener">Open the graveyard</a>
     </main>
   </body>
 </html>

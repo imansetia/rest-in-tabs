@@ -9,7 +9,8 @@ import { manualBurialBlock } from '../core/selection.js';
 import {
   errorText,
   blockReasonText,
-  graveCountText,
+  tabsAtRestText,
+  lastBuriedText,
   buryIdleResultText,
   idleButtonState,
   WORKING_TEXT,
@@ -28,6 +29,8 @@ function byId<T extends HTMLElement = HTMLElement>(id: string): T {
 }
 
 const countEl = byId('grave-count');
+const lastEl = byId('last');
+const lastEpitaphEl = byId('last-epitaph');
 const buryThisButton = byId<HTMLButtonElement>('bury-this');
 const buryThisReason = byId('bury-this-reason');
 const buryIdleButton = byId<HTMLButtonElement>('bury-idle');
@@ -77,12 +80,20 @@ function setStatus(text: string, isError: boolean): void {
 // Data
 // ---------------------------------------------------------------------------
 
+/** "<b>26</b> tabs at rest" and the newest Epitaph under "Last buried". */
 async function refreshCount(): Promise<void> {
   try {
-    countEl.textContent = graveCountText((await getGraves()).length);
+    const graves = await getGraves();
+    const { number, words } = tabsAtRestText(graves.length);
+    const bold = document.createElement('b');
+    bold.textContent = number;
+    countEl.replaceChildren(bold, ` ${words}`);
+    lastEpitaphEl.textContent = lastBuriedText(graves);
+    lastEl.hidden = false;
   } catch (err) {
     console.error('Could not read graves:', err);
     countEl.textContent = COUNT_UNAVAILABLE_TEXT;
+    lastEl.hidden = true; // no false "Nothing yet."
   }
 }
 

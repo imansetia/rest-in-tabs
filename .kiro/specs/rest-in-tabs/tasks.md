@@ -174,7 +174,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - On an error reply there is no animation and the error toast shows
     - Reduced motion: the stone fades out, and the toast still shows
     - _Requirements: 4.11, 5.3, 5.4, 9.1, 9.2_
-  - [ ] 11.11 Popup in the graveyard style
+  - [x] 11.11 Popup in the graveyard style
     - 320 px wide, with tokens and fonts, the fence strip, and the ghost mascot with "N tabs at rest"
     - Primary "Bury N idle tabs" (Cinzel, spectral outline), secondary "Bury this tab"
     - "Last buried" with the newest epitaph; "Open the graveyard"

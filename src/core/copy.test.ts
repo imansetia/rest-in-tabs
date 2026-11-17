@@ -3,7 +3,9 @@ import * as fc from 'fast-check';
 import {
   errorText,
   blockReasonText,
-  graveCountText,
+  tabsAtRestText,
+  lastBuriedText,
+  NOTHING_BURIED_TEXT,
   buryIdleResultText,
   idleButtonState,
   formatCount,
@@ -42,12 +44,39 @@ describe('blockReasonText', () => {
   });
 });
 
-describe('graveCountText', () => {
-  it('handles zero, one and many', () => {
-    expect(graveCountText(0)).toBe('No graves yet.');
-    expect(graveCountText(1)).toBe('1 grave');
-    expect(graveCountText(2)).toBe('2 graves');
-    expect(graveCountText(2000)).toBe('2,000 graves');
+describe('tabsAtRestText', () => {
+  it('handles zero, one and many, as "<b>26</b> tabs at rest" in the mockup', () => {
+    expect(tabsAtRestText(0)).toEqual({ number: '0', words: 'tabs at rest' });
+    expect(tabsAtRestText(1)).toEqual({ number: '1', words: 'tab at rest' });
+    expect(tabsAtRestText(26)).toEqual({ number: '26', words: 'tabs at rest' });
+    expect(tabsAtRestText(2000)).toEqual({ number: '2,000', words: 'tabs at rest' });
+  });
+});
+
+describe('lastBuriedText', () => {
+  it('is the newest Epitaph, whatever the order', () => {
+    const graves = [
+      { buriedAt: 10, epitaph: 'Older.' },
+      { buriedAt: 30, epitaph: 'Newest.' },
+      { buriedAt: 20, epitaph: 'Middle.' },
+    ];
+    expect(lastBuriedText(graves)).toBe('Newest.');
+    expect(lastBuriedText([...graves].reverse())).toBe('Newest.');
+  });
+
+  it('says "Nothing yet." when there are no graves', () => {
+    expect(lastBuriedText([])).toBe(NOTHING_BURIED_TEXT);
+    expect(NOTHING_BURIED_TEXT).toBe('Nothing yet.');
+  });
+
+  it('always returns the Epitaph of a grave with the latest burial time', () => {
+    fc.assert(
+      fc.property(fc.array(fc.record({ buriedAt: fc.integer({ min: 0, max: 1e12 }), epitaph: fc.string({ minLength: 1 }) }), { minLength: 1, maxLength: 40 }), (graves) => {
+        const latest = Math.max(...graves.map((g) => g.buriedAt));
+        expect(graves.filter((g) => g.buriedAt === latest).map((g) => g.epitaph)).toContain(lastBuriedText(graves));
+      }),
+      { numRuns: 200 },
+    );
   });
 });
 

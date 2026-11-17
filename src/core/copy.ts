@@ -1,5 +1,6 @@
 import type { ErrorCode } from './messages.js';
 import type { ManualBlockReason } from './selection.js';
+import type { Grave } from './types.js';
 
 // User-facing text for the Popup (and later the Graveyard). Plain and short:
 // puns belong in epitaphs, not in buttons or errors.
@@ -49,10 +50,20 @@ export function blockReasonText(reason: ManualBlockReason): string {
   return BLOCK_TEXT[reason];
 }
 
-export function graveCountText(count: number): string {
-  if (count === 0) return 'No graves yet.';
-  if (count === 1) return '1 grave';
-  return `${count.toLocaleString('en-US')} graves`;
+/**
+ * The Popup's grave count, as the mockup: "<b>26</b> tabs at rest". The number
+ * and the words are returned apart so the page can make the number bold.
+ */
+export function tabsAtRestText(count: number): { number: string; words: string } {
+  return { number: formatCount(count), words: count === 1 ? 'tab at rest' : 'tabs at rest' };
+}
+
+/** The Popup's "Last buried" line: the newest Grave's Epitaph, as the mockup. */
+export const NOTHING_BURIED_TEXT = 'Nothing yet.';
+export function lastBuriedText(graves: ReadonlyArray<Pick<Grave, 'buriedAt' | 'epitaph'>>): string {
+  let newest: Pick<Grave, 'buriedAt' | 'epitaph'> | undefined;
+  for (const grave of graves) if (newest === undefined || grave.buriedAt > newest.buriedAt) newest = grave;
+  return newest?.epitaph ?? NOTHING_BURIED_TEXT;
 }
 
 /**
