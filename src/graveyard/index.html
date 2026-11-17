@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="./scene.css" />
     <link rel="stylesheet" href="./stone.css" />
     <link rel="stylesheet" href="./plaque.css" />
+    <link rel="stylesheet" href="./list.css" />
     <script type="module" src="./graveyard.ts"></script>
   </head>
   <body>
@@ -32,6 +33,10 @@
         <span class="sr-only">Search the graveyard</span>
         <input id="q" type="search" placeholder="Search by title, site or epitaph" autocomplete="off" />
       </label>
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" id="v-land" aria-pressed="true">Landscape</button>
+        <button type="button" id="v-list" aria-pressed="false">List</button>
+      </div>
       <div class="seg" role="group" aria-label="Theme">
         <button type="button" id="th-night" aria-pressed="false">Night</button>
         <button type="button" id="th-dusk" aria-pressed="false">Dusk</button>
@@ -89,6 +94,25 @@
             <button type="button" class="btn danger" id="pl-exo">Exorcise</button>
           </div>
         </aside>
+      </section>
+
+      <section class="list" id="list" aria-label="Graveyard, list view" hidden>
+        <div class="list-head">
+          <span id="list-count"></span>
+          <span class="spacer"></span>
+          <label>Sort
+            <select id="sort">
+              <option value="new">Newest first</option>
+              <option value="old">Oldest first</option>
+              <option value="name">Name</option>
+            </select>
+          </label>
+        </div>
+        <table>
+          <thead><tr><th>Tab</th><th>Epitaph</th><th>Cause of death</th><th>Buried</th><th>Condition</th><th><span class="sr-only">Actions</span></th></tr></thead>
+          <tbody id="list-body"></tbody>
+        </table>
+        <p class="empty" id="list-empty" hidden></p>
       </section>
     </main>
 

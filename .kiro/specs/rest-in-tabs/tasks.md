@@ -152,7 +152,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - "No grave bears that name." with "Clear search"; clearing resets the view
     - Reduced motion: the camera jumps without gliding, and fades are instant
     - _Requirements: 4.4, 4.6, 9.2_
-  - [ ] 11.7 List view
+  - [x] 11.7 List view
     - The Landscape / List switch
     - A table with icon, title and domain, epitaph, cause of death, "x ago" (full date on hover), condition label, and Resurrect / Exorcise
     - Sort newest, oldest or name; the same search and empty states

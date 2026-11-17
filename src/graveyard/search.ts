@@ -21,9 +21,21 @@ export interface SearchElements {
   message: HTMLElement;
 }
 
-export function startSearch(els: SearchElements, landscape: Landscape): { clear(): void } {
+export interface Search {
+  /** The trimmed query ('' when not searching). */
+  term(): string;
+  /** Empty the field and reset the view. */
+  clear(): void;
+  /** Apply the current query again; `walk` moves the camera (after switching back to the Landscape). */
+  reapply(walk: boolean): void;
+  /** Run after every apply (the List view re-renders). */
+  onApply(callback: () => void): void;
+}
+
+export function startSearch(els: SearchElements, landscape: Landscape): Search {
   let cameraScale = 1;
   let timer: ReturnType<typeof setTimeout> | undefined;
+  const applyListeners: Array<() => void> = [];
 
   function walkTo(plot: HTMLElement | null): void {
     if (plot === null) {
@@ -79,7 +91,9 @@ export function startSearch(els: SearchElements, landscape: Landscape): { clear(
       if (searching && first === null) showNoMatch();
       else els.message.hidden = true;
     }
-    if (walk) walkTo(first);
+    // The camera only moves while the Landscape is shown (it has no size in the List view).
+    if (walk && !els.scene.hidden) walkTo(first);
+    for (const listener of applyListeners) listener();
   }
 
   els.input.addEventListener('input', () => {
@@ -88,12 +102,15 @@ export function startSearch(els: SearchElements, landscape: Landscape): { clear(
   });
   landscape.onRender(() => apply(false));
 
-  const api = {
+  const api: Search = {
+    term: () => els.input.value.trim(),
     clear(): void {
       clearTimeout(timer);
       els.input.value = '';
       apply(true);
     },
+    reapply: (walk) => apply(walk),
+    onApply: (callback) => void applyListeners.push(callback),
   };
   return api;
 }

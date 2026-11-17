@@ -11,6 +11,8 @@ import { startLandscape } from './landscape.js';
 import { createPlaque } from './plaque.js';
 import { graveActions } from './actions.js';
 import { startSearch } from './search.js';
+import { startList } from './list.js';
+import { startViewSwitch } from './view-switch.js';
 
 function byId<T extends HTMLElement = HTMLElement>(id: string): T {
   const el = document.getElementById(id);
@@ -96,9 +98,44 @@ const plaque = createPlaque(
   actions,
 );
 
-startSearch(
-  { input: byId<HTMLInputElement>('q'), scene: byId('scene'), camera: byId('camera'), message: byId('scene-msg') },
+const searchInput = byId<HTMLInputElement>('q');
+const search = startSearch(
+  { input: searchInput, scene: byId('scene'), camera: byId('camera'), message: byId('scene-msg') },
   landscape,
+);
+
+// ---------------------------------------------------------------------------
+// List view and the Landscape / List switch
+// ---------------------------------------------------------------------------
+
+const list = startList(
+  { root: byId('list'), count: byId('list-count'), sort: byId<HTMLSelectElement>('sort'), body: byId('list-body'), empty: byId('list-empty') },
+  {
+    graves: () => landscape.graves(),
+    term: () => search.term(),
+    displayClock,
+    actions,
+    clearSearch: () => {
+      search.clear();
+      searchInput.focus();
+    },
+  },
+);
+landscape.onData(() => list.render());
+search.onApply(() => list.render());
+
+startViewSwitch(
+  { landscapeButton: byId<HTMLButtonElement>('v-land'), listButton: byId<HTMLButtonElement>('v-list'), scene: byId('scene'), list: byId('list') },
+  {
+    showLandscape() {
+      landscape.render(); // laid out again now that the scene has a size
+      search.reapply(true);
+    },
+    showList() {
+      plaque.close(false);
+      list.render();
+    },
+  },
 );
 
 // A stone opens (or switches) the Plaque.

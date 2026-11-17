@@ -31,6 +31,8 @@ export interface Landscape {
   graves(): Grave[];
   /** Run after every render (search re-applies its matches). */
   onRender(callback: () => void): void;
+  /** Run whenever the graves are read, even when the landscape does not re-render (the List view). */
+  onData(callback: () => void): void;
   /**
    * Call before sending resurrect/exorcise for this grave. While it is
    * expected to leave, a storage change that only removes it does not
@@ -50,6 +52,7 @@ export function startLandscape(
   let graves: Grave[] | null = null;
   const leaving = new Set<string>();
   const renderListeners: Array<() => void> = [];
+  const dataListeners: Array<() => void> = [];
 
   function render(): void {
     if (graves === null) return; // not read yet: show neither graves nor the empty message
@@ -83,6 +86,7 @@ export function startLandscape(
       graves !== null && leaving.size > 0 && sameGraves(graves.filter((g) => !leaving.has(g.id)), next);
     graves = next;
     if (!onlyLeaversGone) render();
+    for (const listener of dataListeners) listener();
   }
 
   let resizeTimer: ReturnType<typeof setTimeout> | undefined;
@@ -98,6 +102,7 @@ export function startLandscape(
     grave: (id) => graves?.find((g) => g.id === id),
     graves: () => graves ?? [],
     onRender: (callback) => void renderListeners.push(callback),
+    onData: (callback) => void dataListeners.push(callback),
     expectLeaving: (id) => void leaving.add(id),
     cancelLeaving: (id) => void leaving.delete(id),
     vacate(id, look) {

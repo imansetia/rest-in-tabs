@@ -10,6 +10,7 @@ import {
   formatMemory,
   freedMemoryText,
   exorciseConfirmText,
+  listCountText,
   BURY_TAB_DONE_TEXT,
   RESURRECT_DONE_TEXT,
   EXORCISE_DONE_TEXT,
@@ -92,6 +93,15 @@ describe('stats bar', () => {
   it('labels the figure as an estimate', () => {
     expect(freedMemoryText(2300)).toBe('≈ 2.3 GB freed (estimated)');
     expect(freedMemoryText(0)).toBe('≈ 0 MB freed (estimated)');
+  });
+});
+
+describe('listCountText', () => {
+  it('reads "N of M graves"', () => {
+    expect(listCountText(3, 26)).toBe('3 of 26 graves');
+    expect(listCountText(0, 0)).toBe('0 of 0 graves');
+    expect(listCountText(1, 1)).toBe('1 of 1 grave');
+    expect(listCountText(1204, 2000)).toBe('1,204 of 2,000 graves');
   });
 });
 

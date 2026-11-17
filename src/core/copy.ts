@@ -24,6 +24,11 @@ export const BURY_TAB_DONE_TEXT = 'Tab buried.';
 export const COUNT_UNAVAILABLE_TEXT = 'Could not read the graveyard.';
 /** Graveyard empty state (Requirement 4.5). */
 export const NO_GRAVES_TEXT = 'Nothing has died here yet. Give it time.';
+/** List view header, as the mockup: "3 of 26 graves". */
+export function listCountText(shown: number, total: number): string {
+  return `${formatCount(shown)} of ${formatCount(total)} ${total === 1 ? 'grave' : 'graves'}`;
+}
+
 /** Search with no match (Requirement 4.6). */
 export const NO_MATCH_TEXT = 'No grave bears that name.';
 export const CLEAR_SEARCH_LABEL = 'Clear search';
