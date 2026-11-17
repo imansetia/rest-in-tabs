@@ -4,11 +4,11 @@
 /** Row scale and fog veil, front row first. */
 export const ROWS: ReadonlyArray<{ scale: number; veil: number }> = [
   { scale: 1, veil: 0 },
-  { scale: 0.78, veil: 0.26 },
-  { scale: 0.62, veil: 0.5 },
-  { scale: 0.5, veil: 0.68 },
-  { scale: 0.41, veil: 0.8 },
-  { scale: 0.34, veil: 0.86 },
+  { scale: 0.78, veil: 0.18 },
+  { scale: 0.62, veil: 0.35 },
+  { scale: 0.5, veil: 0.48 },
+  { scale: 0.41, veil: 0.56 },
+  { scale: 0.34, veil: 0.6 },
 ];
 
 const PLOT_HEIGHT = 236;

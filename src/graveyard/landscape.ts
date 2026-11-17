@@ -5,11 +5,10 @@
 import { getGraves } from '../platform/storage.js';
 import { sortGraves } from '../core/decay.js';
 import { layoutRows } from '../core/layout.js';
-import type { RowLayout } from '../core/layout.js';
 import { riseDelays } from '../core/burial-motion.js';
 import type { Grave } from '../core/types.js';
 import { NO_GRAVES_TEXT } from '../core/copy.js';
-import { plotElement } from './stone.js';
+import { rowElement, sameGraves } from './row.js';
 import { playMassBurial } from './mass-burial.js';
 
 const RESIZE_DEBOUNCE_MS = 200;
@@ -38,8 +37,10 @@ export interface Landscape {
   /**
    * Hold storage-driven updates until the returned function is called, e.g.
    * while our own "Bury idle tabs" request runs, so its graves rise together.
+   * Releasing reads storage again and resolves once the view has settled
+   * (any mass burial it started has ended), so the result toast comes after it.
    */
-  holdUpdates(): () => void;
+  holdUpdates(): () => Promise<void>;
   /**
    * Call before sending resurrect/exorcise for this grave. While it is
    * expected to leave, a storage change that only removes it does not
@@ -64,6 +65,15 @@ export function startLandscape(els: LandscapeElements, displayClock: () => numbe
   let holds = 0;
   let animating = false;
   let refreshWaiting = false;
+  let reading = 0; // refreshes past the hold check and not yet finished
+  let settledWaiters: Array<() => void> = [];
+
+  function checkSettled(): void {
+    if (animating || holds > 0 || refreshWaiting || reading > 0) return;
+    const waiters = settledWaiters;
+    settledWaiters = [];
+    for (const resolve of waiters) resolve();
+  }
 
   function render(rising: ReadonlySet<string> = new Set()): void {
     if (graves === null) return; // not read yet: show neither graves nor the empty message
@@ -92,11 +102,26 @@ export function startLandscape(els: LandscapeElements, displayClock: () => numbe
       refreshWaiting = true;
       return;
     }
+    reading++;
+    try {
+      await readAndShow();
+    } finally {
+      reading--;
+      checkSettled();
+    }
+  }
+
+  async function readAndShow(): Promise<void> {
     let next: Grave[];
     try {
       next = await getGraves();
     } catch (err) {
       console.error('Could not read the graves; keeping the last view:', err);
+      return;
+    }
+    // Another read started an animation while this one waited: read again after it.
+    if (animating) {
+      refreshWaiting = true;
       return;
     }
     const known = graves === null ? null : new Set(graves.map((g) => g.id));
@@ -145,13 +170,19 @@ export function startLandscape(els: LandscapeElements, displayClock: () => numbe
       holds++;
       let released = false;
       return () => {
-        if (released) return;
-        released = true;
-        holds--;
-        if (holds === 0 && refreshWaiting) {
-          refreshWaiting = false;
-          void refresh();
+        const settled = new Promise<void>((resolve) => settledWaiters.push(resolve));
+        if (!released) {
+          released = true;
+          holds--;
+          // Read even if no change arrived during the hold: the request's last
+          // write may reach this page after its response does.
+          if (holds === 0) {
+            refreshWaiting = false;
+            void refresh();
+          }
         }
+        checkSettled();
+        return settled;
       };
     },
     expectLeaving: (id) => void leaving.add(id),
@@ -161,23 +192,4 @@ export function startLandscape(els: LandscapeElements, displayClock: () => numbe
       plot?.classList.add(look);
     },
   };
-}
-
-/** Same graves with the same data, in any order. */
-function sameGraves(a: Grave[], b: Grave[]): boolean {
-  const key = (list: Grave[]) => JSON.stringify([...list].sort((x, y) => (x.id < y.id ? -1 : x.id > y.id ? 1 : 0)));
-  return a.length === b.length && key(a) === key(b);
-}
-
-function rowElement(row: RowLayout, graves: Grave[], displayNow: number, delays: Map<string, number>): HTMLElement {
-  const el = document.createElement('div');
-  el.className = 'row';
-  el.dataset.s = String(row.scale);
-  // CSSOM writes: allowed by the CSP, unlike inline style attributes.
-  el.style.setProperty('--s', String(row.scale));
-  el.style.setProperty('--veil', String(row.veil));
-  el.style.bottom = `${row.bottom}px`;
-  el.style.zIndex = String(60 - row.index * 10);
-  for (const grave of graves) el.append(plotElement(grave, row.index, displayNow, delays.get(grave.id)));
-  return el;
 }

@@ -56,6 +56,13 @@ describe('layoutRows — folding a short last row', () => {
   });
 });
 
+describe('ROWS', () => {
+  it('uses the steering row scales and fog veils', () => {
+    expect(ROWS.map((r) => r.scale)).toEqual([1, 0.78, 0.62, 0.5, 0.41, 0.34]);
+    expect(ROWS.map((r) => r.veil)).toEqual([0, 0.18, 0.35, 0.48, 0.56, 0.6]);
+  });
+});
+
 describe('layoutRows — invariants', () => {
   it('places every grave once, front row first, using the steering scales and veils', () => {
     let multiRow = 0;

@@ -11,12 +11,13 @@ const REFRESH_MS = 60_000;
 
 /**
  * `holdUpdates` pauses the Landscape's storage-driven updates while the request
- * runs, so all graves of this burial rise together in one mass burial.
+ * runs, so all graves of this burial rise together in one mass burial. Its
+ * release resolves when that burial has settled; the result toast waits for it.
  */
 export function startIdleButton(
   button: HTMLButtonElement,
   toast: Toast,
-  holdUpdates: () => () => void,
+  holdUpdates: () => () => Promise<void>,
 ): { refresh(): Promise<void> } {
   let count: number | null = null;
   let busy = false;
@@ -48,7 +49,8 @@ export function startIdleButton(
 
     const release = holdUpdates();
     const response = await sendMessage({ type: 'buryIdle' });
-    release();
+    // As in the mockup, the result shows once the new graves have settled.
+    await release();
 
     busy = false;
     toast.show(response.ok ? buryIdleResultText(response.count ?? 0) : errorText(response.error));
