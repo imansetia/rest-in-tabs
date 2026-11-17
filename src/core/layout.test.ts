@@ -47,9 +47,14 @@ describe('layoutRows — a short last row', () => {
     expect(counts(layoutRows(7, 1250, 900))).toEqual([5, 2]);
   });
 
-  it('stays its own row when the row in front is full', () => {
+  it('stays its own row when the front row is full', () => {
     expect(counts(layoutRows(6 + 2, 1280, 900))).toEqual([6, 2]);
-    expect(counts(layoutRows(6 + 8 + 1, 1280, 900))).toEqual([6, 8, 1]);
+  });
+
+  it('joins a back row even past its capacity, so no lone stone floats on the horizon', () => {
+    // 1440 px: front = floor(1400 / 202) = 6; rows hold 6, 8, 11, then 1 left over.
+    expect(counts(layoutRows(26, 1440, 900))).toEqual([6, 8, 12]);
+    expect(counts(layoutRows(6 + 8 + 1, 1280, 900))).toEqual([6, 9]);
   });
 
   it('a last row with 3 or more stays', () => {
@@ -90,11 +95,17 @@ describe('layoutRows — invariants', () => {
           // and never holds more than fits across the scene.
           const front = Math.max(2, Math.floor((width - 40) / 202));
           if (rows.length > 0) expect(rows[0].count).toBeLessThanOrEqual(front);
-          // Every row but the last is full; only the last row may be short.
-          rows.slice(0, -1).forEach((row) => {
-            expect(row.count).toBe(Math.max(front, Math.floor(front / row.scale) + row.index));
-          });
-          if (rows.length > 1) multiRow++;
+          const capacity = (row: { scale: number; index: number }) => Math.max(front, Math.floor(front / row.scale) + row.index);
+          // Every row but the last is exactly full.
+          rows.slice(0, -1).forEach((row) => expect(row.count).toBe(capacity(row)));
+          if (rows.length > 1) {
+            multiRow++;
+            // A short last row (fewer than 3) only stands alone right behind a full front row.
+            const last = rows[rows.length - 1];
+            if (last.count < 3) expect(rows.length).toBe(2);
+            // Behind a back row, the last row always has 3 or more (a short one joined it).
+            if (rows.length > 2) expect(last.count).toBeGreaterThanOrEqual(3);
+          }
         },
       ),
       { numRuns: 300 },

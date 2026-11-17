@@ -1,0 +1,12 @@
+/* Effects fixed over the page, from design/mockup.html. Created only when
+   motion is allowed (resurrect-fx.ts, exorcise-fx.ts); all hidden from screen readers. */
+
+.fx { position: fixed; z-index: 125; pointer-events: none; }
+
+/* Exorcise (task 11.10): one lightning bolt, then bats scatter. */
+.bolt { position: fixed; z-index: 131; pointer-events: none; }
+.bat svg { display: block; width: 100%; }
+
+/* While it is exorcised, the stone takes no clicks; the ground hides it as it sinks. */
+.plot.exorcising .stone { pointer-events: none; }
+.plot.sinking { clip-path: inset(-300% -80% 0 -80%); }

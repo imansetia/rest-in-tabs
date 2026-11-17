@@ -70,9 +70,22 @@ main { position: relative; }
 /* Mass burial: the fog rolls in thick (task 11.8). */
 .scene.fogroll .fog { opacity: 1; transition-duration: .7s; }
 .scene.fogroll .fog.f-near { opacity: .95; }
+/* Exorcise: a moment of silence, the scene dims and the fog stops (task 11.10). */
+.scene.hush .fog { animation-play-state: paused; }
+.scene.hush { filter: brightness(.82) saturate(.8); transition: filter .5s; }
+/* The lightning flash covers the scene only, never the header. */
+.flash { position: absolute; inset: 0; z-index: 85; pointer-events: none; background: #dfe9ff; opacity: 0; }
 
 .fence { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 58px; z-index: 70; pointer-events: none; }
 .fence-crow { position: absolute; right: 9%; bottom: 46px; width: 46px; z-index: 71; transform-origin: 60% 90%; }
+/* After an exorcism the crow on the fence calls once (a head movement; no sound). */
+.fence-crow.caw { animation: caw .7s ease-in-out 1; }
+@keyframes caw {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-14deg) translateY(-2px); }
+  45% { transform: rotate(4deg); }
+  60% { transform: rotate(-10deg); }
+}
 /* A crow flies across the moon during a mass burial. */
 .flyer { position: absolute; top: 10%; left: -80px; width: 64px; z-index: 5; pointer-events: none; opacity: 0; }
 .flyer.go { animation: fly 4.2s linear 1; }
@@ -127,10 +140,10 @@ main { position: relative; }
 .scene-msg button { display: block; margin: 12px auto 0; font-family: Inter, sans-serif; font-style: normal; font-size: 14px; }
 
 /* Reduced motion: the fog stands still, the camera jumps without gliding, the
-   search fades are instant, and no crow flies. */
+   search fades are instant, no crow flies and the fence crow keeps still. */
 @media (prefers-reduced-motion: reduce) {
   .fog { animation: none !important; transition: none; }
-  .flyer.go { animation: none !important; }
+  .flyer.go, .fence-crow.caw { animation: none !important; }
   .camera { transition: none; }
   .plot, .plot::after { transition: none; }
 }

@@ -11,10 +11,11 @@
 import type { Grave } from '../core/types.js';
 import {
   GLOW_IN_MS, SLIDE_AT_MS, SLIDE_MS, GHOST_AT_MS, GHOST_RISE_MS, FLY_AT_MS, FLY_MS, GLOW_OUT_MS,
-  PETAL_COUNT, RESURRECT_FADE_MS, RETURN_MS, resurrectGeometry, petalFlight, type Box,
+  PETAL_COUNT, RESURRECT_FADE_MS, RETURN_MS, resurrectGeometry, petalFlight,
 } from '../core/resurrect-motion.js';
 import { medallion } from './stone.js';
 import { prefersReducedMotion } from './mass-burial.js';
+import { fx, settle, sleep, staticSvg } from './fx.js';
 
 /** The mockup's GHOST: static markup, no user data. */
 const GHOST_SVG =
@@ -24,33 +25,6 @@ const GHOST_SVG =
 
 const SLID = { transform: 'translateX(34%) rotate(10deg)', opacity: 0.9 };
 const EASE_SLIDE = 'cubic-bezier(.3,.7,.3,1)';
-
-const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-/** Resolves when the animation ends or is cancelled. */
-const settle = (animation: Animation) => animation.finished.then(() => undefined, () => undefined);
-
-let ghostTemplate: Element | undefined;
-function ghostSvg(): Element {
-  if (ghostTemplate === undefined) {
-    const holder = document.createElement('template');
-    holder.innerHTML = GHOST_SVG;
-    ghostTemplate = holder.content.firstElementChild!;
-  }
-  return ghostTemplate.cloneNode(true) as Element;
-}
-
-/** A decorative element fixed over the page (CSSOM writes, allowed by the CSP). */
-function fx(className: string, box: Box): HTMLElement {
-  const el = document.createElement('div');
-  el.className = `fx ${className}`;
-  el.setAttribute('aria-hidden', 'true');
-  el.style.left = `${box.x}px`;
-  el.style.top = `${box.y}px`;
-  el.style.width = `${box.w}px`;
-  if (box.h !== undefined) el.style.height = `${box.h}px`;
-  document.body.append(el);
-  return el;
-}
 
 /**
  * Play the animation up to the moment the tab should open. Resolves with
@@ -91,7 +65,7 @@ export async function playResurrect(plot: HTMLElement, grave: Grave): Promise<{ 
 
   // 3. The ghost rises with the icon for eyes; marigold petals burst outward and fall.
   const ghost = fx('ghost', geo.ghost);
-  ghost.append(ghostSvg(), medallion(grave, 'eye l'), medallion(grave, 'eye r'));
+  ghost.append(staticSvg(GHOST_SVG), medallion(grave, 'eye l'), medallion(grave, 'eye r'));
   ghost.animate(
     [
       { opacity: 0, transform: 'translateY(45%) scale(.55)' },

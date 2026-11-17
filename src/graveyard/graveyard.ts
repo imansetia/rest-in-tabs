@@ -80,6 +80,7 @@ const actions = graveActions(
   toast,
   { dialog: confirmDialog, text: byId('cf-text'), keep: byId<HTMLButtonElement>('cf-keep'), go: byId<HTMLButtonElement>('cf-go') },
   () => plaque,
+  { scene: byId('scene'), flash: byId('flash'), crow: byId('fence-crow') },
 );
 const plaque = createPlaque(
   {

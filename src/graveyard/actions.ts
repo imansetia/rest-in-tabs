@@ -1,6 +1,7 @@
 // Resurrect and Exorcise from the Graveyard (Requirements 5.1 to 5.4). The page
 // only sends messages; the service worker opens tabs and writes storage.
-// Resurrect plays its animation first (task 11.9); Exorcise's arrives in 11.10.
+// Resurrect plays its animation before the message (task 11.9); Exorcise
+// plays its animation after a successful reply (task 11.10).
 
 import type { Grave } from '../core/types.js';
 import { sendMessage } from '../platform/messaging.js';
@@ -10,19 +11,22 @@ import type { Plaque, PlaqueActions } from './plaque.js';
 import type { Toast } from './toast.js';
 import { askExorcise, type ConfirmElements } from './confirm.js';
 import { playResurrect } from './resurrect-fx.js';
+import { playExorcise, type ExorciseElements } from './exorcise-fx.js';
 
 export function graveActions(
   landscape: Landscape,
   toast: Toast,
   confirm: ConfirmElements,
   plaque: () => Plaque,
+  effects: ExorciseElements,
 ): PlaqueActions {
-  const resurrecting = new Set<string>();
+  // Graves being resurrected or exorcised: a second action on them is ignored.
+  const inFlight = new Set<string>();
 
   return {
     async resurrect(grave: Grave) {
-      if (resurrecting.has(grave.id)) return; // its ghost is already on the way
-      resurrecting.add(grave.id);
+      if (inFlight.has(grave.id)) return; // its ghost is already on the way
+      inFlight.add(grave.id);
       landscape.expectLeaving(grave.id);
       // No re-render may replace the stone while its animation runs.
       const release = landscape.holdUpdates();
@@ -42,26 +46,38 @@ export function graveActions(
           toast.show(errorText(response.error));
         }
       } finally {
-        resurrecting.delete(grave.id);
+        inFlight.delete(grave.id);
         void release(); // reads storage again: a kept grave re-renders, a removed one stays soil
       }
     },
 
     async exorcise(grave: Grave, invoker: HTMLElement) {
+      if (inFlight.has(grave.id)) return;
       if (!(await askExorcise(confirm, grave))) {
         invoker.focus(); // kept: the Plaque stays open
         return;
       }
+      inFlight.add(grave.id);
       plaque().close(false);
       landscape.expectLeaving(grave.id);
-      const response = await sendMessage({ type: 'exorcise', graveId: grave.id });
-      if (response.ok) {
-        landscape.vacate(grave.id, 'gone');
-        toast.show(EXORCISE_DONE_TEXT);
-      } else {
-        landscape.cancelLeaving(grave.id);
-        toast.show(errorText(response.error));
-        void landscape.refresh();
+      // No re-render may replace the stone before or during its animation.
+      const release = landscape.holdUpdates();
+      try {
+        const response = await sendMessage({ type: 'exorcise', graveId: grave.id });
+        if (response.ok) {
+          // Deleted for good: now the stone goes down into the dark. No animation in the List view.
+          const plot = landscape.visiblePlot(grave.id);
+          if (plot !== null) await playExorcise(plot, effects);
+          landscape.vacate(grave.id, 'gone');
+          toast.show(EXORCISE_DONE_TEXT);
+        } else {
+          // On an error reply there is no animation (task 11.10).
+          landscape.cancelLeaving(grave.id);
+          toast.show(errorText(response.error));
+        }
+      } finally {
+        inFlight.delete(grave.id);
+        void release(); // reads storage again: a kept grave re-renders, a deleted one stays bare ground
       }
     },
   };

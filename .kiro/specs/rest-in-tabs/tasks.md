@@ -169,7 +169,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - On an error reply the stone returns and the error toast shows; on success the plot becomes fresh soil
     - Reduced motion: a short fade of the stone, then the same message and result
     - _Requirements: 4.11, 5.1, 5.2, 9.1, 9.2_
-  - [ ] 11.10 Exorcise animation
+  - [x] 11.10 Exorcise animation
     - After confirmation, `exorcise` is sent; on success: a moment of silence (0.8 s), one lightning strike with a flash limited to the scene, bats scatter, the stone sinks (1.1 s), bare ground, the fence crow calls once
     - On an error reply there is no animation and the error toast shows
     - Reduced motion: the stone fades out, and the toast still shows

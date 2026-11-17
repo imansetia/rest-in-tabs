@@ -1,8 +1,8 @@
 /* Resurrect: up into warm light (task 11.9), copied from design/mockup.html.
    The glow is the only warm light on the page. Every element here is created
-   only when motion is allowed (resurrect-fx.ts); reduced motion fades the stone. */
+   only when motion is allowed (resurrect-fx.ts); reduced motion fades the stone.
+   The shared .fx layer is in fx.css. */
 
-.fx { position: fixed; z-index: 125; pointer-events: none; }
 .warm-glow {
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 196, 102, .85) 0%, rgba(255, 154, 31, .45) 35%, rgba(255, 140, 20, 0) 70%);

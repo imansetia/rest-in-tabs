@@ -36,9 +36,10 @@ export interface RowLayout {
  *   236 × s × 0.7 px higher (s of the row in front). Before adding row i > 0 at
  *   `bottom`, stop if bottom + 236 × s_i × 0.55 > 0.8 × sceneHeight. The last
  *   row added holds the rest.
- * - A last row with fewer than 3 graves joins the row in front of it, but only
- *   if that row still fits within its capacity (a row never grows wider than
- *   the scene).
+ * - A last row with fewer than 3 graves joins the row in front of it, unless
+ *   that is the front row and it would then exceed its capacity. The front row
+ *   never grows wider than the scene; back rows may run slightly past the
+ *   edges (the fog hides them), and a lone stone never floats on the horizon.
  *
  * Validates: Requirement 4.2
  */
@@ -63,7 +64,7 @@ export function layoutRows(graveCount: number, sceneWidth: number, sceneHeight: 
   const used = rows.filter((row) => row.count > 0);
   const last = used[used.length - 1];
   const inFront = used[used.length - 2];
-  if (inFront !== undefined && last.count < 3 && inFront.count + last.count <= inFront.capacity) {
+  if (inFront !== undefined && last.count < 3 && (inFront.index > 0 || inFront.count + last.count <= inFront.capacity)) {
     used.pop();
     inFront.count += last.count;
   }
