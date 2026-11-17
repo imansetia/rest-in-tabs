@@ -134,6 +134,15 @@ main { position: relative; flex: 1 0 auto; display: flex; flex-direction: column
     linear-gradient(to top, rgb(var(--fog) / calc(var(--veil) * .55)), transparent 70%);
   transition: opacity .9s ease;
 }
+/* A crowded last row (layoutRows gives it --step, the distance between plot
+   centres): the stones stand closer, overlapping, so every grave stays in the
+   scene. A search match, a focused stone and the stone under the pointer are
+   raised above their neighbours, so each can be read and clicked. */
+.row.crowded { gap: 0; }
+.row.crowded .plot + .plot { margin-left: calc(var(--step) - var(--w) * var(--s)); }
+.row.crowded .plot:hover, .row.crowded .plot:focus-within { z-index: 2; }
+.scene.searching .row.crowded .plot.match { z-index: 3; }
+
 /* Searching: matches lose their veil and come clear; the rest fade to about 28%. */
 .scene.searching .plot.match { filter: none; }
 .scene.searching .plot::after { opacity: .3; }

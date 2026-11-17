@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Related tests on save",
+      "trigger": "PostFileSave",
+      "description": "When a file in src/ is saved, run the Vitest tests related to it and report failures.",
+      "matcher": "[\\\\/]src[\\\\/].+\\.(ts|html|css)$",
+      "action": {
+        "type": "agent",
+        "prompt": "A file in src/ was just saved. Run only the Vitest tests related to it, from the project root, in one-shot mode: `npx vitest related --run <saved file path>` (if the saved file is a .css or .html file, also run `npx vitest run src/no-inline.test.ts`). If every test passes, say so in one line with the test count. If any test fails, report each failure: test name, file, the assertion message, and for fast-check failures the seed and the counterexample. Do not change any code because of this hook; only report."
+      }
+    }
+  ]
+}

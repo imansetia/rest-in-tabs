@@ -12,8 +12,36 @@ export const ROWS: ReadonlyArray<{ scale: number; veil: number }> = [
 ];
 
 const PLOT_HEIGHT = 236;
-const PLOT_PITCH = 172 + 30; // plot width plus the gap between plots
+const PLOT_WIDTH = 172;
+const PLOT_GAP = 30;
+const PLOT_PITCH = PLOT_WIDTH + PLOT_GAP; // plot width plus the gap between plots
 const FRONT_BOTTOM = 58;
+/** Space kept clear at each side of the scene (the front row's capacity uses the same 40 px). */
+const SIDE_MARGIN = 20;
+
+/**
+ * Row pitch p: each next row sits 236 × s × p px higher. 0.7 in a scene 680 px
+ * or taller (as in the mockup), closer in a short scene so more rows fit:
+ * p = max(0.45, 0.7 × min(1, sceneHeight / 680)).
+ */
+export function rowPitch(sceneHeight: number): number {
+  const h = Number.isFinite(sceneHeight) ? Math.max(0, sceneHeight) : 0;
+  return Math.max(0.45, 0.7 * Math.min(1, h / 680));
+}
+
+/**
+ * Distance in px between the centres of neighbouring plots when a row's stones
+ * at normal spacing (172 × s wide, 30 × s apart) would be wider than the scene
+ * less its side margins; they then stand closer, overlapping, so the whole row
+ * fits. undefined when the row fits at normal spacing.
+ */
+export function crowdedStep(count: number, scale: number, sceneWidth: number): number | undefined {
+  if (count < 2) return undefined;
+  const room = sceneWidth - 2 * SIDE_MARGIN;
+  const normal = count * PLOT_WIDTH * scale + (count - 1) * PLOT_GAP * scale;
+  if (normal <= room) return undefined;
+  return Math.max(0, (room - PLOT_WIDTH * scale) / (count - 1));
+}
 
 export interface RowLayout {
   /** 0 = front row. Also the "depth" used to darken and blur farther rows. */
@@ -24,6 +52,11 @@ export interface RowLayout {
   bottom: number;
   /** How many graves stand in this row. */
   count: number;
+  /**
+   * Only on a crowded last row: px between neighbouring plot centres (closer
+   * than normal, overlapping), so every stone stays in the scene.
+   */
+  step?: number;
 }
 
 /**
@@ -33,25 +66,28 @@ export interface RowLayout {
  * - Front row capacity: floor((width − 40) / 202), at least 2.
  *   Row i holds max(front, floor(front / s_i) + i).
  * - The front row sits 58 px above the bottom; each next row sits
- *   236 × s × 0.7 px higher (s of the row in front). Before adding row i > 0 at
- *   `bottom`, stop if bottom + 236 × s_i × 0.55 > 0.8 × sceneHeight. The last
- *   row added holds the rest.
+ *   236 × s × p px higher (s of the row in front, p = rowPitch(sceneHeight)).
+ *   Before adding row i > 0 at `bottom`, stop if
+ *   bottom + 236 × s_i × 0.55 > 0.8 × sceneHeight. The last row added holds the rest.
  * - A last row with fewer than 3 graves joins the row in front of it, unless
  *   that is the front row and it would then exceed its capacity. The front row
  *   never grows wider than the scene; back rows may run slightly past the
  *   edges (the fog hides them), and a lone stone never floats on the horizon.
+ * - The last row never hides graves past the edges: if it would be wider than
+ *   the scene, it gets a `step` (crowdedStep) and its stones overlap.
  *
  * Validates: Requirement 4.2
  */
 export function layoutRows(graveCount: number, sceneWidth: number, sceneHeight: number): RowLayout[] {
   const front = Math.max(2, Math.floor((sceneWidth - 40) / PLOT_PITCH));
 
+  const pitch = rowPitch(sceneHeight);
   const rows: Array<RowLayout & { capacity: number }> = [];
   let bottom = FRONT_BOTTOM;
   for (const [index, { scale, veil }] of ROWS.entries()) {
     if (index > 0 && bottom + PLOT_HEIGHT * scale * 0.55 > sceneHeight * 0.8) break;
     rows.push({ index, scale, veil, bottom, count: 0, capacity: Math.max(front, Math.floor(front / scale) + index) });
-    bottom += PLOT_HEIGHT * scale * 0.7;
+    bottom += PLOT_HEIGHT * scale * pitch;
   }
   rows[rows.length - 1].capacity = Infinity;
 
@@ -68,7 +104,13 @@ export function layoutRows(graveCount: number, sceneWidth: number, sceneHeight: 
     used.pop();
     inFront.count += last.count;
   }
-  return used.map(({ capacity: _capacity, ...row }) => row);
+  const result: RowLayout[] = used.map(({ capacity: _capacity, ...row }) => row);
+  const back = result[result.length - 1];
+  if (back !== undefined) {
+    const step = crowdedStep(back.count, back.scale, sceneWidth);
+    if (step !== undefined) back.step = step;
+  }
+  return result;
 }
 
 /**

@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Spec sync after a task",
+      "trigger": "PostTaskExec",
+      "description": "When a spec task is finished, check that tasks.md, requirements.md and the code still agree, and report gaps.",
+      "action": {
+        "type": "agent",
+        "prompt": "A spec task was just marked completed. Check that .kiro/specs/rest-in-tabs/tasks.md, requirements.md, design.md and the code still agree: (1) every acceptance criterion in requirements.md (written as N.M) is referenced by at least one task's \"_Requirements:\" line in tasks.md; list any criterion no task references; (2) every requirement number a task references exists in requirements.md; (3) for tasks marked [x], spot-check that the functions, files and messages they name exist in src/ (search for them); (4) any wording the task or requirement fixes (button labels, toasts, numbers such as 170 ms or 0 to 14 days) matches the code. Report gaps as a short list with file and line; say \"Spec sync: no gaps\" if there are none. Do not edit anything; only report."
+      }
+    }
+  ]
+}

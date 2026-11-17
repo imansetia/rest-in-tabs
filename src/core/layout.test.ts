@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { layoutRows, graveRows, plotJitter, ROWS } from './layout.js';
+import { layoutRows, graveRows, plotJitter, rowPitch, crowdedStep, ROWS } from './layout.js';
 
 const counts = (rows: ReturnType<typeof layoutRows>) => rows.map((r) => r.count);
 
@@ -27,17 +27,92 @@ describe('layoutRows — the 80% stop', () => {
     expect(rows.map((r) => r.index)).toEqual([0, 1, 2, 3, 4, 5]);
   });
 
-  it('540 px tall: row 2 would pass 80% (352.1 + 80.5 > 432), so row 1 holds the rest', () => {
+  it('540 px tall: p = 0.556, so a third row fits; row 3 would pass 80% (372.9 + 64.9 > 432)', () => {
     const rows = layoutRows(500, 1280, 540);
-    expect(rows.map((r) => r.index)).toEqual([0, 1]);
-    expect(counts(rows)).toEqual([6, 494]);
+    expect(rows.map((r) => r.index)).toEqual([0, 1, 2]);
+    expect(counts(rows)).toEqual([6, 8, 486]);
   });
 
-  it('places rows at 58 px and then 236 × s × 0.7 higher each', () => {
+  it('a 460 to 480 px scene fits 3 rows (it fitted 2 with the fixed pitch of 0.7)', () => {
+    for (const h of [460, 470, 478, 480]) expect(layoutRows(30, 1280, h).map((r) => r.index)).toEqual([0, 1, 2]);
+  });
+
+  it('places rows at 58 px and then 236 × s × p higher each (p = 0.7 at 900 px)', () => {
     const rows = layoutRows(500, 1280, 900);
     expect(rows[0].bottom).toBe(58);
     expect(rows[1].bottom).toBeCloseTo(58 + 236 * 0.7, 6);
     expect(rows[2].bottom).toBeCloseTo(58 + 236 * 0.7 + 236 * 0.78 * 0.7, 6);
+  });
+
+  it('uses the scene\'s pitch for every row (460 px: p = 0.7 × 460 / 680)', () => {
+    const p = (0.7 * 460) / 680;
+    const rows = layoutRows(30, 1280, 460);
+    expect(rows[1].bottom).toBeCloseTo(58 + 236 * p, 6);
+    expect(rows[2].bottom).toBeCloseTo(58 + 236 * p + 236 * 0.78 * p, 6);
+  });
+});
+
+describe('rowPitch', () => {
+  it('0.7 at 680 px and taller, 0.7 × h / 680 below, never under 0.45', () => {
+    expect(rowPitch(680)).toBe(0.7);
+    expect(rowPitch(900)).toBe(0.7);
+    expect(rowPitch(340)).toBeCloseTo(0.45, 10); // 0.35 → floor 0.45
+    expect(rowPitch(0)).toBe(0.45);
+    expect(rowPitch(Number.NaN)).toBe(0.45);
+  });
+
+  it('follows p = max(0.45, 0.7 × min(1, h / 680)) for any height', () => {
+    fc.assert(
+      fc.property(fc.double({ min: 0, max: 5000, noNaN: true }), (h) => {
+        expect(rowPitch(h)).toBeCloseTo(Math.max(0.45, 0.7 * Math.min(1, h / 680)), 12);
+        if (h >= 680) expect(rowPitch(h)).toBe(0.7);
+        expect(rowPitch(h)).toBeGreaterThanOrEqual(0.45);
+        expect(rowPitch(h)).toBeLessThanOrEqual(0.7);
+      }),
+      { numRuns: 300 },
+    );
+  });
+});
+
+describe('crowded last row', () => {
+  /** Plot centres of the last row, as the page places them: centred, at its step or at normal spacing. */
+  function lastRowCentres(n: number, width: number, height: number): { centres: number[]; scale: number; step?: number } {
+    const rows = layoutRows(n, width, height);
+    const last = rows[rows.length - 1];
+    const step = last.step ?? (172 + 30) * last.scale;
+    const span = (last.count - 1) * step;
+    return { centres: Array.from({ length: last.count }, (_, i) => width / 2 - span / 2 + i * step), scale: last.scale, step: last.step };
+  }
+
+  it('30 graves at 1280 x 460: the 16-stone back row stands closer, inside the scene', () => {
+    const rows = layoutRows(30, 1280, 460);
+    expect(counts(rows)).toEqual([6, 8, 16]);
+    const last = rows[2];
+    expect(last.step).toBeDefined();
+    expect(last.step!).toBeLessThan(202 * last.scale); // overlapping or closer than normal
+    const { centres } = lastRowCentres(30, 1280, 460);
+    expect(Math.min(...centres) - (172 * last.scale) / 2).toBeGreaterThanOrEqual(20 - 1e-9);
+    expect(Math.max(...centres) + (172 * last.scale) / 2).toBeLessThanOrEqual(1260 + 1e-9);
+  });
+
+  it('a last row that fits keeps its normal spacing (no step), and no other row gets one', () => {
+    const rows = layoutRows(20, 1280, 900);
+    expect(rows.every((r) => r.step === undefined)).toBe(true);
+    expect(crowdedStep(1, 1, 300)).toBeUndefined();
+  });
+
+  it('for any grave count and scene size, every stone centre in the last row lies inside the scene', () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 1, max: 2000 }), fc.integer({ min: 360, max: 3840 }), fc.integer({ min: 460, max: 900 }), (n, width, height) => {
+        const rows = layoutRows(n, width, height);
+        rows.slice(0, -1).forEach((r) => expect(r.step).toBeUndefined());
+        // The centres are evenly spaced, so the outermost two decide (one expect each, not one per stone).
+        const { centres } = lastRowCentres(n, width, height);
+        expect(centres[0]).toBeGreaterThan(0);
+        expect(centres[centres.length - 1]).toBeLessThan(width);
+      }),
+      { numRuns: 400 },
+    );
   });
 });
 

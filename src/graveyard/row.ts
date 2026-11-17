@@ -19,6 +19,11 @@ export function rowElement(row: RowLayout, graves: Grave[], displayNow: number, 
   el.style.setProperty('--veil', String(row.veil));
   el.style.bottom = `${row.bottom}px`;
   el.style.zIndex = String(60 - row.index * 10);
+  // A crowded last row: the stones stand closer (overlapping) so all stay in the scene (scene.css).
+  if (row.step !== undefined) {
+    el.classList.add('crowded');
+    el.style.setProperty('--step', `${row.step}px`);
+  }
   for (const grave of graves) el.append(plotElement(grave, row.index, displayNow, delays.get(grave.id)));
   return el;
 }

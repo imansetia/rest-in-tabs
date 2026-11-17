@@ -226,7 +226,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - Kept in page memory only and reset to 0 when Demo is turned off; never sent to the service worker or stored
     - Moving it closes the Plaque and re-renders without animation (reduced motion needs nothing extra)
     - _Requirements: 8.5, 8.6, 6.1, 6.2_
-  - [ ]* 15.2 Sound (optional), off by default, with a toggle in the Graveyard header
+  - [ ]* 15.2 Sound (optional), off by default, with a toggle in the Graveyard header — **skipped** (not built for the submission; sound stays off, as the steering default)
     - Wind, a distant owl, one crow call on burial, a soft rising tone on resurrect, a low cello drone
     - Bundled files with their licences; no jump scares
     - _Requirements: none (design steering file, Sound); 9.9 applies (no network)_

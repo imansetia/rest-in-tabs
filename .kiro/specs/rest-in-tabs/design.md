@@ -101,6 +101,9 @@ sortGraves(graves: Grave[]): Grave[]              // newest first
 
 // landscape layout (rules in the design steering file)
 layoutRows(graveCount: number, sceneWidth: number, sceneHeight: number): RowLayout[]
+rowPitch(sceneHeight: number): number                 // p = max(0.45, 0.7 × min(1, sceneHeight / 680))
+crowdedStep(count: number, scale: number, sceneWidth: number): number | undefined
+graveRows<T>(newestFirst: T[], rows: RowLayout[]): { row: RowLayout; graves: T[] }[]  // page order: front row first
 plotJitter(graveId: string): { tiltDeg: number; offsetPx: number; hasCrow: boolean; hasCross: boolean }
 
 // icons
@@ -123,6 +126,10 @@ estimateFreedMb(buried: number): number
 - otherwise "round(d / 30) months"
 
 `layoutRows` implements the row rule in the design steering file exactly. It returns, for each row, its scale `s`, fog veil, bottom offset in px and the number of graves it holds.
+
+- **Row pitch.** Each next row sits `236 × s × p` px higher, with `p = rowPitch(sceneHeight)`: 0.7 in a scene 680 px or taller (as in the mockup), down to 0.45 in a short one, so a 460 to 480 px scene fits 3 rows.
+- **Crowded last row.** When the last row's stones at normal spacing (`172 × s` wide, `30 × s` apart) would be wider than the scene less 20 px at each side, `layoutRows` gives that row a `step`: the distance between neighbouring plot centres, `(sceneWidth − 40 − 172 × s) / (count − 1)`. The page sets it as `--step` on the row and the plots overlap, so every grave stays in the scene, clickable and searchable. No other row is ever crowded.
+- **Raised stones.** In a crowded row, the stone under the pointer, a focused stone and a search match are drawn above their neighbours.
 
 `plotJitter` hashes the grave id with the mockup's hash: `h = 7`, then `h = (h × 31 + charCode) mod 9973` for each character. From it:
 - tilt: `((h mod 7) − 3) || 2` degrees
@@ -332,7 +339,7 @@ For any interval `ms` >= 0, `formatDuration` returns "less than an hour" exactly
 ## Testing Strategy
 
 - **Property-based tests (fast-check, 100+ runs each):** the twelve properties above, one test per property, each tagged `Feature: rest-in-tabs, Property N`.
-- **Unit tests for the new pure functions:** `layoutRows` (row capacities, the 80% stop, folding a short last row), `plotJitter` (same id gives the same result), `countDuplicates`, `parseGrave` (missing and bad `duplicateCount` become 1), `timeAgo` ("just now" below 1 hour), `faviconSrc` (pageUrl is URL-encoded).
+- **Unit tests for the new pure functions:** `layoutRows` (row capacities, the 80% stop, folding a short last row, the row pitch formula, every last-row stone centre inside the scene), `plotJitter` (same id gives the same result), `countDuplicates`, `parseGrave` (missing and bad `duplicateCount` become 1), `timeAgo` ("just now" below 1 hour), `faviconSrc` (pageUrl is URL-encoded).
 - **Unit tests (Vitest):** concrete examples and edge cases for the same functions: boundary at exactly the Idle Threshold, subdomain matching, 200-character truncation on a multi-byte string, empty Grave list.
 - **Orchestration tests:** service worker burial and resurrection flows with fake `platform/` adapters, covering "save fails → tab not closed" and "create fails → Grave kept".
 - **Manual checks before submission:**

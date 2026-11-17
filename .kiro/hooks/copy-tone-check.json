@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Copy tone check",
+      "trigger": "PostFileSave",
+      "description": "When src/core/copy.ts or any src/**/index.html is saved, check every user-facing string against the Copy rules in the design steering file and list violations.",
+      "matcher": "[\\\\/]src[\\\\/](core[\\\\/]copy\\.ts|(.+[\\\\/])?index\\.html)$",
+      "action": {
+        "type": "agent",
+        "prompt": "src/core/copy.ts or an index.html under src/ was just saved. Read the saved file and the \"Copy\" section of .kiro/steering/design.md. Check every user-facing string in the saved file (button labels, headings, help lines, placeholders, titles, aria-labels, toasts, error messages, empty states; not code comments, ids or class names) against these rules: English only; plain and literal; no exclamation marks; no puns on death or RIP; no memes or emoji; never address the reader (no \"you\", \"your\", \"we'll\"); one line for empty states; the exact wording the steering file fixes (tagline, \"Nothing has died here yet. Give it time.\", \"No grave bears that name.\", \"Clear search\", the toasts, \"≈ … freed (estimated)\"). List each violation as: file, line, the string, the rule it breaks, and a suggested plain rewrite. If there are none, say \"Copy check: no violations\" with the number of strings checked. Do not edit the file; only report."
+      }
+    }
+  ]
+}
