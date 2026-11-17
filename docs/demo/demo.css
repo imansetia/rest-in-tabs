@@ -1,0 +1,38 @@
+/* Shared style for the Rest in Tabs demo pages. System fonts only: nothing is
+   loaded from the web. Each page is an ordinary light web page, so the
+   graveyard's dark theme stands out when they are buried. */
+
+* { box-sizing: border-box; }
+html { background: #f6f4ef; }
+body {
+  margin: 0 auto; max-width: 720px; padding: 28px 22px 40px;
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #1f2328;
+}
+a { color: #1b5e9e; }
+header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+header img { width: 40px; height: 40px; flex: 0 0 auto; }
+header .site { font-weight: 600; }
+header .crumbs { margin-left: auto; font-size: 14px; }
+h1 { font-size: 30px; line-height: 1.2; margin: 6px 0 12px; }
+h2 { font-size: 20px; margin: 26px 0 8px; }
+p, li { margin: 0 0 12px; }
+.meta { color: #59616b; font-size: 14px; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 15px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #ddd8cc; vertical-align: top; }
+th { font-weight: 600; background: #ece8de; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.card { background: #fff; border: 1px solid #e2ddd1; border-radius: 10px; padding: 16px 18px; margin: 14px 0; }
+.button { display: inline-block; padding: 9px 16px; border-radius: 8px; border: 0; background: #2d5f8b; color: #fff; font: inherit; font-weight: 600; }
+.button.muted { background: #6f7984; }
+.actions { margin-top: 14px; }
+label { display: block; font-weight: 600; margin: 12px 0 4px; }
+input[type="text"], input[type="email"], input[type="password"], select {
+  width: 100%; max-width: 360px; padding: 8px 10px; border: 1px solid #c9c3b6; border-radius: 6px; font: inherit; background: #fff;
+}
+code, pre { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 14px; }
+pre { background: #fff; border: 1px solid #e2ddd1; border-radius: 8px; padding: 12px 14px; overflow-x: auto; }
+blockquote { margin: 12px 0; padding: 4px 16px; border-left: 4px solid #c9c3b6; color: #3d444d; }
+.comment { border-left: 4px solid #d4a72c; padding: 8px 14px; background: #fff8e6; margin: 10px 0; }
+.empty-heading { color: #9aa1a9; font-style: italic; margin-top: -4px; }
+footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid #ddd8cc; color: #59616b; font-size: 14px; }

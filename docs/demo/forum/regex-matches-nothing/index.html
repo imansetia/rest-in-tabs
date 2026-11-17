@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Regex matches nothing</title>
+  <meta name="description" content="Asked four years ago. Three answers, none accepted.">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../demo.css">
+</head>
+<body>
+  <header>
+    <img src="icon.svg" alt="">
+    <span class="site">Questions &amp; answers</span>
+    <a class="crumbs" href="../../">All demo pages</a>
+  </header>
+  <h1>Regex matches nothing</h1>
+  <p class="meta">Asked four years ago · viewed 2,318 times · 3 answers</p>
+  <div class="card">
+    <p>This pattern should match dates such as 2021-04-09, but it matches nothing, not even a line that holds only a date.</p>
+    <pre>^\d{4}-\d{2}-\d{2}$</pre>
+    <p>The input is read from a file, one date per line.</p>
+  </div>
+  <h2>3 answers</h2>
+  <div class="card"><p>The lines probably end in a carriage return. Try <code>^\d{4}-\d{2}-\d{2}\r?$</code>.</p><p class="meta">2 votes</p></div>
+  <div class="card"><p>Without the multiline flag, <code>^</code> and <code>$</code> match the start and end of the whole file, not of each line.</p><p class="meta">1 vote</p></div>
+  <div class="card"><p>Check that the backslashes survive when the pattern is written as a string in the code.</p><p class="meta">0 votes</p></div>
+  <footer>Demo page for Rest in Tabs. Not a real shop or service.</footer>
+</body>
+</html>
