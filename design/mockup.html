@@ -180,11 +180,11 @@ main { position: relative; }
 .fog {
   position: absolute; left: -50%; width: 200%; pointer-events: none;
   background:
-    radial-gradient(ellipse 18% 60% at 10% 60%, rgba(var(--fog), .26), transparent 70%),
-    radial-gradient(ellipse 22% 50% at 34% 50%, rgba(var(--fog), .2), transparent 70%),
-    radial-gradient(ellipse 16% 70% at 58% 65%, rgba(var(--fog), .24), transparent 70%),
-    radial-gradient(ellipse 24% 55% at 82% 55%, rgba(var(--fog), .2), transparent 70%),
-    linear-gradient(to top, transparent, rgba(var(--fog), .08) 45%, transparent);
+    radial-gradient(ellipse 18% 60% at 10% 60%, rgb(var(--fog) / .18), transparent 70%),
+    radial-gradient(ellipse 22% 50% at 34% 50%, rgb(var(--fog) / .14), transparent 70%),
+    radial-gradient(ellipse 16% 70% at 58% 65%, rgb(var(--fog) / .17), transparent 70%),
+    radial-gradient(ellipse 24% 55% at 82% 55%, rgb(var(--fog) / .14), transparent 70%),
+    linear-gradient(to top, transparent, rgb(var(--fog) / .06) 45%, transparent);
   animation: drift 70s linear infinite;
   transition: opacity 1.2s ease;
 }
@@ -242,8 +242,8 @@ main { position: relative; }
 .plot::after {
   content: ""; position: absolute; inset: -12% -16% -8%; pointer-events: none; z-index: 4;
   background:
-    radial-gradient(ellipse 75% 70% at 50% 60%, rgba(var(--fog), calc(var(--veil) * .9)) 0%, rgba(var(--fog), calc(var(--veil) * .7)) 55%, transparent 85%),
-    linear-gradient(to top, rgba(var(--fog), calc(var(--veil) * .55)), transparent 70%);
+    radial-gradient(ellipse 75% 70% at 50% 60%, rgb(var(--fog) / calc(var(--veil) * .9)) 0%, rgb(var(--fog) / calc(var(--veil) * .7)) 55%, transparent 85%),
+    linear-gradient(to top, rgb(var(--fog) / calc(var(--veil) * .55)), transparent 70%);
   transition: opacity .9s ease;
 }
 .scene.searching .plot::after { opacity: .3; }
@@ -317,9 +317,9 @@ main { position: relative; }
 .stage-weathered .stone {
   transform: rotate(var(--tilt));
   background:
-    radial-gradient(circle at 18% 88%, rgba(var(--moss), .6) 0 16%, transparent 30%),
-    radial-gradient(circle at 82% 94%, rgba(var(--moss), .5) 0 13%, transparent 26%),
-    radial-gradient(circle at 10% 34%, rgba(var(--moss), .32) 0 7%, transparent 15%),
+    radial-gradient(circle at 18% 88%, rgb(var(--moss) / .45) 0 16%, transparent 30%),
+    radial-gradient(circle at 82% 94%, rgb(var(--moss) / .38) 0 13%, transparent 26%),
+    radial-gradient(circle at 10% 34%, rgb(var(--moss) / .24) 0 7%, transparent 15%),
     linear-gradient(165deg, var(--stone-1), var(--stone-2) 68%, var(--stone-edge));
 }
 .stage-weathered .stone > span:not(.fav) { opacity: .78; }
@@ -331,9 +331,9 @@ main { position: relative; }
   padding-top: calc(42px * var(--s));
   clip-path: polygon(0% 22%, 10% 12%, 24% 6%, 38% 4%, 47% 10%, 53% 22%, 61% 15%, 70% 27%, 82% 24%, 100% 38%, 100% 100%, 0% 100%);
   background:
-    radial-gradient(circle at 16% 86%, rgba(var(--moss), .75) 0 22%, transparent 36%),
-    radial-gradient(circle at 86% 90%, rgba(var(--moss), .65) 0 18%, transparent 32%),
-    radial-gradient(circle at 30% 46%, rgba(var(--moss), .4) 0 9%, transparent 18%),
+    radial-gradient(circle at 16% 86%, rgb(var(--moss) / .56) 0 22%, transparent 36%),
+    radial-gradient(circle at 86% 90%, rgb(var(--moss) / .49) 0 18%, transparent 32%),
+    radial-gradient(circle at 30% 46%, rgb(var(--moss) / .3) 0 9%, transparent 18%),
     linear-gradient(165deg, #434a56, #2e343e 68%, #1c2028);
 }
 .stage-crumbling .stone > span:not(.fav) { opacity: .42; }
@@ -761,8 +761,8 @@ dialog .actions { display: flex; justify-content: flex-end; gap: 10px; }
 
   // ---------------------------------------------------------------- landscape
   const ROWS = [
-    { s: 1, veil: 0 }, { s: .78, veil: .26 }, { s: .62, veil: .5 },
-    { s: .5, veil: .68 }, { s: .41, veil: .8 }, { s: .34, veil: .86 },
+    { s: 1, veil: 0 }, { s: .78, veil: .18 }, { s: .62, veil: .35 },
+    { s: .5, veil: .48 }, { s: .41, veil: .56 }, { s: .34, veil: .6 },
   ];
   function hash(str) { let h = 7; for (const c of str) h = (h * 31 + c.charCodeAt(0)) % 9973; return h; }
 

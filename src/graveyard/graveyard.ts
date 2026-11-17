@@ -54,8 +54,6 @@ const stats = startStats({
   memory: byId('st-ram'),
 });
 
-const idleButton = startIdleButton(byId<HTMLButtonElement>('bury-idle'), toast);
-
 // ---------------------------------------------------------------------------
 // Landscape
 // ---------------------------------------------------------------------------
@@ -64,9 +62,13 @@ const idleButton = startIdleButton(byId<HTMLButtonElement>('bury-idle'), toast);
 const displayClock = () => Date.now();
 
 const landscape = startLandscape(
-  { scene: byId('scene'), camera: byId('camera'), message: byId('scene-msg') },
+  { scene: byId('scene'), camera: byId('camera'), message: byId('scene-msg'), flyer: byId('flyer') },
   displayClock,
 );
+
+// Our own "Bury N idle tabs" holds the Landscape's updates until its run ends,
+// so all its graves rise together.
+const idleButton = startIdleButton(byId<HTMLButtonElement>('bury-idle'), toast, () => landscape.holdUpdates());
 
 // ---------------------------------------------------------------------------
 // Plaque, Resurrect, Exorcise
@@ -123,6 +125,11 @@ const list = startList(
 );
 landscape.onData(() => list.render());
 search.onApply(() => list.render());
+// A mass burial clears the search and resets the camera first, as in the mockup.
+landscape.onBurialStart(() => {
+  plaque.close(false);
+  search.clear();
+});
 
 startViewSwitch(
   { landscapeButton: byId<HTMLButtonElement>('v-land'), listButton: byId<HTMLButtonElement>('v-list'), scene: byId('scene'), list: byId('list') },

@@ -159,7 +159,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - Stacked rows below 760 px
     - No animation
     - _Requirements: 4.3, 4.4, 4.5, 4.6, 6.2, 9.6, 10.5_
-  - [ ] 11.8 Mass burial animation
+  - [x] 11.8 Mass burial animation
     - Graves that are new since the last render (own button or the alarm) rise out of the ground: fog rolls in (0.9 s), graves rise 170 ms apart, newest and front row first, counts tick up, a crow crosses the moon, the fog recedes
     - Storage-driven re-renders wait until a running animation ends
     - Reduced motion: new graves fade in, and numbers jump to their final value

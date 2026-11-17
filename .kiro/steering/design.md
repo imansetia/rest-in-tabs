@@ -87,7 +87,8 @@ Layers from back to front: sky with a few stars, full moon (top right, soft blue
 **Rows.** Graves are sorted newest first. The newest stand in the front row; older ones stand further back, smaller and deeper in fog.
 
 - Base plot: 172 × 236 px, stone 196 px tall, scaled by the row factor `s`.
-- Row scales `s`: 1, 0.78, 0.62, 0.5, 0.41, 0.34. Fog veil per row: 0, 0.26, 0.5, 0.68, 0.8, 0.86.
+- Row scales `s`: 1, 0.78, 0.62, 0.5, 0.41, 0.34. Fog veil per row: 0, 0.18, 0.35, 0.48, 0.56, 0.6.
+- Fog and moss colours are written `rgb(var(--fog) / A)` and `rgb(var(--moss) / A)`. Never `rgba(var(--fog), A)`: the tokens are space-separated, so that form is invalid and the browser drops the whole rule. Alphas: fog bands .18, .14, .17, .14 and .06; moss on Weathered stones .45, .38, .24; moss on Crumbling stones .56, .49, .3. Copy them from `design/mockup.html`.
 - The front row sits 58 px above the bottom. Each next row sits `236 × s × 0.7` px higher (`s` of the row in front). Before adding row `i > 0` at height `bottom`, stop if `bottom + 236 × s_i × 0.55 > 0.8 × sceneHeight`; the last row added holds the rest. (Same rule as `renderLandscape` in the mockup.)
 - Front row capacity: `floor((width − 40) / 202)`, at least 2. Row `i` holds `max(front, floor(front / s) + i)`. A last row with fewer than 3 graves joins the row in front of it.
 - Farther rows: darker, less saturated, slightly blurred, and covered by a fog veil. **The front row is always clear.**

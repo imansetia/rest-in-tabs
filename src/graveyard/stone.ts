@@ -40,8 +40,12 @@ function text(className: string, value: string): HTMLElement {
   return span;
 }
 
-/** `depth` is the row index (0 = front); `displayNow` is the time the page displays with. */
-export function plotElement(grave: Grave, depth: number, displayNow: number): HTMLElement {
+/**
+ * `depth` is the row index (0 = front); `displayNow` is the time the page
+ * displays with; `riseDelayMs`, when set, makes the plot rise out of the
+ * ground after that delay (mass burial, task 11.8).
+ */
+export function plotElement(grave: Grave, depth: number, displayNow: number, riseDelayMs?: number): HTMLElement {
   const stage = decayStage(grave.buriedAt, displayNow);
   const jitter = plotJitter(grave.id);
 
@@ -53,6 +57,10 @@ export function plotElement(grave: Grave, depth: number, displayNow: number): HT
   plot.style.setProperty('--d', String(depth));
   plot.style.setProperty('--tilt', `${jitter.tiltDeg}deg`);
   plot.style.setProperty('--jy', `${jitter.offsetPx}px`);
+  if (riseDelayMs !== undefined) {
+    plot.classList.add('rising');
+    plot.style.setProperty('--delay', `${riseDelayMs}ms`);
+  }
 
   const mound = document.createElement('span');
   mound.className = 'mound';

@@ -52,11 +52,11 @@ main { position: relative; }
 .fog {
   position: absolute; left: -50%; width: 200%; pointer-events: none;
   background:
-    radial-gradient(ellipse 18% 60% at 10% 60%, rgba(var(--fog), .26), transparent 70%),
-    radial-gradient(ellipse 22% 50% at 34% 50%, rgba(var(--fog), .2), transparent 70%),
-    radial-gradient(ellipse 16% 70% at 58% 65%, rgba(var(--fog), .24), transparent 70%),
-    radial-gradient(ellipse 24% 55% at 82% 55%, rgba(var(--fog), .2), transparent 70%),
-    linear-gradient(to top, transparent, rgba(var(--fog), .08) 45%, transparent);
+    radial-gradient(ellipse 18% 60% at 10% 60%, rgb(var(--fog) / .26), transparent 70%),
+    radial-gradient(ellipse 22% 50% at 34% 50%, rgb(var(--fog) / .2), transparent 70%),
+    radial-gradient(ellipse 16% 70% at 58% 65%, rgb(var(--fog) / .24), transparent 70%),
+    radial-gradient(ellipse 24% 55% at 82% 55%, rgb(var(--fog) / .2), transparent 70%),
+    linear-gradient(to top, transparent, rgb(var(--fog) / .08) 45%, transparent);
   animation: drift 70s linear infinite;
   transition: opacity 1.2s ease;
 }
@@ -67,9 +67,22 @@ main { position: relative; }
 @keyframes drift { from { transform: translateX(0); } to { transform: translateX(25%); } }
 /* Searching: the fog thins (task 11.6). */
 .scene.searching .fog { opacity: .18; }
+/* Mass burial: the fog rolls in thick (task 11.8). */
+.scene.fogroll .fog { opacity: 1; transition-duration: .7s; }
+.scene.fogroll .fog.f-near { opacity: .95; }
 
 .fence { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 58px; z-index: 70; pointer-events: none; }
 .fence-crow { position: absolute; right: 9%; bottom: 46px; width: 46px; z-index: 71; transform-origin: 60% 90%; }
+/* A crow flies across the moon during a mass burial. */
+.flyer { position: absolute; top: 10%; left: -80px; width: 64px; z-index: 5; pointer-events: none; opacity: 0; }
+.flyer.go { animation: fly 4.2s linear 1; }
+@keyframes fly {
+  0% { opacity: 0; transform: translate(0, 40px) scale(.8); }
+  6% { opacity: 1; }
+  50% { transform: translate(55vw, -10px) scale(.9); }
+  94% { opacity: 1; }
+  100% { opacity: 0; transform: translate(110vw, 20px) scale(.8); }
+}
 
 /* ------------------------------------------------------------------ camera, rows, plots */
 .camera {
@@ -95,8 +108,8 @@ main { position: relative; }
 .plot::after {
   content: ""; position: absolute; inset: -12% -16% -8%; pointer-events: none; z-index: 4;
   background:
-    radial-gradient(ellipse 75% 70% at 50% 60%, rgba(var(--fog), calc(var(--veil) * .9)) 0%, rgba(var(--fog), calc(var(--veil) * .7)) 55%, transparent 85%),
-    linear-gradient(to top, rgba(var(--fog), calc(var(--veil) * .55)), transparent 70%);
+    radial-gradient(ellipse 75% 70% at 50% 60%, rgb(var(--fog) / calc(var(--veil) * .9)) 0%, rgb(var(--fog) / calc(var(--veil) * .7)) 55%, transparent 85%),
+    linear-gradient(to top, rgb(var(--fog) / calc(var(--veil) * .55)), transparent 70%);
   transition: opacity .9s ease;
 }
 /* Searching: matches lose their veil and come clear; the rest fade to about 28%. */
@@ -113,10 +126,11 @@ main { position: relative; }
 }
 .scene-msg button { display: block; margin: 12px auto 0; font-family: Inter, sans-serif; font-style: normal; font-size: 14px; }
 
-/* Reduced motion: the fog stands still, the camera jumps without gliding, and
-   the search fades are instant. */
+/* Reduced motion: the fog stands still, the camera jumps without gliding, the
+   search fades are instant, and no crow flies. */
 @media (prefers-reduced-motion: reduce) {
   .fog { animation: none !important; transition: none; }
+  .flyer.go { animation: none !important; }
   .camera { transition: none; }
   .plot, .plot::after { transition: none; }
 }

@@ -1,13 +1,16 @@
 // Landscape view: graves from storage, sorted newest first, placed in rows by
 // layoutRows (Requirement 4.2). Back rows first in the DOM, as in the mockup.
+// Graves that are new since the last read rise in a mass burial (task 11.8).
 
 import { getGraves } from '../platform/storage.js';
 import { sortGraves } from '../core/decay.js';
 import { layoutRows } from '../core/layout.js';
 import type { RowLayout } from '../core/layout.js';
+import { riseDelays } from '../core/burial-motion.js';
 import type { Grave } from '../core/types.js';
 import { NO_GRAVES_TEXT } from '../core/copy.js';
 import { plotElement } from './stone.js';
+import { playMassBurial } from './mass-burial.js';
 
 const RESIZE_DEBOUNCE_MS = 200;
 
@@ -15,13 +18,10 @@ export interface LandscapeElements {
   scene: HTMLElement;
   camera: HTMLElement;
   message: HTMLElement;
+  /** The crow that crosses the moon during a mass burial. */
+  flyer: Element;
 }
 
-/**
- * `displayClock` gives the time the page displays with. Each render reads it
- * once, so decay stages and every "x ago" agree (the Demo clock in task 15.1
- * passes a shifted clock).
- */
 export interface Landscape {
   refresh(): Promise<void>;
   render(): void;
@@ -33,6 +33,13 @@ export interface Landscape {
   onRender(callback: () => void): void;
   /** Run whenever the graves are read, even when the landscape does not re-render (the List view). */
   onData(callback: () => void): void;
+  /** Run when a mass burial starts (the search is cleared, as in the mockup). */
+  onBurialStart(callback: () => void): void;
+  /**
+   * Hold storage-driven updates until the returned function is called, e.g.
+   * while our own "Bury idle tabs" request runs, so its graves rise together.
+   */
+  holdUpdates(): () => void;
   /**
    * Call before sending resurrect/exorcise for this grave. While it is
    * expected to leave, a storage change that only removes it does not
@@ -45,36 +52,46 @@ export interface Landscape {
   vacate(id: string, look: 'emptied' | 'gone'): void;
 }
 
-export function startLandscape(
-  els: LandscapeElements,
-  displayClock: () => number = () => Date.now(),
-): Landscape {
+/**
+ * `displayClock` gives the time the page displays with. Each render reads it
+ * once, so decay stages and every "x ago" agree (the Demo clock in task 15.1
+ * passes a shifted clock).
+ */
+export function startLandscape(els: LandscapeElements, displayClock: () => number = () => Date.now()): Landscape {
   let graves: Grave[] | null = null;
   const leaving = new Set<string>();
-  const renderListeners: Array<() => void> = [];
-  const dataListeners: Array<() => void> = [];
+  const listeners = { render: [] as Array<() => void>, data: [] as Array<() => void>, burial: [] as Array<() => void> };
+  let holds = 0;
+  let animating = false;
+  let refreshWaiting = false;
 
-  function render(): void {
+  function render(rising: ReadonlySet<string> = new Set()): void {
     if (graves === null) return; // not read yet: show neither graves nor the empty message
     leaving.clear(); // a re-render ends every soil or bare-ground plot
     const displayNow = displayClock();
     const sorted = sortGraves(graves);
+    const delays = riseDelays(sorted.map((g) => g.id), rising);
     const rows = layoutRows(sorted.length, els.scene.clientWidth, els.scene.clientHeight);
 
     let next = 0;
     const rowElements = rows.map((row) => {
       const items = sorted.slice(next, next + row.count);
       next += row.count;
-      return rowElement(row, items, displayNow);
+      return rowElement(row, items, displayNow, delays);
     });
     els.camera.replaceChildren(...rowElements.reverse());
 
     els.message.textContent = NO_GRAVES_TEXT;
     els.message.hidden = sorted.length > 0;
-    for (const listener of renderListeners) listener();
+    for (const listener of listeners.render) listener();
   }
 
   async function refresh(): Promise<void> {
+    // Storage-driven re-renders wait until a running animation (or a hold) ends.
+    if (animating || holds > 0) {
+      refreshWaiting = true;
+      return;
+    }
     let next: Grave[];
     try {
       next = await getGraves();
@@ -82,27 +99,61 @@ export function startLandscape(
       console.error('Could not read the graves; keeping the last view:', err);
       return;
     }
+    const known = graves === null ? null : new Set(graves.map((g) => g.id));
+    const arrived = new Set(known === null ? [] : next.filter((g) => !known.has(g.id)).map((g) => g.id));
     const onlyLeaversGone =
       graves !== null && leaving.size > 0 && sameGraves(graves.filter((g) => !leaving.has(g.id)), next);
     graves = next;
-    if (!onlyLeaversGone) render();
-    for (const listener of dataListeners) listener();
+    for (const listener of listeners.data) listener();
+
+    const visible = !els.scene.hidden && document.visibilityState === 'visible';
+    if (arrived.size > 0 && visible) {
+      animating = true;
+      for (const listener of listeners.burial) listener();
+      try {
+        await playMassBurial(els, arrived.size, () => render(arrived));
+      } finally {
+        animating = false;
+      }
+      if (refreshWaiting) {
+        refreshWaiting = false;
+        void refresh();
+      }
+    } else if (!onlyLeaversGone) {
+      render();
+    }
   }
 
   let resizeTimer: ReturnType<typeof setTimeout> | undefined;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(render, RESIZE_DEBOUNCE_MS);
+    resizeTimer = setTimeout(() => {
+      if (!animating) render();
+    }, RESIZE_DEBOUNCE_MS);
   });
 
   void refresh();
   return {
     refresh,
-    render,
+    render: () => render(),
     grave: (id) => graves?.find((g) => g.id === id),
     graves: () => graves ?? [],
-    onRender: (callback) => void renderListeners.push(callback),
-    onData: (callback) => void dataListeners.push(callback),
+    onRender: (callback) => void listeners.render.push(callback),
+    onData: (callback) => void listeners.data.push(callback),
+    onBurialStart: (callback) => void listeners.burial.push(callback),
+    holdUpdates() {
+      holds++;
+      let released = false;
+      return () => {
+        if (released) return;
+        released = true;
+        holds--;
+        if (holds === 0 && refreshWaiting) {
+          refreshWaiting = false;
+          void refresh();
+        }
+      };
+    },
     expectLeaving: (id) => void leaving.add(id),
     cancelLeaving: (id) => void leaving.delete(id),
     vacate(id, look) {
@@ -118,7 +169,7 @@ function sameGraves(a: Grave[], b: Grave[]): boolean {
   return a.length === b.length && key(a) === key(b);
 }
 
-function rowElement(row: RowLayout, graves: Grave[], displayNow: number): HTMLElement {
+function rowElement(row: RowLayout, graves: Grave[], displayNow: number, delays: Map<string, number>): HTMLElement {
   const el = document.createElement('div');
   el.className = 'row';
   el.dataset.s = String(row.scale);
@@ -127,6 +178,6 @@ function rowElement(row: RowLayout, graves: Grave[], displayNow: number): HTMLEl
   el.style.setProperty('--veil', String(row.veil));
   el.style.bottom = `${row.bottom}px`;
   el.style.zIndex = String(60 - row.index * 10);
-  for (const grave of graves) el.append(plotElement(grave, row.index, displayNow));
+  for (const grave of graves) el.append(plotElement(grave, row.index, displayNow, delays.get(grave.id)));
   return el;
 }

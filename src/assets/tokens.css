@@ -9,6 +9,8 @@
   --hill-far: #0c1424;
   --hill-near: #080d17;
   --ground: #070a10;
+  /* --fog and --moss are space-separated RGB: use rgb(var(--fog) / .5).
+     rgba(var(--fog), .5) mixes the two syntaxes and makes the whole declaration invalid. */
   --fog: 190 202 216;
   --bone: #ece6d8;
   --bone-dim: #b8b2a4;

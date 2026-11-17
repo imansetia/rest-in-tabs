@@ -82,9 +82,9 @@
 .stage-weathered .stone {
   transform: rotate(var(--tilt));
   background:
-    radial-gradient(circle at 18% 88%, rgba(var(--moss), .6) 0 16%, transparent 30%),
-    radial-gradient(circle at 82% 94%, rgba(var(--moss), .5) 0 13%, transparent 26%),
-    radial-gradient(circle at 10% 34%, rgba(var(--moss), .32) 0 7%, transparent 15%),
+    radial-gradient(circle at 18% 88%, rgb(var(--moss) / .6) 0 16%, transparent 30%),
+    radial-gradient(circle at 82% 94%, rgb(var(--moss) / .5) 0 13%, transparent 26%),
+    radial-gradient(circle at 10% 34%, rgb(var(--moss) / .32) 0 7%, transparent 15%),
     linear-gradient(165deg, var(--stone-1), var(--stone-2) 68%, var(--stone-edge));
 }
 /* Faded letters are the steering file's deliberate exception: the full text is
@@ -98,9 +98,9 @@
   padding-top: calc(42px * var(--s));
   clip-path: polygon(0% 22%, 10% 12%, 24% 6%, 38% 4%, 47% 10%, 53% 22%, 61% 15%, 70% 27%, 82% 24%, 100% 38%, 100% 100%, 0% 100%);
   background:
-    radial-gradient(circle at 16% 86%, rgba(var(--moss), .75) 0 22%, transparent 36%),
-    radial-gradient(circle at 86% 90%, rgba(var(--moss), .65) 0 18%, transparent 32%),
-    radial-gradient(circle at 30% 46%, rgba(var(--moss), .4) 0 9%, transparent 18%),
+    radial-gradient(circle at 16% 86%, rgb(var(--moss) / .75) 0 22%, transparent 36%),
+    radial-gradient(circle at 86% 90%, rgb(var(--moss) / .65) 0 18%, transparent 32%),
+    radial-gradient(circle at 30% 46%, rgb(var(--moss) / .4) 0 9%, transparent 18%),
     linear-gradient(165deg, #434a56, #2e343e 68%, #1c2028);
 }
 .stage-crumbling .stone > span:not(.fav) { opacity: .42; }
@@ -118,7 +118,16 @@
   border-radius: 50%; background: rgba(0, 0, 0, .45);
 }
 
-/* Reduced motion: no hover-glow transition. */
+/* new graves rise out of the ground (mass burial, task 11.8) */
+.plot.rising { clip-path: inset(-300% -80% 0 -80%); }
+.plot.rising .stone { animation: rise 1s cubic-bezier(.2, .8, .25, 1) both; animation-delay: var(--delay); }
+.plot.rising .mound, .plot.rising .rose { animation: pop .45s ease-out both; animation-delay: var(--delay); }
+@keyframes rise { from { transform: translateY(105%); } to { transform: translateY(0); } }
+@keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* Reduced motion: no hover-glow transition; new graves fade in instead of rising. */
 @media (prefers-reduced-motion: reduce) {
   .stone { transition: none; }
+  .plot.rising .stone, .plot.rising .mound, .plot.rising .rose { animation: fade .3s both !important; }
 }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }

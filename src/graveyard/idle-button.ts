@@ -9,7 +9,15 @@ import type { Toast } from './toast.js';
 
 const REFRESH_MS = 60_000;
 
-export function startIdleButton(button: HTMLButtonElement, toast: Toast): { refresh(): Promise<void> } {
+/**
+ * `holdUpdates` pauses the Landscape's storage-driven updates while the request
+ * runs, so all graves of this burial rise together in one mass burial.
+ */
+export function startIdleButton(
+  button: HTMLButtonElement,
+  toast: Toast,
+  holdUpdates: () => () => void,
+): { refresh(): Promise<void> } {
   let count: number | null = null;
   let busy = false;
   let latestRequest = 0;
@@ -38,7 +46,9 @@ export function startIdleButton(button: HTMLButtonElement, toast: Toast): { refr
     // A run can take a while (up to 2 s per tab), so say that it started.
     toast.show(WORKING_TEXT, { sticky: true });
 
+    const release = holdUpdates();
     const response = await sendMessage({ type: 'buryIdle' });
+    release();
 
     busy = false;
     toast.show(response.ok ? buryIdleResultText(response.count ?? 0) : errorText(response.error));
