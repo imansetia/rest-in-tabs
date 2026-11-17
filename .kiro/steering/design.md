@@ -84,13 +84,16 @@ A pure function in `src/core`. It picks the first rule that matches; it never in
 
 Layers from back to front: sky with a few stars, full moon (top right, soft blue glow), far and near hills, three bare trees, drifting fog bands, the graves, a low iron fence along the bottom edge with one crow on it.
 
+**Fit to the window.** The page never scrolls on first view: the header and the whole scene, fence included, fit in the window. The header's controls stay on one row at 1440 px and wider, with the Demo clock and "Enable AI epitaphs" both shown (the search field shrinks first, to 200 px). The scene fills the height left below the header, at least 460 px and at most 900 px; only a window shorter than that scrolls.
+
 **Rows.** Graves are sorted newest first. The newest stand in the front row; older ones stand further back, smaller and deeper in fog.
 
 - Base plot: 172 × 236 px, stone 196 px tall, scaled by the row factor `s`.
 - Row scales `s`: 1, 0.78, 0.62, 0.5, 0.41, 0.34. Fog veil per row: 0, 0.18, 0.35, 0.48, 0.56, 0.6.
 - Fog and moss colours are written `rgb(var(--fog) / A)` and `rgb(var(--moss) / A)`. Never `rgba(var(--fog), A)`: the tokens are space-separated, so that form is invalid and the browser drops the whole rule. Alphas: fog bands .18, .14, .17, .14 and .06; moss on Weathered stones .45, .38, .24; moss on Crumbling stones .56, .49, .3. Copy them from `design/mockup.html`.
-- The front row sits 58 px above the bottom. Each next row sits `236 × s × 0.7` px higher (`s` of the row in front). Before adding row `i > 0` at height `bottom`, stop if `bottom + 236 × s_i × 0.55 > 0.8 × sceneHeight`; the last row added holds the rest. (Same rule as `renderLandscape` in the mockup.)
+- The front row sits 58 px above the bottom. Each next row sits `236 × s × p` px higher (`s` of the row in front), where the row pitch `p = max(0.45, 0.7 × min(1, sceneHeight / 680))`: 0.7 in a scene 680 px or taller (as in the mockup), closer on a short laptop window so a third row still fits. Before adding row `i > 0` at height `bottom`, stop if `bottom + 236 × s_i × 0.55 > 0.8 × sceneHeight`; the last row added holds the rest. (Same rule as `renderLandscape` in the mockup.)
 - Front row capacity: `floor((width − 40) / 202)`, at least 2. Row `i` holds `max(front, floor(front / s) + i)`. A last row with fewer than 3 graves joins the row in front of it, unless the row in front is the front row and would then exceed its capacity; in that case it stays a row of its own. (The front row never grows wider than the scene; back rows may run slightly past the edges, where the fog hides them, and a lone stone never floats on the horizon.)
+- The last row never hides graves past the edges: when its stones at their normal spacing would be wider than the scene, they stand closer together, overlapping like an overcrowded old cemetery, so every grave stays in the scene and can be clicked or found by search. A matching grave during search is raised above its neighbours.
 - Farther rows: darker, less saturated, slightly blurred, and covered by a fog veil. **The front row is always clear.**
 - Small deterministic jitter (tilt, vertical offset) from a hash of the grave id, so the yard looks placed by hand but stays stable between renders.
 

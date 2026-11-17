@@ -1,6 +1,9 @@
 /* Graveyard page. Values copied from design/mockup.html. Search, view switch
    and Demo clock join the controls in tasks 11.6, 11.7 and 15.1. */
 
+/* Fit to the window: header, controls, then <main>, which takes the rest (scene.css). */
+body { display: flex; flex-direction: column; }
+
 /* ------------------------------------------------------------------ header */
 .top {
   display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between;
@@ -32,7 +35,15 @@
 .clock input { width: 120px; accent-color: var(--spectral-dim); }
 .clock output { min-width: 58px; color: var(--bone); font-variant-numeric: tabular-nums; }
 
-.search { position: relative; flex: 1 1 220px; max-width: 340px; }
+.search { position: relative; flex: 1 1 220px; max-width: 340px; min-width: 200px; }
+
+/* Fit to the window: from 1440 px the controls never wrap, even with the Demo
+   clock and "Enable AI epitaphs" shown. Only the search field gives way, down to 200 px. */
+@media (min-width: 1440px) {
+  .controls, .controls-end { flex-wrap: nowrap; }
+  .controls > :not(.search) { flex-shrink: 0; }
+  .search { flex-basis: 340px; }
+}
 .search input {
   width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--line);
   background: var(--panel); color: var(--text);

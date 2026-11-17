@@ -1,10 +1,14 @@
 /* Landscape scene, copied from design/mockup.html. Search, mass burial,
    exorcise and stone details add their own rules in tasks 11.4 to 11.10. */
 
-main { position: relative; }
+/* Fit to the window (design steering file): the page is a column (graveyard.css)
+   and the scene fills the height left below the header, 460 to 900 px. This
+   replaces the mockup's clamp(540px, 100vh - 150px, 900px), which guessed the
+   header's height. */
+main { position: relative; flex: 1 0 auto; display: flex; flex-direction: column; }
 .scene {
   position: relative; overflow: hidden;
-  height: clamp(540px, calc(100vh - 150px), 900px);
+  flex: 1 0 0; min-height: 460px; max-height: 900px;
   background:
     radial-gradient(ellipse 60% 40% at 80% 12%, rgba(120, 150, 200, .12), transparent 70%),
     linear-gradient(to bottom, var(--sky-1) 0%, var(--sky-2) 42%, var(--sky-3) 64%, var(--hill-far) 66%);

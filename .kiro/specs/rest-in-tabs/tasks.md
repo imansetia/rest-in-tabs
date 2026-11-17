@@ -214,8 +214,10 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - [x] 13.4 Add excerpt pruning in the service-worker alarm handler (separate step from `expiredGraves`): remove `excerpt` from any Grave where `now - buriedAt > 7 * 24 * 60 * 60 * 1000`  
     - _Requirements: 3.4_
 
-- [ ] 14. Checkpoint: full manual test
+- [x] 14. Checkpoint: full manual test
   - Load unpacked in Chrome and Edge; run the manual checks from the design's Testing Strategy; ask the user about anything that fails.
+  - Result: everything passed in Chrome 157 and Edge 157. The one failure (the page scrolled on first view at 1536x650 CSS px with the Demo clock and "Enable AI epitaphs" shown) was fixed by the steering file's "Fit to the window" rule.
+  - Note: on the test device the Chrome Summarizer reports "unavailable", and Chrome logs "The model was available but there was not an execution config available for the feature." as a warning on every check. This is browser behaviour, not the extension's; the fallback epitaphs stay, as designed.
 
 - [ ] 15. Demo helpers
   - [x] 15.1 Demo clock

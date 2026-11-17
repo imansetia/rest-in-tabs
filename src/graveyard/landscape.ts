@@ -39,6 +39,9 @@ export function startLandscape(els: LandscapeElements, displayClock: () => numbe
     for (const resolve of waiters) resolve();
   }
 
+  const sceneSize = () => `${els.scene.clientWidth}x${els.scene.clientHeight}`;
+  let renderedSize = '';
+
   function render(rising: ReadonlySet<string> = new Set()): void {
     if (graves === null) return; // not read yet: show neither graves nor the empty message
     leaving.clear(); // a re-render ends every soil or bare-ground plot
@@ -46,6 +49,7 @@ export function startLandscape(els: LandscapeElements, displayClock: () => numbe
     const sorted = sortGraves(graves);
     const delays = riseDelays(sorted.map((g) => g.id), rising);
     const rows = layoutRows(sorted.length, els.scene.clientWidth, els.scene.clientHeight);
+    renderedSize = sceneSize();
 
     // A live update (e.g. an AI epitaph) replaces every stone: keep focus on the same grave.
     const focusedId = document.activeElement?.closest<HTMLElement>('#camera .plot')?.dataset.id;
@@ -120,10 +124,14 @@ export function startLandscape(els: LandscapeElements, displayClock: () => numbe
   const relayout = () => {
     resizeTimer = animating || holds > 0 ? setTimeout(relayout, RESIZE_DEBOUNCE_MS) : (render(), undefined);
   };
-  window.addEventListener('resize', () => {
+  // The scene fills the window below the header, so its size changes on a
+  // window resize and also when the header wraps (the Demo clock or the AI
+  // button appearing). Lay out again whenever it differs from the last render.
+  new ResizeObserver(() => {
+    if (els.scene.hidden || sceneSize() === renderedSize) return;
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(relayout, RESIZE_DEBOUNCE_MS);
-  });
+  }).observe(els.scene);
 
   void refresh();
   return {
