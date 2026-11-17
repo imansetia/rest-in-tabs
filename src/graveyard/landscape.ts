@@ -129,6 +129,10 @@ export function startLandscape(els: LandscapeElements, displayClock: () => numbe
   return {
     refresh,
     render: () => render(),
+    renderWhenIdle() {
+      clearTimeout(resizeTimer);
+      relayout();
+    },
     grave: (id) => graves?.find((g) => g.id === id),
     graves: () => graves ?? [],
     onRender: (callback) => void listeners.render.push(callback),

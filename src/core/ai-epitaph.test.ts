@@ -40,6 +40,16 @@ describe('cleanAiEpitaph', () => {
     expect(cleanAiEpitaph('* A room in Ribeira.')).toBe('A room in Ribeira.');
     expect(cleanAiEpitaph('1. Lab-tested reviews\n of 40 keyboards.')).toBe('Lab-tested reviews of 40 keyboards.');
     expect(cleanAiEpitaph('“Select a parent element.”')).toBe('Select a parent element.');
+    expect(cleanAiEpitaph('"Select a parent element."')).toBe('Select a parent element.');
+    expect(cleanAiEpitaph("- 'Thin crust, slow rise.'")).toBe('Thin crust, slow rise.');
+  });
+
+  it('keeps the quotes when another quote of the same kind is inside', () => {
+    expect(cleanAiEpitaph('"A" and "B"')).toBe('"A" and "B"');
+    expect(cleanAiEpitaph('“Dune” versus “Foundation”')).toBe('“Dune” versus “Foundation”');
+    expect(cleanAiEpitaph("'Twas the night, wasn't it'")).toBe("'Twas the night, wasn't it'");
+    expect(cleanAiEpitaph('"Half a quote')).toBe('"Half a quote');
+    expect(cleanAiEpitaph('"')).toBe('"');
     expect(cleanAiEpitaph('   ')).toBe('');
     expect(cleanAiEpitaph(' - ')).toBe(''); // a bullet with nothing after it
     expect(cleanAiEpitaph('-40% on keyboards today.')).toBe('-40% on keyboards today.'); // not a bullet

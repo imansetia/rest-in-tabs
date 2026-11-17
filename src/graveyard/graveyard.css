@@ -23,6 +23,15 @@
   padding: 10px 24px 14px; border-bottom: 1px solid var(--line); background: var(--sky-1);
 }
 
+/* The AI button and "Bury idle tabs" stay together at the right end, also
+   when the row wraps (the mockup's spacer did this with one button). */
+.controls-end { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px 14px; margin-left: auto; }
+
+/* Demo clock (task 15.1), from the mockup */
+.clock { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+.clock input { width: 120px; accent-color: var(--spectral-dim); }
+.clock output { min-width: 58px; color: var(--bone); font-variant-numeric: tabular-nums; }
+
 .search { position: relative; flex: 1 1 220px; max-width: 340px; }
 .search input {
   width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--line);
@@ -47,4 +56,6 @@
 
 @media (max-width: 640px) {
   .top, .controls { padding-left: 16px; padding-right: 16px; }
+  /* Narrow: every control starts at the left, one column. */
+  .controls-end { margin-left: 0; justify-content: flex-start; }
 }

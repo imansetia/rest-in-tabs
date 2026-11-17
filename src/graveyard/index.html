@@ -43,10 +43,17 @@
         <button type="button" id="th-night" aria-pressed="false">Night</button>
         <button type="button" id="th-dusk" aria-pressed="false">Dusk</button>
       </div>
-      <span class="spacer"></span>
-      <!-- Shown only when the on-device model can be downloaded (task 13). -->
-      <button type="button" class="btn" id="ai-enable" hidden>Enable AI epitaphs</button>
-      <button type="button" class="btn primary" id="bury-idle">Bury idle tabs</button>
+      <!-- Shown only while the Demo setting is on (task 15.1). -->
+      <label class="clock" id="clock-wrap" hidden>Demo clock
+        <input id="clock" type="range" min="0" max="14" step="1" value="0" />
+        <output id="clock-out" for="clock">+0 days</output>
+      </label>
+      <!-- Kept together at the right end, so they wrap as one group. -->
+      <div class="controls-end">
+        <!-- Shown only when the on-device model can be downloaded (task 13). -->
+        <button type="button" class="btn" id="ai-enable" title="Downloads the browser's built-in AI model once. Summaries are written on this device." hidden>Enable AI epitaphs</button>
+        <button type="button" class="btn primary" id="bury-idle">Bury idle tabs</button>
+      </div>
     </div>
 
     <main>

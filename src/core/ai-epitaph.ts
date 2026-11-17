@@ -32,17 +32,28 @@ export function gravesToUpgrade(graves: readonly Grave[]): Grave[] {
   return graves.filter((g) => typeof g.excerpt === 'string' && g.excerpt.trim() !== '').sort((a, b) => b.buriedAt - a.buriedAt);
 }
 
+/** Quote pairs the model may wrap a summary in: opening → closing. */
+const QUOTE_PAIRS: Readonly<Record<string, string>> = { '"': '"', '“': '”', "'": "'", '‘': '’' };
+
+/**
+ * Drop one pair of quotes around the whole text, but only when no other quote
+ * of the same kind is inside, so '"A" and "B"' stays as it is.
+ */
+function unwrapQuotes(text: string): string {
+  const close = QUOTE_PAIRS[text[0]];
+  if (close === undefined || text.length < 2 || text[text.length - 1] !== close) return text;
+  const inner = text.slice(1, -1);
+  return inner.includes(text[0]) || inner.includes(close) ? text : inner;
+}
+
 /**
  * The Epitaph from a summary: a leading list marker or wrapping quotes are
  * dropped (the model may still format a one-line summary as a bullet), then the
  * same rules as fallbackEpitaph apply. '' means there is nothing to use.
  */
 export function cleanAiEpitaph(summary: string): string {
-  const text = summary
-    .trim()
-    .replace(/^(?:[-*•]|\d+[.)])(?:\s+|$)/, '')
-    .replace(/^["“'](.*)["”']$/s, '$1');
-  return cleanEpitaphText(text);
+  const text = summary.trim().replace(/^(?:[-*•]|\d+[.)])(?:\s+|$)/, '').trim();
+  return cleanEpitaphText(unwrapQuotes(text));
 }
 
 const EXCERPT_MAX_AGE_MS = EXCERPT_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;

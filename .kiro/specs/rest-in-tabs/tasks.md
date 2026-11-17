@@ -218,7 +218,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - Load unpacked in Chrome and Edge; run the manual checks from the design's Testing Strategy; ask the user about anything that fails.
 
 - [ ] 15. Demo helpers
-  - [ ] 15.1 Demo clock
+  - [x] 15.1 Demo clock
     - A range input of 0 to 14 days, labelled "+N days", shown only while `settings.demo` is on
     - It shifts `displayNow`, so decay stages and every "x ago" text move together
     - Kept in page memory only and reset to 0 when Demo is turned off; never sent to the service worker or stored

@@ -15,6 +15,8 @@ import { startList } from './list.js';
 import { startViewSwitch } from './view-switch.js';
 import { createGraveFocus } from './grave-focus.js';
 import { startAiEpitaphs } from './ai-epitaphs.js';
+import { startDemoClock } from './demo-clock.js';
+import { demoNow } from '../core/demo-clock.js';
 
 function byId<T extends HTMLElement = HTMLElement>(id: string): T {
   const el = document.getElementById(id);
@@ -60,8 +62,10 @@ const stats = startStats({
 // Landscape
 // ---------------------------------------------------------------------------
 
-// One clock for everything the page displays (the Demo clock shifts it in task 15.1).
-const displayClock = () => Date.now();
+// One clock for everything the page displays. The Demo clock (task 15.1) moves
+// it forward; burial, expiry and stats in the service worker use the real time.
+let demoDays = 0;
+const displayClock = () => demoNow(Date.now(), demoDays);
 
 const landscape = startLandscape(
   { scene: byId('scene'), camera: byId('camera'), message: byId('scene-msg'), flyer: byId('flyer') },
@@ -157,6 +161,17 @@ byId('camera').addEventListener('click', (event) => {
   const grave = id === undefined ? undefined : landscape.grave(id);
   if (stone && grave) plaque.open(grave, stone);
 });
+
+// Demo clock: moving it closes the Plaque and re-renders without animation; the
+// List view follows through the search's apply after the render.
+startDemoClock(
+  { root: byId('clock-wrap'), input: byId<HTMLInputElement>('clock'), output: byId<HTMLOutputElement>('clock-out') },
+  (days) => {
+    demoDays = days;
+    plaque.close(false);
+    landscape.renderWhenIdle();
+  },
+);
 
 // On-device AI epitaphs (task 13): the button shows only when the model can be downloaded.
 startAiEpitaphs({ button: byId<HTMLButtonElement>('ai-enable'), toast, graves: () => landscape.graves(), onData: (cb) => landscape.onData(cb) });

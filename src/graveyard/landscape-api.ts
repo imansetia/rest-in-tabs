@@ -13,6 +13,11 @@ export interface LandscapeElements {
 export interface Landscape {
   refresh(): Promise<void>;
   render(): void;
+  /**
+   * Render now, or as soon as no animation or hold is running (the Demo clock:
+   * a re-render must not replace a stone under a ghost, a bolt or rising graves).
+   */
+  renderWhenIdle(): void;
   /** The grave shown with this id, if any. */
   grave(id: string): Grave | undefined;
   /** All graves currently known (empty until the first read). */
