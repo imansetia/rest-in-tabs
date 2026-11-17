@@ -1,5 +1,6 @@
 # Never add .kiro here: the hackathon rules require it in the repo.
 node_modules/
 dist/
+rest-in-tabs.zip
 *.log
 .env
