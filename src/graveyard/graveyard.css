@@ -33,6 +33,8 @@
 /* ------------------------------------------------------------------ toast */
 .toast {
   position: fixed; z-index: 140; left: 50%; bottom: 24px; transform: translate(-50%, 20px);
+  /* left: 50% alone would leave it half the viewport, so short toasts wrapped at 360 px. */
+  width: max-content; max-width: calc(100vw - 32px);
   padding: 10px 16px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line);
   opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s;
 }

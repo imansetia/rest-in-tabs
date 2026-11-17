@@ -814,7 +814,8 @@ dialog .actions { display: flex; justify-content: flex-end; gap: 10px; }
     }
     // Newest graves rise first: the front row, then the ones behind it.
     const riseOrder = new Map(sorted.filter((g) => risingIds.has(g.id)).map((g, i) => [g.id, i]));
-    camera.innerHTML = rows.filter((r) => r.items.length).reverse().map((r) => {
+    // Front row first in page order, so Tab reaches the newest graves first; rows stack by z-index.
+    camera.innerHTML = rows.filter((r) => r.items.length).map((r) => {
       const bottom = r.bottom;
       const plots = r.items.map((g) => {
         const isNew = riseOrder.has(g.id);

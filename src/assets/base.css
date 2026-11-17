@@ -3,6 +3,15 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
+html { background: var(--sky-1); }
+
+/* Theme on load. tokens.css already follows the system before any script runs.
+   A saved choice that differs from the system is only known once storage has
+   been read (a few milliseconds), so until then only the page background shows
+   and the other theme never flashes. theme.ts sets data-theme-ready; whatever
+   happens, the page shows after 0.3 s (a step, not motion). */
+html:not([data-theme-ready]) body { visibility: hidden; animation: theme-wait 0s .3s forwards; }
+@keyframes theme-wait { to { visibility: visible; } }
 body {
   background: var(--sky-1);
   color: var(--text);

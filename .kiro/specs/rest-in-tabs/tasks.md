@@ -180,7 +180,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - "Last buried" with the newest epitaph; "Open the graveyard"
     - No animation
     - _Requirements: 2.2, 2.3, 2.4, 9.3, 9.4, 9.7_
-  - [ ] 11.12 Accessibility and layout pass
+  - [x] 11.12 Accessibility and layout pass
     - Keyboard-only run through every action; `--spectral` focus ring; decorations hidden from screen readers
     - AA contrast in Night and Dusk
     - 360 px width

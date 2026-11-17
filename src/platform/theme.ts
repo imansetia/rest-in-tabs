@@ -33,12 +33,20 @@ export function startTheme(onApply: (theme: Theme) => void = () => {}): ThemeCon
   };
 
   apply();
+  // base.css shows only the background until the saved choice is known (no flash of the other theme).
+  const ready = () => {
+    document.documentElement.dataset.themeReady = '';
+  };
   chrome.storage.local.get(STORAGE_KEYS.theme).then(
     (result) => {
       stored = parseTheme(result[STORAGE_KEYS.theme]);
       apply();
+      ready();
     },
-    (err: unknown) => console.error('Could not read the theme; following the system:', err),
+    (err: unknown) => {
+      console.error('Could not read the theme; following the system:', err);
+      ready();
+    },
   );
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'local' || !(STORAGE_KEYS.theme in changes)) return;

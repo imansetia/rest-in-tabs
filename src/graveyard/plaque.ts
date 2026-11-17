@@ -1,7 +1,8 @@
 // Plaque: the details of one grave, with Resurrect and Exorcise (Requirements 4.8, 4.9).
 // Behaviour as in design/mockup.html:
 // - opens on a stone, focus moves to Resurrect; another stone switches it;
-// - closes with ×, Esc or a click anywhere outside it; × and Esc return focus to the stone;
+// - closes with ×, Esc or a click anywhere outside it; × and Esc return focus to
+//   the stone; a click outside leaves focus where the user clicked (task 11.12);
 // - clicks (and Esc) inside the Exorcise confirmation leave it open.
 
 import type { Grave } from '../core/types.js';

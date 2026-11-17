@@ -13,6 +13,7 @@ import { graveActions } from './actions.js';
 import { startSearch } from './search.js';
 import { startList } from './list.js';
 import { startViewSwitch } from './view-switch.js';
+import { createGraveFocus } from './grave-focus.js';
 
 function byId<T extends HTMLElement = HTMLElement>(id: string): T {
   const el = document.getElementById(id);
@@ -81,6 +82,7 @@ const actions = graveActions(
   { dialog: confirmDialog, text: byId('cf-text'), keep: byId<HTMLButtonElement>('cf-keep'), go: byId<HTMLButtonElement>('cf-go') },
   () => plaque,
   { scene: byId('scene'), flash: byId('flash'), crow: byId('fence-crow') },
+  createGraveFocus({ scene: byId('scene'), camera: byId('camera'), listBody: byId('list-body'), fallback: byId('q') }),
 );
 const plaque = createPlaque(
   {

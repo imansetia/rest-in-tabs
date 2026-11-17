@@ -28,6 +28,13 @@ const TEXT = ['text', 'muted', 'bone', 'bone-dim', 'spectral', 'danger'];
 const SURFACES = ['sky-1', 'panel', 'panel-2'];
 
 describe('colour tokens', () => {
+  it('the light-system default (before any script) is exactly the Dusk block', () => {
+    const early = block(':root:not([data-theme])');
+    expect(tokensCss).toMatch(/@media \(prefers-color-scheme: light\) \{\s*:root:not\(\[data-theme\]\) \{/);
+    expect(early).toEqual(block('[data-theme="dusk"]'));
+    expect(Object.keys(early).length).toBeGreaterThan(5);
+  });
+
   it('match the steering file table', () => {
     expect(themes.night['sky-1']).toBe('#03050b');
     expect(themes.dusk['sky-1']).toBe('#121a2b');

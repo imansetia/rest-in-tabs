@@ -18,6 +18,24 @@ export function faviconSrc(extensionBase: string, pageUrl: string, size: number)
   return url.toString();
 }
 
+/**
+ * A page that never has an icon (the .invalid top-level domain is reserved and
+ * never resolves). For pages without a stored icon the _favicon endpoint does
+ * not fail: it serves the browser's generic placeholder, the same image every
+ * time. The placeholder for this page is the reference to compare against.
+ */
+export const NO_ICON_PAGE_URL = 'https://no-icon.invalid/';
+
+/**
+ * Same image, pixel for pixel (RGBA bytes from a canvas). Used to tell the
+ * browser's placeholder apart from a real favicon, so the letter shows instead.
+ */
+export function samePixels(a: ArrayLike<number>, b: ArrayLike<number>): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  return true;
+}
+
 /** First character of the domain after a leading "www.", upper-cased (mockup: initial). */
 export function letterFor(domain: string): string {
   const first = [...domain.replace(/^www\./i, '')][0];

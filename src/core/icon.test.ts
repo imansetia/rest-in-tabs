@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { faviconSrc, letterFor, discColor, DISC_COLORS, DISC_LETTER_COLOR } from './icon.js';
+import * as fc from 'fast-check';
+import { faviconSrc, letterFor, discColor, samePixels, NO_ICON_PAGE_URL, DISC_COLORS, DISC_LETTER_COLOR } from './icon.js';
 import { contrast } from './contrast.js';
 
 describe('faviconSrc', () => {
@@ -17,6 +18,29 @@ describe('faviconSrc', () => {
     expect(url.searchParams.get('pageUrl')).toBe(page);
     expect(url.searchParams.get('size')).toBe('32');
     expect(url.searchParams.getAll('x')).toEqual([]); // the page's own query stays inside pageUrl
+  });
+});
+
+describe('samePixels', () => {
+  it('is true only for identical pixel data', () => {
+    expect(samePixels([1, 2, 3, 255], [1, 2, 3, 255])).toBe(true);
+    expect(samePixels(new Uint8ClampedArray([0, 0, 0, 0]), [0, 0, 0, 0])).toBe(true);
+    expect(samePixels([1, 2, 3, 255], [1, 2, 4, 255])).toBe(false);
+    expect(samePixels([1, 2, 3, 255], [1, 2, 3])).toBe(false); // a different size is a different image
+  });
+
+  it('agrees with element-wise equality', () => {
+    fc.assert(
+      fc.property(fc.uint8Array({ maxLength: 64 }), fc.uint8Array({ maxLength: 64 }), (a, b) => {
+        expect(samePixels(a, b)).toBe(a.length === b.length && a.every((v, i) => v === b[i]));
+        expect(samePixels(a, Uint8Array.from(a))).toBe(true);
+      }),
+      { numRuns: 200 },
+    );
+  });
+
+  it('uses a reserved domain that can never have an icon', () => {
+    expect(new URL(NO_ICON_PAGE_URL).hostname.endsWith('.invalid')).toBe(true);
   });
 });
 

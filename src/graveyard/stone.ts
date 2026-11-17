@@ -8,14 +8,15 @@ import { plotJitter } from '../core/layout.js';
 import { causeOfDeath } from '../core/cause.js';
 import { stoneName, stoneDates, stoneLabel } from '../core/stone-text.js';
 import { letterFor, discColor } from '../core/icon.js';
-import { iconSrc } from '../platform/favicon.js';
+import { iconSrc, isMissingIcon } from '../platform/favicon.js';
 import { decoration } from './decorations.js';
 
 /**
  * The grave's icon: Chrome's _favicon image over the first letter of the domain
- * on a muted disc (Requirement 4.12). The image appears once it has loaded; if
- * it fails it is removed, so the letter shows. Also used by the Plaque, the List
- * view and the Resurrect ghost (tasks 11.5 to 11.9).
+ * on a muted disc (Requirement 4.12). The image appears once it has loaded and
+ * proved to be a real favicon. If it fails, or it is the browser's generic
+ * placeholder (served for pages with no stored icon), it is removed, so the
+ * letter shows. Also used by the List view and the Resurrect ghost.
  */
 export function medallion(grave: Pick<Grave, 'url' | 'domain'>, className = 'fav'): HTMLElement {
   const disc = document.createElement('span');
@@ -26,7 +27,11 @@ export function medallion(grave: Pick<Grave, 'url' | 'domain'>, className = 'fav
 
   const img = document.createElement('img');
   img.alt = '';
-  img.addEventListener('load', () => img.classList.add('ok'), { once: true });
+  img.addEventListener(
+    'load',
+    () => void isMissingIcon(img).then((missing) => (missing ? img.remove() : img.classList.add('ok'))),
+    { once: true },
+  );
   img.addEventListener('error', () => img.remove(), { once: true });
   img.src = iconSrc(grave.url);
   disc.append(img);

@@ -48,3 +48,23 @@
   --panel-2: #1c2638;
   --line: #3a4559;
 }
+
+/* Before any script has run, follow the system: Dusk when it prefers light
+   (steering: "Default: Dusk when the system prefers light, otherwise Night").
+   Same values as the Dusk block above (tokens.test.ts checks they match), so a
+   light-system computer never paints Night first. The scripts set data-theme. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --sky-1: #121a2b;
+    --sky-2: #222c42;
+    --sky-3: #3a4561;
+    --hill-far: #1a2336;
+    --hill-near: #121a29;
+    --ground: #0f1520;
+    --stone-1: #5c6474;
+    --stone-2: #464d5b;
+    --panel: #151d2c;
+    --panel-2: #1c2638;
+    --line: #3a4559;
+  }
+}

@@ -112,7 +112,7 @@ The condition is also shown as a text label ("Fresh", "Weathered", "Crumbling") 
 
 **Plaque (grave details).** Clicking a stone opens a plaque at the bottom of the scene: title, domain, epitaph, cause of death, last visited, buried (date and "x ago"), condition, and two buttons, **Resurrect** (primary) and **Exorcise**. It closes with ×, with Esc, or with a click anywhere outside it. Clicking another stone switches the plaque to that grave. Clicks inside the confirm dialog do not close it. Focus moves to Resurrect on open and back to the stone on close with × or Esc.
 
-**Search.** Matches title, domain or epitaph, ignoring case and surrounding spaces, 180 ms after typing stops. The fog thins, non-matching graves fade to about 28%, matching graves lose their veil, and the view glides (1.1 s) toward the first match, enlarging it up to 1.9× so a far grave comes forward. Clearing the search resets the view.
+**Search.** Matches title, domain or epitaph, ignoring case and surrounding spaces, 180 ms after typing stops. The fog thins, non-matching graves fade to about 28%, matching graves lose their veil, and the view glides (1.1 s) toward the newest match, enlarging it up to 1.9× so a far grave comes forward. (Rows are in the page front row first, so Tab reaches the newest graves first; rows stack visually by z-index, not by page order.) Clearing the search resets the view.
 
 **List view.** A switch Landscape / List. The list is a table: tab (favicon, title, domain), epitaph, cause of death, buried ("x ago", full date on hover), condition, actions (Resurrect, Exorcise). Sort: newest first, oldest first, name. It carries all serious searching; the landscape is for atmosphere.
 
