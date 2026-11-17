@@ -7,6 +7,7 @@ import type { Theme } from '../core/types.js';
 import { createToast } from './toast.js';
 import { startStats } from './stats.js';
 import { startIdleButton } from './idle-button.js';
+import { startLandscape } from './landscape.js';
 
 function byId<T extends HTMLElement = HTMLElement>(id: string): T {
   const el = document.getElementById(id);
@@ -50,9 +51,20 @@ const stats = startStats({
 
 const idleButton = startIdleButton(byId<HTMLButtonElement>('bury-idle'), toast);
 
+// ---------------------------------------------------------------------------
+// Landscape
+// ---------------------------------------------------------------------------
+
+const landscape = startLandscape({
+  scene: byId('scene'),
+  camera: byId('camera'),
+  message: byId('scene-msg'),
+});
+
 // Live updates (Requirement 4.7). Settings changes (threshold, protected
 // sites) change the idle count as well as graves do.
 onStorageChanged((keys) => {
   if (keys.includes('stats')) void stats.refresh();
+  if (keys.includes('graves')) void landscape.refresh();
   if (keys.includes('graves') || keys.includes('settings')) void idleButton.refresh();
 });

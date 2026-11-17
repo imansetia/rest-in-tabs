@@ -123,7 +123,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - The toast live region; live updates via `onStorageChanged`
     - Reduced motion: toasts appear without sliding
     - _Requirements: 2.2, 4.7, 4.10, 7.1, 7.2, 9.5_
-  - [ ] 11.3 Scene and row layout
+  - [x] 11.3 Scene and row layout
     - Static scene layers: sky with stars, moon, hills, three trees, fog bands, fence with a crow
     - `layoutRows` and `plotJitter` in `src/core`, with unit tests for row capacities, the 80% stop and folding a short last row
     - Rows rendered newest first, front row clear, back rows veiled

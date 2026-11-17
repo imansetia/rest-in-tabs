@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../assets/tokens.css" />
     <link rel="stylesheet" href="../assets/base.css" />
     <link rel="stylesheet" href="./graveyard.css" />
+    <link rel="stylesheet" href="./scene.css" />
     <script type="module" src="./graveyard.ts"></script>
   </head>
   <body>
@@ -33,7 +34,40 @@
       <button type="button" class="btn primary" id="bury-idle">Bury idle tabs</button>
     </div>
 
-    <main id="main"></main>
+    <main>
+      <section class="scene" id="scene" aria-label="Graveyard, landscape view">
+        <div class="stars" aria-hidden="true"></div>
+        <div class="moon" aria-hidden="true"></div>
+        <svg class="hills" viewBox="0 0 1440 320" preserveAspectRatio="none" aria-hidden="true">
+          <path class="far" d="M0 200 C180 140 360 160 520 182 C700 206 820 128 1000 140 C1160 152 1300 196 1440 172 L1440 320 L0 320Z"/>
+          <path class="near" d="M0 250 C200 214 380 234 560 244 C760 254 900 208 1080 218 C1240 228 1340 250 1440 240 L1440 320 L0 320Z"/>
+        </svg>
+        <div class="ground" aria-hidden="true"></div>
+        <svg class="tree t3" viewBox="0 0 200 300" aria-hidden="true"><g fill="none" stroke-linecap="round"><path d="M100 300 C98 250 102 210 96 170" stroke-width="14"/><path d="M97 190 C80 160 60 150 40 120" stroke-width="7"/><path d="M99 175 C120 150 140 140 160 112" stroke-width="7"/><path d="M96 170 C96 140 92 112 100 80" stroke-width="6"/></g></svg>
+        <svg class="tree t1" viewBox="0 0 200 300" aria-hidden="true"><g fill="none" stroke-linecap="round"><path d="M100 300 C98 250 102 210 96 170" stroke-width="14"/><path d="M97 190 C80 160 60 150 40 120" stroke-width="7"/><path d="M60 148 C50 130 48 112 52 96" stroke-width="4"/><path d="M99 175 C120 150 140 140 160 112" stroke-width="7"/><path d="M140 138 C150 120 168 112 182 108" stroke-width="3.5"/><path d="M96 170 C96 140 92 112 100 80" stroke-width="6"/><path d="M99 110 C112 96 120 80 118 60" stroke-width="3.5"/><path d="M100 96 C88 84 80 70 78 52" stroke-width="3"/><path d="M44 124 C34 118 24 118 14 122" stroke-width="2.5"/><path d="M158 116 C164 100 162 88 156 76" stroke-width="2.5"/><path d="M118 62 C124 52 132 48 140 46" stroke-width="2"/></g></svg>
+        <svg class="tree t2" viewBox="0 0 200 300" aria-hidden="true"><g fill="none" stroke-linecap="round"><path d="M100 300 C100 240 96 200 104 150" stroke-width="12"/><path d="M102 200 C84 176 66 168 46 146" stroke-width="6"/><path d="M104 160 C124 136 146 128 168 98" stroke-width="6"/><path d="M104 150 C102 120 108 96 98 70" stroke-width="5"/><path d="M60 158 C52 140 52 126 58 110" stroke-width="3"/><path d="M98 76 C86 66 82 54 84 40" stroke-width="2.5"/></g></svg>
+
+        <div class="fog f-far" aria-hidden="true"></div>
+        <div class="fog f-mid" aria-hidden="true"></div>
+        <div class="camera" id="camera"></div>
+        <div class="fog f-near" aria-hidden="true"></div>
+
+        <svg class="fence" aria-hidden="true" preserveAspectRatio="none">
+          <defs>
+            <pattern id="bars" width="26" height="58" patternUnits="userSpaceOnUse">
+              <rect x="11" y="12" width="4" height="46" fill="#05070b"/>
+              <path d="M13 1 L18 12 L8 12Z" fill="#05070b"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="58" fill="url(#bars)"/>
+          <rect y="22" width="100%" height="4" fill="#05070b"/>
+          <rect y="48" width="100%" height="10" fill="#05070b"/>
+        </svg>
+        <svg class="fence-crow" id="fence-crow" viewBox="0 0 60 50" aria-hidden="true"><path d="M8 30 C10 22 18 18 26 19 C30 12 38 10 44 14 L55 13 L46 18 C48 24 46 32 38 36 L40 47 M33 37 L32 47" fill="#04060a" stroke="#04060a" stroke-width="2"/><path d="M8 30 C4 31 2 34 1 38 C6 35 12 34 18 32" fill="#04060a"/><circle cx="42" cy="16" r="1.3" fill="#9aa3b0"/></svg>
+
+        <p class="scene-msg" id="scene-msg" hidden></p>
+      </section>
+    </main>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </body>

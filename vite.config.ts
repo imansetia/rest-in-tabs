@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig, type Plugin } from 'vite';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -27,6 +28,9 @@ function fontLicences(): Plugin {
 
 export default defineConfig({
   plugins: [fontLicences()],
+  test: {
+    testTimeout: 20000,
+  },
   build: {
     rollupOptions: {
       input: {

@@ -22,6 +22,8 @@ const BLOCK_TEXT: Record<ManualBlockReason, string> = {
 export const WORKING_TEXT = 'Working…';
 export const BURY_TAB_DONE_TEXT = 'Tab buried.';
 export const COUNT_UNAVAILABLE_TEXT = 'Could not read the graveyard.';
+/** Graveyard empty state (Requirement 4.5). */
+export const NO_GRAVES_TEXT = 'Nothing has died here yet. Give it time.';
 
 export function errorText(code: ErrorCode): string {
   return ERROR_TEXT[code];
