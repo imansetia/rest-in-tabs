@@ -1,8 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { stoneDate, stoneDates, timeAgo, stoneName, stoneLabel, STAGE_LABEL } from './stone-text.js';
+import { longDate, stoneDate, stoneDates, timeAgo, stoneName, stoneLabel, STAGE_LABEL } from './stone-text.js';
 
 const HOUR = 3_600_000;
 const DAY = 24 * HOUR;
+
+describe('longDate', () => {
+  it('formats as the mockup fmtLong', () => {
+    expect(longDate(new Date(2026, 10, 15, 12).getTime())).toBe('15 November 2026');
+    expect(longDate(new Date(2026, 0, 3, 12).getTime())).toBe('3 January 2026');
+  });
+});
 
 describe('stoneDate / stoneDates', () => {
   it('formats as the mockup: day and short month in capitals', () => {

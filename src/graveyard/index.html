@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="./graveyard.css" />
     <link rel="stylesheet" href="./scene.css" />
     <link rel="stylesheet" href="./stone.css" />
+    <link rel="stylesheet" href="./plaque.css" />
     <script type="module" src="./graveyard.ts"></script>
   </head>
   <body>
@@ -67,8 +68,34 @@
         <svg class="fence-crow" id="fence-crow" viewBox="0 0 60 50" aria-hidden="true"><path d="M8 30 C10 22 18 18 26 19 C30 12 38 10 44 14 L55 13 L46 18 C48 24 46 32 38 36 L40 47 M33 37 L32 47" fill="#04060a" stroke="#04060a" stroke-width="2"/><path d="M8 30 C4 31 2 34 1 38 C6 35 12 34 18 32" fill="#04060a"/><circle cx="42" cy="16" r="1.3" fill="#9aa3b0"/></svg>
 
         <p class="scene-msg" id="scene-msg" hidden></p>
+
+        <aside class="plaque" id="plaque" aria-labelledby="pl-title" hidden>
+          <button type="button" class="close" id="pl-close" aria-label="Close">×</button>
+          <h2 id="pl-title"></h2>
+          <div class="domain" id="pl-domain"></div>
+          <dl>
+            <dt>Epitaph</dt><dd class="epitaph" id="pl-epi"></dd>
+            <dt>Cause of death</dt><dd id="pl-cause"></dd>
+            <dt>Last visited</dt><dd id="pl-visited"></dd>
+            <dt>Buried</dt><dd id="pl-buried"></dd>
+            <dt>Condition</dt><dd><span class="chip" id="pl-stage"></span></dd>
+          </dl>
+          <div class="actions">
+            <button type="button" class="btn primary" id="pl-res">Resurrect</button>
+            <button type="button" class="btn danger" id="pl-exo">Exorcise</button>
+          </div>
+        </aside>
       </section>
     </main>
+
+    <dialog id="confirm" aria-labelledby="cf-title" aria-describedby="cf-text">
+      <h2 id="cf-title">Exorcise this grave?</h2>
+      <p id="cf-text"></p>
+      <div class="actions">
+        <button type="button" class="btn" id="cf-keep">Keep it</button>
+        <button type="button" class="btn danger" id="cf-go">Exorcise</button>
+      </div>
+    </dialog>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </body>

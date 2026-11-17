@@ -19,6 +19,11 @@ export function stoneDate(t: number): string {
   return new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase();
 }
 
+/** "15 November 2026", as the mockup's fmtLong (Plaque, List view hover). */
+export function longDate(t: number): string {
+  return new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
 /** "last visited — buried", e.g. "15 NOV — 17 NOV". */
 export function stoneDates(lastAccessed: number, buriedAt: number): string {
   return `${stoneDate(lastAccessed)} — ${stoneDate(buriedAt)}`;

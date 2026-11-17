@@ -9,7 +9,10 @@ import {
   formatCount,
   formatMemory,
   freedMemoryText,
+  exorciseConfirmText,
   BURY_TAB_DONE_TEXT,
+  RESURRECT_DONE_TEXT,
+  EXORCISE_DONE_TEXT,
 } from './copy.js';
 import { ERROR_CODES } from './messages.js';
 
@@ -89,6 +92,14 @@ describe('stats bar', () => {
   it('labels the figure as an estimate', () => {
     expect(freedMemoryText(2300)).toBe('≈ 2.3 GB freed (estimated)');
     expect(freedMemoryText(0)).toBe('≈ 0 MB freed (estimated)');
+  });
+});
+
+describe('Plaque copy', () => {
+  it('uses the steering file wording', () => {
+    expect(RESURRECT_DONE_TEXT).toBe('Reopened in a new tab.');
+    expect(EXORCISE_DONE_TEXT).toBe('Grave deleted permanently.');
+    expect(exorciseConfirmText('Q3 budget memo')).toBe('“Q3 budget memo” will be deleted permanently. This cannot be undone.');
   });
 });
 

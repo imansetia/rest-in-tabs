@@ -22,14 +22,33 @@ export interface LandscapeElements {
  * once, so decay stages and every "x ago" agree (the Demo clock in task 15.1
  * passes a shifted clock).
  */
+export interface Landscape {
+  refresh(): Promise<void>;
+  render(): void;
+  /** The grave shown with this id, if any. */
+  grave(id: string): Grave | undefined;
+  /**
+   * Call before sending resurrect/exorcise for this grave. While it is
+   * expected to leave, a storage change that only removes it does not
+   * re-render, so its plot can show soil or bare ground (Requirement 4.11).
+   */
+  expectLeaving(id: string): void;
+  /** The request failed: stop expecting the grave to leave. */
+  cancelLeaving(id: string): void;
+  /** Show the plot as fresh empty soil ('emptied') or bare ground ('gone'). */
+  vacate(id: string, look: 'emptied' | 'gone'): void;
+}
+
 export function startLandscape(
   els: LandscapeElements,
   displayClock: () => number = () => Date.now(),
-): { refresh(): Promise<void>; render(): void } {
+): Landscape {
   let graves: Grave[] | null = null;
+  const leaving = new Set<string>();
 
   function render(): void {
     if (graves === null) return; // not read yet: show neither graves nor the empty message
+    leaving.clear(); // a re-render ends every soil or bare-ground plot
     const displayNow = displayClock();
     const sorted = sortGraves(graves);
     const rows = layoutRows(sorted.length, els.scene.clientWidth, els.scene.clientHeight);
@@ -47,13 +66,17 @@ export function startLandscape(
   }
 
   async function refresh(): Promise<void> {
+    let next: Grave[];
     try {
-      graves = await getGraves();
+      next = await getGraves();
     } catch (err) {
       console.error('Could not read the graves; keeping the last view:', err);
       return;
     }
-    render();
+    const onlyLeaversGone =
+      graves !== null && leaving.size > 0 && sameGraves(graves.filter((g) => !leaving.has(g.id)), next);
+    graves = next;
+    if (!onlyLeaversGone) render();
   }
 
   let resizeTimer: ReturnType<typeof setTimeout> | undefined;
@@ -63,7 +86,23 @@ export function startLandscape(
   });
 
   void refresh();
-  return { refresh, render };
+  return {
+    refresh,
+    render,
+    grave: (id) => graves?.find((g) => g.id === id),
+    expectLeaving: (id) => void leaving.add(id),
+    cancelLeaving: (id) => void leaving.delete(id),
+    vacate(id, look) {
+      const plot = els.camera.querySelector(`.plot[data-id="${CSS.escape(id)}"]`);
+      plot?.classList.add(look);
+    },
+  };
+}
+
+/** Same graves with the same data, in any order. */
+function sameGraves(a: Grave[], b: Grave[]): boolean {
+  const key = (list: Grave[]) => JSON.stringify([...list].sort((x, y) => (x.id < y.id ? -1 : x.id > y.id ? 1 : 0)));
+  return a.length === b.length && key(a) === key(b);
 }
 
 function rowElement(row: RowLayout, graves: Grave[], displayNow: number): HTMLElement {

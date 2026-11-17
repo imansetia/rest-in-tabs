@@ -109,6 +109,15 @@
 .stage-crumbling .weeds, .stage-crumbling.has-crow .perch { display: block; }
 .stage-crumbling.has-cross .fallen { display: block; }
 
+/* after a resurrection: fresh empty soil; after an exorcism: bare ground (Requirement 4.11) */
+.plot.emptied .stone, .plot.emptied .deco { display: none; }
+.plot.emptied .mound { background: radial-gradient(ellipse at 50% 30%, #33281c, var(--soil-dark) 72%); height: calc(26px * var(--s)); }
+.plot.gone .stone, .plot.gone .deco, .plot.gone .mound { display: none; }
+.plot.gone::before {
+  content: ""; position: absolute; left: 6%; right: 6%; bottom: calc(-4px * var(--s)); height: calc(10px * var(--s));
+  border-radius: 50%; background: rgba(0, 0, 0, .45);
+}
+
 /* Reduced motion: no hover-glow transition. */
 @media (prefers-reduced-motion: reduce) {
   .stone { transition: none; }

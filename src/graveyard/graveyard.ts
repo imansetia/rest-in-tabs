@@ -8,6 +8,8 @@ import { createToast } from './toast.js';
 import { startStats } from './stats.js';
 import { startIdleButton } from './idle-button.js';
 import { startLandscape } from './landscape.js';
+import { createPlaque } from './plaque.js';
+import { graveActions } from './actions.js';
 
 function byId<T extends HTMLElement = HTMLElement>(id: string): T {
   const el = document.getElementById(id);
@@ -55,10 +57,50 @@ const idleButton = startIdleButton(byId<HTMLButtonElement>('bury-idle'), toast);
 // Landscape
 // ---------------------------------------------------------------------------
 
-const landscape = startLandscape({
-  scene: byId('scene'),
-  camera: byId('camera'),
-  message: byId('scene-msg'),
+// One clock for everything the page displays (the Demo clock shifts it in task 15.1).
+const displayClock = () => Date.now();
+
+const landscape = startLandscape(
+  { scene: byId('scene'), camera: byId('camera'), message: byId('scene-msg') },
+  displayClock,
+);
+
+// ---------------------------------------------------------------------------
+// Plaque, Resurrect, Exorcise
+// ---------------------------------------------------------------------------
+
+const confirmDialog = byId<HTMLDialogElement>('confirm');
+const actions = graveActions(
+  landscape,
+  toast,
+  { dialog: confirmDialog, text: byId('cf-text'), keep: byId<HTMLButtonElement>('cf-keep'), go: byId<HTMLButtonElement>('cf-go') },
+  () => plaque,
+);
+const plaque = createPlaque(
+  {
+    root: byId('plaque'),
+    close: byId<HTMLButtonElement>('pl-close'),
+    title: byId('pl-title'),
+    domain: byId('pl-domain'),
+    epitaph: byId('pl-epi'),
+    cause: byId('pl-cause'),
+    visited: byId('pl-visited'),
+    buried: byId('pl-buried'),
+    stage: byId('pl-stage'),
+    resurrect: byId<HTMLButtonElement>('pl-res'),
+    exorcise: byId<HTMLButtonElement>('pl-exo'),
+    confirm: confirmDialog,
+  },
+  displayClock,
+  actions,
+);
+
+// A stone opens (or switches) the Plaque.
+byId('camera').addEventListener('click', (event) => {
+  const stone = event.target instanceof Element ? event.target.closest<HTMLElement>('.stone') : null;
+  const id = stone?.closest<HTMLElement>('.plot')?.dataset.id;
+  const grave = id === undefined ? undefined : landscape.grave(id);
+  if (stone && grave) plaque.open(grave, stone);
 });
 
 // Live updates (Requirement 4.7). Settings changes (threshold, protected

@@ -138,7 +138,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - Every displayed time uses one `displayNow`, so the Demo clock in task 15 can shift it
     - Reduced motion: no hover-glow transition
     - _Requirements: 4.1, 4.12, 6.1, 6.2, 10.5_
-  - [ ] 11.5 Plaque, Resurrect and Exorcise (no animation yet)
+  - [x] 11.5 Plaque, Resurrect and Exorcise (no animation yet)
     - Plaque fields and focus rules; it closes on ×, Esc or a click outside; another stone switches it; clicks in the confirm dialog do not close it
     - The `<dialog>` confirm ("Keep it" has default focus)
     - `resurrect` / `exorcise` messages, with error codes shown through `errorText`
