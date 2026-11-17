@@ -10,6 +10,7 @@ import {
   blockReasonText,
   graveCountText,
   buryIdleResultText,
+  idleButtonState,
   WORKING_TEXT,
   BURY_TAB_DONE_TEXT,
   COUNT_UNAVAILABLE_TEXT,
@@ -34,6 +35,10 @@ const statusEl = byId('status');
 let currentTab: TabInfo | null = null;
 let tabLoaded = false;
 let busy = false;
+/** Last countIdle reply; null until the first one arrives. */
+let idleCount: number | null = null;
+/** Only the newest countIdle request may update idleCount. */
+let countRequest = 0;
 
 // ---------------------------------------------------------------------------
 // Rendering
@@ -55,7 +60,9 @@ function isUnavailable(button: HTMLButtonElement): boolean {
 function render(): void {
   const block = tabLoaded ? manualBurialBlock(currentTab) : null;
   setUnavailable(buryThisButton, busy || !tabLoaded || block !== null);
-  setUnavailable(buryIdleButton, busy);
+  const idle = idleButtonState(idleCount);
+  buryIdleButton.textContent = idle.label;
+  setUnavailable(buryIdleButton, busy || !idle.available);
   buryThisReason.textContent = block === null ? '' : blockReasonText(block);
   buryThisReason.hidden = block === null;
 }
@@ -89,6 +96,19 @@ async function refreshCurrentTab(): Promise<void> {
   render();
 }
 
+/**
+ * Ask the service worker how many tabs the idle button would bury. If the
+ * request fails, the last count stays (or none, so the label reads
+ * "Bury idle tabs" and the button stays usable).
+ */
+async function refreshIdleCount(): Promise<void> {
+  const mine = ++countRequest;
+  const response = await sendMessage({ type: 'countIdle' });
+  if (mine !== countRequest) return; // a newer request was sent meanwhile
+  if (response.ok && response.count !== undefined) idleCount = response.count;
+  render();
+}
+
 // ---------------------------------------------------------------------------
 // Actions
 // ---------------------------------------------------------------------------
@@ -110,8 +130,9 @@ async function run(message: Message, successText: (response: Success) => string)
   } else {
     setStatus(errorText(response.error), true);
   }
-  // After a burial the active tab of this window may be a different one.
-  await refreshCurrentTab();
+  // After a burial the active tab of this window may be a different one, and
+  // fewer tabs are idle.
+  await Promise.all([refreshCurrentTab(), refreshIdleCount()]);
 }
 
 buryThisButton.addEventListener('click', () => {
@@ -134,3 +155,4 @@ onStorageChanged(() => {
 render();
 void refreshCount();
 void refreshCurrentTab();
+void refreshIdleCount();

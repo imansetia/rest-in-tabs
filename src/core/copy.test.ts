@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { errorText, blockReasonText, graveCountText, buryIdleResultText } from './copy.js';
+import {
+  errorText,
+  blockReasonText,
+  graveCountText,
+  buryIdleResultText,
+  idleButtonState,
+  BURY_TAB_DONE_TEXT,
+} from './copy.js';
 import { ERROR_CODES } from './messages.js';
 
 describe('errorText', () => {
@@ -41,5 +48,25 @@ describe('buryIdleResultText', () => {
     expect(buryIdleResultText(0)).toBe('No idle tabs to bury.');
     expect(buryIdleResultText(1)).toBe('Buried 1 idle tab.');
     expect(buryIdleResultText(12)).toBe('Buried 12 idle tabs.');
+  });
+
+  it('"Bury this tab" has its own toast', () => {
+    expect(BURY_TAB_DONE_TEXT).toBe('Tab buried.');
+  });
+});
+
+describe('idleButtonState', () => {
+  it('reads "Bury idle tabs" and stays usable before the first count', () => {
+    expect(idleButtonState(null)).toEqual({ label: 'Bury idle tabs', available: true });
+  });
+
+  it('is unavailable with "No idle tabs to bury" when the count is 0', () => {
+    expect(idleButtonState(0)).toEqual({ label: 'No idle tabs to bury', available: false });
+  });
+
+  it('shows the count otherwise', () => {
+    expect(idleButtonState(1)).toEqual({ label: 'Bury 1 idle tab', available: true });
+    expect(idleButtonState(12)).toEqual({ label: 'Bury 12 idle tabs', available: true });
+    expect(idleButtonState(2000)).toEqual({ label: 'Bury 2,000 idle tabs', available: true });
   });
 });

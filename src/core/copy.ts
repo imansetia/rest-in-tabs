@@ -37,6 +37,20 @@ export function graveCountText(count: number): string {
   return `${count.toLocaleString('en-US')} graves`;
 }
 
+/**
+ * Label and availability of the "Bury N idle tabs" button (Requirements 2.2,
+ * 4.10). `count` is the last countIdle reply, or null before the first reply
+ * (or when every request so far failed): the button then reads
+ * "Bury idle tabs" and stays usable, because burying does not need the count.
+ */
+export function idleButtonState(count: number | null): { label: string; available: boolean } {
+  if (count === null) return { label: 'Bury idle tabs', available: true };
+  if (count === 0) return { label: 'No idle tabs to bury', available: false };
+  if (count === 1) return { label: 'Bury 1 idle tab', available: true };
+  return { label: `Bury ${count.toLocaleString('en-US')} idle tabs`, available: true };
+}
+
+/** Toast after the idle button. "Bury this tab" uses BURY_TAB_DONE_TEXT instead. */
 export function buryIdleResultText(count: number): string {
   if (count === 0) return 'No idle tabs to bury.';
   if (count === 1) return 'Buried 1 idle tab.';

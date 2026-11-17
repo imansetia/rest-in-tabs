@@ -94,7 +94,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - Add `src/no-inline.test.ts`, which fails if any file under `src/` contains a `style="` attribute or an inline `on…=` event handler
     - Rebuild and confirm the Popup still works under the new policy
     - _Requirements: 4.12, 9.9_
-  - [ ] 10.6 Popup idle button and toasts
+  - [x] 10.6 Popup idle button and toasts
     - The label comes from `countIdle`: "Bury N idle tabs", "No idle tabs to bury" (unavailable) when N is 0, and "Bury idle tabs" (usable) before the first reply or if it fails
     - Refresh the count after each request
     - Toasts: "Buried 1 idle tab." / "Buried N idle tabs." for the idle button, "Tab buried." for "Bury this tab"
