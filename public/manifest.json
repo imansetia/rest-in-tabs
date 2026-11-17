@@ -4,8 +4,11 @@
   "version": "0.1.0",
   "description": "Buries idle tabs in a spooky graveyard and lets you resurrect them in one click.",
   "minimum_chrome_version": "121",
-  "permissions": ["tabs", "storage", "alarms", "scripting"],
+  "permissions": ["tabs", "storage", "alarms", "scripting", "favicon"],
   "host_permissions": ["<all_urls>"],
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'"
+  },
   "background": {
     "service_worker": "service-worker.js",
     "type": "module"

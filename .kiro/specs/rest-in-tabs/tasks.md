@@ -90,7 +90,7 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - `parseMessage` accepts `countIdle`; the service worker replies `{ ok: true, count }` without writing and without waiting in the run queue
     - Test with fake adapters: for the same tabs, the `countIdle` count equals the number a manual run buries
     - _Requirements: 2.2, 4.10_
-  - [ ] 10.5 Manifest: add the `favicon` permission and the `content_security_policy.extension_pages` from design.md
+  - [x] 10.5 Manifest: add the `favicon` permission and the `content_security_policy.extension_pages` from design.md
     - Add `src/no-inline.test.ts`, which fails if any file under `src/` contains a `style="` attribute or an inline `on…=` event handler
     - Rebuild and confirm the Popup still works under the new policy
     - _Requirements: 4.12, 9.9_
