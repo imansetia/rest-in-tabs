@@ -28,7 +28,11 @@ describe('idleForDisplay', () => {
 describe('idleMinutesFrom', () => {
   it('converts, rounding float noise away but keeping real fractions', () => {
     expect(idleMinutesFrom(1.5, 'hours')).toBe(90);
-    expect(idleMinutesFrom(0.1, 'hours')).toBe(6);
+    // Both products carry float noise (504.00000000000006, 122.99999999999999).
+    expect(0.35 * 1440).not.toBe(504);
+    expect(2.05 * 60).not.toBe(123);
+    expect(idleMinutesFrom(0.35, 'days')).toBe(504);
+    expect(idleMinutesFrom(2.05, 'hours')).toBe(123);
     expect(idleMinutesFrom(7, 'days')).toBe(10080);
     expect(idleMinutesFrom(2.5, 'minutes')).toBe(2.5);
     expect(Number.isNaN(idleMinutesFrom(Number.NaN, 'hours'))).toBe(true);
@@ -38,7 +42,7 @@ describe('idleMinutesFrom', () => {
     expect(validateSetting('idleMinutes', idleMinutesFrom(4, 'minutes')).ok).toBe(false);
     expect(validateSetting('idleMinutes', idleMinutesFrom(8, 'days')).ok).toBe(false);
     expect(validateSetting('idleMinutes', idleMinutesFrom(2.5, 'minutes')).ok).toBe(false);
-    expect(validateSetting('idleMinutes', idleMinutesFrom(0.1, 'hours')).ok).toBe(true);
+    expect(validateSetting('idleMinutes', idleMinutesFrom(2.05, 'hours')).ok).toBe(true);
   });
 });
 
@@ -53,8 +57,8 @@ describe('parseIdleUnit and rangeErrorText', () => {
   it('shows the allowed range from validateSetting', () => {
     const idle = validateSetting('idleMinutes', 1);
     const keep = validateSetting('retentionDays', 0);
-    expect(!idle.ok && rangeErrorText(idle.range)).toBe('Allowed: 5–10080 minutes (7 days).');
-    expect(!keep.ok && rangeErrorText(keep.range)).toBe('Allowed: 1–365 days, or Never.');
+    expect(!idle.ok && rangeErrorText(idle.range)).toBe('Allowed: 5 minutes to 7 days.');
+    expect(!keep.ok && rangeErrorText(keep.range)).toBe('Allowed: 1 to 365 days, or Never.');
   });
 });
 

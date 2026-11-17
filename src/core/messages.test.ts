@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseMessage, parseResponse, ERROR_CODES } from './messages.js';
+import { parseMessage, parseResponse, ERROR_CODES, UPDATE_EPITAPH_MAX_CHARS } from './messages.js';
 
 describe('parseResponse', () => {
   it('keeps well-formed replies', () => {
@@ -46,6 +46,20 @@ describe('parseMessage', () => {
     expect(parseMessage({ type: 'buryTab', tabId: '7' })).toBeNull();
     expect(parseMessage({ type: 'buryTab', tabId: 1.5 })).toBeNull();
     expect(parseMessage({ type: 'buryTab', tabId: -1 })).toBeNull();
+  });
+
+  it('accepts updateEpitaph with a grave id and some text, and drops extra fields', () => {
+    expect(parseMessage({ type: 'updateEpitaph', graveId: 'g1', epitaph: 'A short summary.', epitaphSource: 'meta' }))
+      .toEqual({ type: 'updateEpitaph', graveId: 'g1', epitaph: 'A short summary.' });
+  });
+
+  it('rejects updateEpitaph without an id, without text, or with too much text', () => {
+    expect(parseMessage({ type: 'updateEpitaph', epitaph: 'x' })).toBeNull();
+    expect(parseMessage({ type: 'updateEpitaph', graveId: 'g1' })).toBeNull();
+    expect(parseMessage({ type: 'updateEpitaph', graveId: 'g1', epitaph: '   \n ' })).toBeNull();
+    expect(parseMessage({ type: 'updateEpitaph', graveId: 'g1', epitaph: 42 })).toBeNull();
+    expect(parseMessage({ type: 'updateEpitaph', graveId: 'g1', epitaph: 'x'.repeat(UPDATE_EPITAPH_MAX_CHARS) })).not.toBeNull();
+    expect(parseMessage({ type: 'updateEpitaph', graveId: 'g1', epitaph: 'x'.repeat(UPDATE_EPITAPH_MAX_CHARS + 1) })).toBeNull();
   });
 
   it('rejects a missing or empty graveId', () => {

@@ -47,8 +47,13 @@ export function startLandscape(els: LandscapeElements, displayClock: () => numbe
     const delays = riseDelays(sorted.map((g) => g.id), rising);
     const rows = layoutRows(sorted.length, els.scene.clientWidth, els.scene.clientHeight);
 
+    // A live update (e.g. an AI epitaph) replaces every stone: keep focus on the same grave.
+    const focusedId = document.activeElement?.closest<HTMLElement>('#camera .plot')?.dataset.id;
     // Front row first in the page, so Tab reaches the newest graves first.
     els.camera.replaceChildren(...graveRows(sorted, rows).map(({ row, graves: items }) => rowElement(row, items, displayNow, delays)));
+    if (focusedId !== undefined) {
+      els.camera.querySelector<HTMLElement>(`.plot[data-id="${CSS.escape(focusedId)}"] .stone`)?.focus({ preventScroll: true });
+    }
 
     els.message.textContent = NO_GRAVES_TEXT;
     els.message.hidden = sorted.length > 0;

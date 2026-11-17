@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { resurrect, exorcise, expireGraves } from './grave-actions.js';
+import { resurrect, exorcise, expireGraves, updateEpitaph, pruneExcerpts } from './grave-actions.js';
 import { DAY, makeGrave, fakeStorage, fakeTabs } from './test-fakes.js';
 
 afterEach(() => {
@@ -72,5 +72,72 @@ describe('expireGraves', () => {
 
     expect(await expireGraves(storage.adapter)).toBe(0);
     expect(storage.graves()).toHaveLength(1);
+  });
+});
+
+describe('updateEpitaph (task 13.2)', () => {
+  it('cleans the text, marks it "ai", deletes the excerpt and keeps everything else', async () => {
+    const storage = fakeStorage({
+      graves: [makeGrave('a', { excerpt: 'Long page text.', epitaphSource: 'meta' }), makeGrave('b', { excerpt: 'Other text.' })],
+      stats: { buried: 2, resurrected: 0 },
+    });
+
+    expect(await updateEpitaph(storage.adapter, 'a', '  - A riverside   room\nin Ribeira.  ')).toEqual({ ok: true });
+    const [a, b] = storage.graves();
+    expect(a.epitaph).toBe('A riverside room in Ribeira.');
+    expect(a.epitaphSource).toBe('ai');
+    expect('excerpt' in a).toBe(false);
+    expect({ ...a, epitaph: '', epitaphSource: '' }).toEqual({ ...makeGrave('a', { buriedAt: a.buriedAt, lastAccessed: a.lastAccessed }), epitaph: '', epitaphSource: '' });
+    expect(b.excerpt).toBe('Other text.'); // other graves untouched
+    expect(storage.stats()).toEqual({ buried: 2, resurrected: 0 });
+  });
+
+  it('cuts the Epitaph to 200 code points, as fallbackEpitaph does', async () => {
+    const storage = fakeStorage({ graves: [makeGrave('a', { excerpt: 'x' })] });
+    await updateEpitaph(storage.adapter, 'a', '👻 '.repeat(300));
+    const epitaph = storage.graves()[0].epitaph;
+    expect([...epitaph].length).toBeLessThanOrEqual(200);
+    expect(epitaph).toBe(epitaph.trim());
+  });
+
+  it('refuses text with nothing left after cleaning, and a grave that left', async () => {
+    const storage = fakeStorage({ graves: [makeGrave('a', { excerpt: 'x' })] });
+    expect(await updateEpitaph(storage.adapter, 'a', ' - ')).toEqual({ ok: false, error: 'bad-request' });
+    expect(await updateEpitaph(storage.adapter, 'gone', 'Summary.')).toEqual({ ok: false, error: 'not-found' });
+    expect(storage.graves()[0].excerpt).toBe('x');
+  });
+
+  it('reports a failed write and changes nothing', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const storage = fakeStorage({ graves: [makeGrave('a', { excerpt: 'x', epitaph: 'Old.' })], failWrites: true });
+    expect(await updateEpitaph(storage.adapter, 'a', 'New.')).toEqual({ ok: false, error: 'save-failed' });
+    expect(storage.graves()[0].epitaph).toBe('Old.');
+  });
+
+  it('waits for the write queue: a resurrect queued first removes the grave, so the update finds nothing', async () => {
+    const storage = fakeStorage({ graves: [makeGrave('a', { excerpt: 'x' })] });
+    const [res, upd] = await Promise.all([
+      resurrect(storage.adapter, fakeTabs([]).adapter, 'a'),
+      updateEpitaph(storage.adapter, 'a', 'Summary.'),
+    ]);
+    expect(res).toEqual({ ok: true });
+    expect(upd).toEqual({ ok: false, error: 'not-found' });
+    expect(storage.graves()).toEqual([]);
+  });
+});
+
+describe('pruneExcerpts (task 13.4)', () => {
+  it('drops excerpts of graves buried more than 7 days ago and keeps the graves', async () => {
+    const now = Date.now();
+    const storage = fakeStorage({
+      graves: [
+        makeGrave('old', { buriedAt: now - 8 * DAY, excerpt: 'old text' }),
+        makeGrave('edge', { buriedAt: now - 7 * DAY + 60_000, excerpt: 'edge text' }),
+        makeGrave('new', { buriedAt: now - DAY, excerpt: 'new text' }),
+      ],
+    });
+    expect(await pruneExcerpts(storage.adapter)).toBe(1);
+    expect(storage.graves().map((g) => [g.id, g.excerpt])).toEqual([['old', undefined], ['edge', 'edge text'], ['new', 'new text']]);
+    expect(await pruneExcerpts(storage.adapter)).toBe(0);
   });
 });

@@ -5,6 +5,10 @@ import {
   blockReasonText,
   tabsAtRestText,
   lastBuriedText,
+  aiDoneText,
+  ENABLE_AI_LABEL,
+  AI_WRITING_TEXT,
+  AI_FAILED_TEXT,
   NOTHING_BURIED_TEXT,
   buryIdleResultText,
   idleButtonState,
@@ -155,5 +159,14 @@ describe('idleButtonState', () => {
     expect(idleButtonState(1)).toEqual({ label: 'Bury 1 idle tab', available: true });
     expect(idleButtonState(12)).toEqual({ label: 'Bury 12 idle tabs', available: true });
     expect(idleButtonState(2000)).toEqual({ label: 'Bury 2,000 idle tabs', available: true });
+  });
+});
+
+describe('AI epitaph copy', () => {
+  it('plain and literal, no exclamation marks', () => {
+    expect(aiDoneText(0)).toBe('AI epitaphs are on.');
+    expect(aiDoneText(1)).toBe('Updated 1 epitaph.');
+    expect(aiDoneText(1204)).toBe('Updated 1,204 epitaphs.');
+    for (const t of [ENABLE_AI_LABEL, AI_WRITING_TEXT, AI_FAILED_TEXT, aiDoneText(3)]) expect(t).not.toContain('!');
   });
 });

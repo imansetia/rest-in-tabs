@@ -104,7 +104,7 @@ export function validateSetting(key: keyof Settings, value: unknown): ValidateRe
     case 'idleMinutes':
       if (isInt(value) && (value as number) >= IDLE_MINUTES_MIN && (value as number) <= IDLE_MINUTES_MAX)
         return OK;
-      return err(`${IDLE_MINUTES_MIN}–${IDLE_MINUTES_MAX} minutes (7 days)`);
+      return err(`${IDLE_MINUTES_MIN} minutes to ${IDLE_MINUTES_MAX / 1440} days`);
 
     case 'protectedSites':
       if (Array.isArray(value) && value.every((s) => typeof s === 'string')) return OK;
@@ -118,7 +118,7 @@ export function validateSetting(key: keyof Settings, value: unknown): ValidateRe
         (value as number) <= RETENTION_DAYS_MAX
       )
         return OK;
-      return err(`${RETENTION_DAYS_MIN}–${RETENTION_DAYS_MAX} days, or Never`);
+      return err(`${RETENTION_DAYS_MIN} to ${RETENTION_DAYS_MAX} days, or Never`);
 
     case 'demo':
       if (typeof value === 'boolean') return OK;

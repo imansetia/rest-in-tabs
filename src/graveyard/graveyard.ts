@@ -14,6 +14,7 @@ import { startSearch } from './search.js';
 import { startList } from './list.js';
 import { startViewSwitch } from './view-switch.js';
 import { createGraveFocus } from './grave-focus.js';
+import { startAiEpitaphs } from './ai-epitaphs.js';
 
 function byId<T extends HTMLElement = HTMLElement>(id: string): T {
   const el = document.getElementById(id);
@@ -156,6 +157,9 @@ byId('camera').addEventListener('click', (event) => {
   const grave = id === undefined ? undefined : landscape.grave(id);
   if (stone && grave) plaque.open(grave, stone);
 });
+
+// On-device AI epitaphs (task 13): the button shows only when the model can be downloaded.
+startAiEpitaphs({ button: byId<HTMLButtonElement>('ai-enable'), toast, graves: () => landscape.graves(), onData: (cb) => landscape.onData(cb) });
 
 // Live updates (Requirement 4.7). Settings changes (threshold, protected
 // sites) change the idle count as well as graves do.

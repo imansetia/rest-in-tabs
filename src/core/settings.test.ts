@@ -218,12 +218,12 @@ describe('validateSetting', () => {
       expect(validateSetting('idleMinutes', 30.5).ok).toBe(false);
       expect(validateSetting('idleMinutes', '30').ok).toBe(false);
     });
-    it('range message contains the min and max', () => {
+    it('range message reads like the help line: "5 minutes to 7 days"', () => {
       const result = validateSetting('idleMinutes', 0);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.range).toContain(String(IDLE_MINUTES_MIN));
-        expect(result.range).toContain(String(IDLE_MINUTES_MAX));
+        expect(result.range).toBe(`${IDLE_MINUTES_MIN} minutes to ${IDLE_MINUTES_MAX / 1440} days`);
+        expect(result.range).toBe('5 minutes to 7 days');
       }
     });
   });
@@ -269,7 +269,7 @@ describe('validateSetting', () => {
       const result = validateSetting('retentionDays', 0);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.range).toContain('Never');
+        expect(result.range).toBe('1 to 365 days, or Never');
         expect(result.range).not.toContain('null');
       }
     });

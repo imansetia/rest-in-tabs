@@ -34,15 +34,21 @@ export function fallbackEpitaph(page: PageInfo): { text: string; source: Epitaph
   ];
 
   for (const { text, source } of candidates) {
-    const normalised = collapseWhitespace(text);
-    if (normalised.length > 0) {
-      // Truncate to EPITAPH_MAX code points, then trim trailing whitespace again.
-      // Example: "a ".repeat(150) → collapse → "a a a..." (200 codepoints) → might end with space.
-      return { text: truncateByCodePoint(normalised, EPITAPH_MAX).trimEnd(), source };
-    }
+    const cleaned = cleanEpitaphText(text);
+    if (cleaned.length > 0) return { text: cleaned, source };
   }
 
   return { text: 'Untitled page', source: 'title' };
+}
+
+/**
+ * The Epitaph cleaning rules (Requirement 3.3), shared by fallbackEpitaph and
+ * the AI epitaph upgrade: trim, collapse every whitespace run to one space,
+ * cut to EPITAPH_MAX code points, trim the end again. '' when nothing is left.
+ */
+export function cleanEpitaphText(text: string): string {
+  // Example: "a ".repeat(150) → collapse → "a a a..." (200 code points) → might end with a space.
+  return truncateByCodePoint(collapseWhitespace(text), EPITAPH_MAX).trimEnd();
 }
 
 // ---------------------------------------------------------------------------

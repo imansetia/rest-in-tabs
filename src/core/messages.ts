@@ -5,7 +5,12 @@ export type Message =
   | { type: 'buryIdle' }
   | { type: 'countIdle' }
   | { type: 'resurrect'; graveId: string }
-  | { type: 'exorcise'; graveId: string };
+  | { type: 'exorcise'; graveId: string }
+  /** An on-device AI summary for a grave (task 13); the service worker cleans and saves it. */
+  | { type: 'updateEpitaph'; graveId: string; epitaph: string };
+
+/** updateEpitaph text longer than this is refused before cleaning (the stored Epitaph is at most 200 code points). */
+export const UPDATE_EPITAPH_MAX_CHARS = 2_000;
 
 /**
  * - bad-request: message did not parse
@@ -55,7 +60,7 @@ export function parseResponse(raw: unknown): MessageResponse {
 export function parseMessage(raw: unknown): Message | null {
   if (raw === null || typeof raw !== 'object') return null;
   const m = raw as Record<string, unknown>;
-  const { tabId, graveId } = m;
+  const { tabId, graveId, epitaph } = m;
 
   switch (m.type) {
     case 'buryTab':
@@ -70,6 +75,11 @@ export function parseMessage(raw: unknown): Message | null {
       return typeof graveId === 'string' && graveId !== '' ? { type: 'resurrect', graveId } : null;
     case 'exorcise':
       return typeof graveId === 'string' && graveId !== '' ? { type: 'exorcise', graveId } : null;
+    case 'updateEpitaph':
+      return typeof graveId === 'string' && graveId !== '' &&
+        typeof epitaph === 'string' && epitaph.trim() !== '' && epitaph.length <= UPDATE_EPITAPH_MAX_CHARS
+        ? { type: 'updateEpitaph', graveId, epitaph }
+        : null;
     default:
       return null;
   }

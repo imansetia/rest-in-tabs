@@ -105,3 +105,12 @@ export function buryIdleResultText(count: number): string {
   if (count === 1) return 'Buried 1 idle tab.';
   return `Buried ${count.toLocaleString('en-US')} idle tabs.`;
 }
+
+/** On-device AI epitaphs (task 13): the header button and its toasts. */
+export const ENABLE_AI_LABEL = 'Enable AI epitaphs';
+export const AI_WRITING_TEXT = 'Writing epitaphs…';
+export const AI_FAILED_TEXT = 'Could not enable AI epitaphs.';
+export function aiDoneText(count: number): string {
+  if (count === 0) return 'AI epitaphs are on.';
+  return count === 1 ? 'Updated 1 epitaph.' : `Updated ${formatCount(count)} epitaphs.`;
+}

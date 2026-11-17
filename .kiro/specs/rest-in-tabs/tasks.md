@@ -1,4 +1,4 @@
-﻿# Implementation Plan
+# Implementation Plan
 
 Tasks marked `*` are optional and can be skipped for a faster first version.
 
@@ -197,21 +197,21 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - No animation
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 9.3, 9.4, 9.7_
 
-- [ ] 13. Add on-device AI epitaphs
-  - [ ] 13.1 Implement `platform/summarizer.ts`: `checkAvailability()` wrapping `Summarizer.availability()`, and `createAndSummarize(text)` wrapping `Summarizer.create()` + `.summarize()` with `downloadprogress` callback
+- [x] 13. Add on-device AI epitaphs
+  - [x] 13.1 Implement `platform/summarizer.ts`: `checkAvailability()` wrapping `Summarizer.availability()`, and `createAndSummarize(text)` wrapping `Summarizer.create()` + `.summarize()` with `downloadprogress` callback
     - _Requirements: 3.4, 3.5_
-  - [ ] 13.2 Add the `updateEpitaph(graveId, epitaph)` message
+  - [x] 13.2 Add the `updateEpitaph(graveId, epitaph)` message
     - `parseMessage` validates it
     - The service worker cleans the text with the same rules as `fallbackEpitaph` (collapsed whitespace, at most 200 code points), sets `epitaphSource: "ai"`, deletes the excerpt, and writes through the write queue
     - Orchestration tests with fake adapters
     - _Requirements: 3.3, 3.4_
-  - [ ] 13.3 On Graveyard load, call `checkAvailability()`:
+  - [x] 13.3 On Graveyard load, call `checkAvailability()`:
     - `"available"` → for each Grave with an excerpt, call `createAndSummarize` and send `updateEpitaph`; the page never writes graves itself
     - `"downloadable"` → render an "Enable AI epitaphs" button in the header style; on click call `createAndSummarize` (triggers the download), show progress as text, then upgrade Epitaphs as above
     - `"downloading"` / `"unavailable"` → do nothing; the fallback Epitaph stays
     - Updated stones re-render through the normal live update, with no extra animation
     - _Requirements: 3.4, 3.5_
-  - [ ] 13.4 Add excerpt pruning in the service-worker alarm handler (separate step from `expiredGraves`): remove `excerpt` from any Grave where `now - buriedAt > 7 * 24 * 60 * 60 * 1000`  
+  - [x] 13.4 Add excerpt pruning in the service-worker alarm handler (separate step from `expiredGraves`): remove `excerpt` from any Grave where `now - buriedAt > 7 * 24 * 60 * 60 * 1000`  
     - _Requirements: 3.4_
 
 - [ ] 14. Checkpoint: full manual test

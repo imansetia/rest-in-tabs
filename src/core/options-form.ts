@@ -14,7 +14,7 @@ export function idleForDisplay(minutes: number): { amount: number; unit: IdleUni
 
 /**
  * Minutes from what the user typed (1.5 hours → 90). Float noise is rounded
- * away (0.1 hours → 6, not 6.000000000000001); a real fraction of a minute
+ * away (0.35 days → 504, not 504.00000000000006); a real fraction of a minute
  * stays a fraction, so validateSetting rejects it. NaN stays NaN.
  */
 export function idleMinutesFrom(amount: number, unit: IdleUnit): number {
@@ -35,7 +35,7 @@ export function rangeErrorText(range: string): string {
 export const SITE_ERROR = {
   empty: 'Enter a site such as example.com.',
   invalid: 'Enter a site such as example.com.',
-  scheme: 'Only web sites (http or https) can be protected.',
+  scheme: 'Only websites (http or https) can be protected.',
   duplicate: 'This site is already on the list.',
 } as const;
 

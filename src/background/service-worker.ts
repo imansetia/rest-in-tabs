@@ -14,7 +14,7 @@ import { queryTabs, getTab, removeTab, createTab } from '../platform/tabs.js';
 import { extractPageInfo } from '../platform/extract.js';
 import type { StorageAdapter, TabsAdapter, ExtractAdapter } from '../core/adapters.js';
 import { buryTabs, buryTab, countIdleTabs } from '../core/burial.js';
-import { resurrect, exorcise, expireGraves } from '../core/grave-actions.js';
+import { resurrect, exorcise, expireGraves, updateEpitaph, pruneExcerpts } from '../core/grave-actions.js';
 import { parseMessage } from '../core/messages.js';
 import type { Message, MessageResponse } from '../core/messages.js';
 
@@ -75,6 +75,13 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     console.error('Expiry failed:', err);
   }
 
+  // A separate step from expiry: excerpts are kept 7 days at most (task 13.4).
+  try {
+    await pruneExcerpts(storage);
+  } catch (err) {
+    console.error('Excerpt pruning failed:', err);
+  }
+
   try {
     await buryTabs(storage, tabs, extract, true);
   } catch (err) {
@@ -117,5 +124,7 @@ async function handleMessage(message: Message): Promise<MessageResponse> {
       return resurrect(storage, tabs, message.graveId);
     case 'exorcise':
       return exorcise(storage, message.graveId);
+    case 'updateEpitaph':
+      return updateEpitaph(storage, message.graveId, message.epitaph);
   }
 }
