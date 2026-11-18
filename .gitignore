@@ -4,3 +4,4 @@ dist/
 rest-in-tabs.zip
 *.log
 .env
+graphify-out/

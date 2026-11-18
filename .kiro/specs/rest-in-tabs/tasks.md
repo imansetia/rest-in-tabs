@@ -238,3 +238,10 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
   - Result: README done; all of `.kiro/` (hooks, specs, steering) is tracked and not ignored; GitHub detects the licence as MIT (repo API `license.spdx_id` = MIT), so it shows in the About section
   - [x] 16.1 Attach `rest-in-tabs.zip` to a GitHub release as the testable build (done by hand by the user; the README's "latest release" link points there)
     - Result: release v0.1.0 carries `rest-in-tabs.zip` (169,114 bytes), byte-identical to the local `npm run zip` output
+  - [x] 16.2 Extension icon
+    - Render `public/icons/icon-16.png` from `design/icon/icon-16.svg` and `icon-32.png`, `icon-48.png`, `icon-128.png` from `design/icon/icon.svg`, transparent outside the rounded square (`scripts/render-icons.mjs`, `npm run icons`; the PNGs are committed)
+    - Manifest `icons` (16, 32, 48, 128) and `action.default_icon` (16, 32); version 0.1.1 in `manifest.json` and `package.json`
+    - The same icon as the favicon of the graveyard, popup and settings pages
+    - `src/manifest-icons.test.ts`: every manifest icon path exists under `public/` and its PNG size matches its key
+    - _Requirements: none (design steering file, Extension icon)_
+    - Result: four PNGs rendered with headless Edge (16, 32, 48 and 128 px; corner alpha 0, centre opaque); manifest and package at 0.1.1; favicon link on the three pages; the icon test passes; the build copies them to `dist/icons/`

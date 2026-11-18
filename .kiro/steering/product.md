@@ -23,4 +23,4 @@ Students, researchers and developers who hoard tabs (20+ open at once).
 - Judges value: real impact, deep Kiro usage, polished design, clear 3-minute demo.
 
 ## Tone
-Playful-spooky, never gory. Copy is short. Puns are welcome in epitaphs, not in buttons or errors.
+Playful-spooky, never gory. Copy is short. The dry humour lives in the cause of death; the epitaph is the page's own factual summary; buttons and errors stay plain (see the Copy rules in design.md).

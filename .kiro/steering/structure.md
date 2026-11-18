@@ -6,6 +6,8 @@ inclusion: always
 
 ```
 public/        manifest.json (copied to dist/ unchanged)
+  icons/         icon-16/32/48/128.png, rendered from design/icon/ by npm run icons and committed
+design/icon/   icon sources: icon.svg (32, 48, 128 px) and icon-16.svg (16 px only)
 src/
   core/          pure logic (selection, decay, epitaph, stats) + *.test.ts
                  orchestration with injected adapters: burial.ts (bury runs, buryTab),
@@ -18,7 +20,8 @@ src/
   popup/         toolbar popup
   options/       settings page
 scripts/       build tooling run by npm scripts, not shipped: zip-dist.mjs packs dist/ as
-               rest-in-tabs.zip (npm run zip), Node built-ins only
+               rest-in-tabs.zip (npm run zip), Node built-ins only; render-icons.mjs renders
+               public/icons/ (npm run icons), Node built-ins plus a local headless Edge or Chrome
 docs/demo/     static demo pages for GitHub Pages (rules in design/demo-pages.md)
 .kiro/           specs, steering, hooks (must stay committed)
 LICENSE          MIT

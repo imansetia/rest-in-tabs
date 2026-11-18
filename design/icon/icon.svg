@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 32 32">
+  <title>Rest in Tabs</title>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="7" fill="#0a1222" stroke="#2b3444"/>
+  <circle cx="25.5" cy="7" r="3" fill="#ece6d8"/>
+  <circle cx="27" cy="5.8" r="2.6" fill="#0a1222"/>
+  <path d="M9 27 V14 A7 7 0 0 1 23 14 V27 Z" fill="#6b7383"/>
+  <rect x="3" y="26" width="26" height="2.5" rx="1" fill="#1a2336"/>
+  <rect x="15" y="11.5" width="2" height="10" rx="0.6" fill="#ece6d8"/>
+  <rect x="12.3" y="14.3" width="7.4" height="2" rx="0.6" fill="#ece6d8"/>
+</svg>

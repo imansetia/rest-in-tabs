@@ -1,6 +1,6 @@
 {
   "name": "rest-in-tabs",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Chrome/Edge extension that buries idle tabs in a spooky graveyard and lets you resurrect them in one click.",
   "license": "MIT",
@@ -11,7 +11,8 @@
   "scripts": {
     "build": "tsc --noEmit && vite build",
     "test": "vitest run",
-    "zip": "npm run build && node scripts/zip-dist.mjs"
+    "zip": "npm run build && node scripts/zip-dist.mjs",
+    "icons": "node scripts/render-icons.mjs"
   },
   "devDependencies": {
     "@types/chrome": "^0.3.7",

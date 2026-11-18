@@ -147,6 +147,10 @@ Every animation below is turned off or replaced by a short fade under `prefers-r
 3. The buried count and the memory estimate count up.
 4. A crow flies across the moon. The fog recedes.
 
+## Extension icon
+
+An arched headstone with a bone cross, under a crescent moon, on a night square with rounded corners. The sources are `design/icon/icon.svg` (32-unit grid, used for 32, 48 and 128 px) and `design/icon/icon-16.svg` (redrawn on a 16 px grid with whole-pixel edges, used for 16 px only; never scale the master down to 16). Use the files as they are: colours `#0a1222` square (`--sky-2`, Night), `#2b3444` edge (`--line`), `#6b7383` stone (one step lighter than `--stone-1` so it reads at 16 px), `#ece6d8` cross and moon (`--bone`), `#1a2336` ground. The corners outside the square are transparent. The same icon is the favicon of the graveyard, popup and settings pages.
+
 ## Popup
 
 320 px wide, the same tokens as the graveyard. An iron fence strip along the top. Ghost mascot (friendly, not scary) beside "Rest in Tabs" and "N tabs at rest". Primary button "Bury N idle tabs", secondary "Bury this tab" (unavailable with its reason on private windows and non-web pages), then "Last buried" with the newest epitaph, then the link "Open the graveyard". The popup is a tool, not a page: one main action, visible at once.
