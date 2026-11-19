@@ -116,6 +116,15 @@ main { position: relative; flex: 1 0 auto; display: flex; flex-direction: column
   display: flex; justify-content: center; align-items: flex-end;
   gap: calc(30px * var(--s));
 }
+/* Only stones take clicks (design steering file, Rows). Each row is a
+   full-width box stacked above the rows behind it, so neither the row nor its
+   plots may catch the pointer; the stone buttons do. A click on empty scene
+   space falls through to the scene and still closes the Plaque. The stone rule
+   is weaker than .plot.resurrecting .stone and .plot.exorcising .stone, so
+   those still turn clicks off. :hover and :focus-within on a crowded row's
+   plot still match through the stone. */
+.row, .plot { pointer-events: none; }
+.plot > .stone { pointer-events: auto; }
 .plot {
   --w: 172px;
   position: relative; flex: 0 0 auto;

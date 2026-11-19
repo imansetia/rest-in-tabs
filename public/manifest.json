@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Rest in Tabs",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Buries idle tabs in a spooky graveyard and lets you resurrect them in one click.",
   "minimum_chrome_version": "121",
   "icons": {

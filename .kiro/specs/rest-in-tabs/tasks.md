@@ -245,3 +245,9 @@ Tasks marked `*` are optional and can be skipped for a faster first version.
     - `src/manifest-icons.test.ts`: every manifest icon path exists under `public/` and its PNG size matches its key
     - _Requirements: none (design steering file, Extension icon)_
     - Result: four PNGs rendered with headless Edge (16, 32, 48 and 128 px; corner alpha 0, centre opaque); manifest and package at 0.1.1; favicon link on the three pages; the icon test passes; the build copies them to `dist/icons/`
+  - [x] 16.3 Only stones take clicks
+    - Bug: each `.row` is a full-width absolute box stacked above the rows behind it (z-index 60 − index × 10), so its empty part caught the pointer and back-row stones could not be hovered or clicked
+    - Fix in `src/graveyard/scene.css`: `.row` and `.plot` take no pointer events, `.plot > .stone` does; `.plot.resurrecting .stone` and `.plot.exorcising .stone` still turn clicks off, and the crowded-row hover and focus raise still match through the stone
+    - Version 0.1.2 in `manifest.json` and `package.json`
+    - _Requirements: 4.8, 4.9 (design steering file, Rows: "Only stones take clicks")_
+    - Result: in headless Edge with the built extension, 30 graves at 1536x650, 20 at 1280x900 and 100 at 1536x900 (3 or 4 rows): `elementFromPoint` at a visible point of every stone in every row returns that stone, and no sampled point is caught by a row or plot box. With the old rule put back as a control, 479 of 613 sampled points on the middle row and 1,137 of 1,317 on the back row were caught by a nearer box. A back-row click opens its Plaque, a crowded last-row click switches it, empty sky and empty row space close it; hover on a back row shows the glow; search, the crowded-row raise, Resurrect and Exorcise behave as before
